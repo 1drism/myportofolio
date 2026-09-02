@@ -5,12 +5,12 @@
 }
 
 :root {
-    --ink: #1c1917;
-    --paper: #faf6f0;
-    --accent: #d95d39;
-    --accent-dark: #a8442a;
-    --line: #e3d9c9;
-    --text-muted: #6b6459;
+    --ink: #fbfbfb;
+    --paper: #00101f;
+    --accent: #002548a1;
+    --accent-light: #4787c4a1;
+    --line: #4787c4a1;
+    --text-muted: #b8b5b2;
     --radius: 4px;
 }
 
@@ -85,7 +85,7 @@ h1, .brand {
     font-size: 0.85rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--accent-dark);
+    color: var(--accent-light);
     font-weight: 700;
     margin-bottom: 0.75rem;
 }
@@ -134,11 +134,12 @@ h1, .brand {
     background-color: var(--ink);
     border-radius: var(--radius);
     padding: 0.5rem 1.1rem;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .social-link:hover {
     background-color: var(--accent);
+    color: var(--ink)
 }
 
 .hero-photo {
@@ -165,8 +166,7 @@ h1, .brand {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: var(--radius);
-    border: 3px solid var(--ink);
+    border-radius: 15px;
 }
 
 .site-footer {
