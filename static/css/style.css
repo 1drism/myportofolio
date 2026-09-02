@@ -193,3 +193,34 @@ h1, .brand {
         justify-content: flex-start;
     }
 }
+
+.skills-grid{
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 256px);
+    justify-content: center;
+    gap: 16px;
+}
+
+.skills-card {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--accent);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.skills-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+}
+
+.skills h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2.5rem;
+}
