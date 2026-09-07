@@ -28,6 +28,11 @@ body {
     color: var(--ink);
     background-color: var(--paper);
     line-height: 1.6;
+    background-image: radial-gradient(
+        ellipse at top,
+        rgba(176, 148, 4, 0.12),
+        transparent 35%
+    );
 }
 
 h1, .brand {
