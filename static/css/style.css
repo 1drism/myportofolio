@@ -115,6 +115,17 @@ h1, .brand {
     from { opacity: 0; transform: translateY(40px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes catFromLeft {
+    from { opacity: 0; transform: translateX(-80px) rotate(-15deg); }
+    to   { opacity: 0.5; transform: translateX(0) rotate(45deg); }   /* end semi-transparent = subtle */
+}
+
+@keyframes catFromRight {
+    from { opacity: 0; transform: translateX(80px) rotate(15deg); }
+    to   { opacity: 0.5; transform: translateX(0) rotate(-45deg); }
+}
+
 .welcome {
     margin-top: -10rem;
     min-height: 100vh;
@@ -130,7 +141,9 @@ h1, .brand {
     font-size: clamp(2rem, 6vw, 5rem);
     color: var(--ink);
     margin-bottom: 50px;
+    opacity: 0;
     animation: slideFromTop 1s ease forwards;
+    animation-delay: 0.2s;
 }
 
 .welcome-bottom {
@@ -138,9 +151,33 @@ h1, .brand {
     max-width: 90%;
     height: auto;
     margin-top: -4rem;
-    opacity: 0;
+    opacity: 0; /* start invisible for the animation */
     animation: slideFromBottom 1s ease forwards;
-    animation-delay: 0.4s;
+    animation-delay: 0.5s;
+}
+
+.decoration-cat {
+    position: absolute;
+    width: 320px;
+    height: auto;
+    filter: blur(3px);
+    opacity: 0; /* start invisible for the animation */
+    z-index: 0;
+    pointer-events: none;
+}
+
+.cat-banana {
+    top: 100px;
+    left: 120px;
+    animation: catFromLeft 1.2s ease forwards;
+    animation-delay: 0.5s;
+}
+
+.cat-milk {
+    bottom: 100px;
+    right: 120px;
+    animation: catFromRight 1.2s ease forwards;
+    animation-delay: 0.3s;
 }
 
 .hero {
@@ -314,13 +351,12 @@ h1, .brand {
     background-color: var(--paper-dark);
     border: 1px solid var(--accent);
     border-radius: 2px;
-    box-shadow: 0 2px 6px var(--accent);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .skills-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 0 15px rgba(4, 64, 128, 0.8);
+        box-shadow: 0 6px 12px var(--accent);
 }
 
 .skills-card img {
