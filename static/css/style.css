@@ -49,6 +49,11 @@ h1, .brand {
     padding: 1.25rem 1.5rem;
 }
 
+.site-header nav a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
 .brand {
     font-size: 1.3rem;
     font-weight: 700;
