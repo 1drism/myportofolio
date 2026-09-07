@@ -160,6 +160,18 @@ h1, .brand {
     box-shadow: 0 0 15px var(--accent-light);
 }
 
+.avatar-hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.hero-photo:hover .avatar-hover {
+    opacity: 1;
+}
+
 .site-footer {
     padding: 1.5rem;
     color: var(--text-muted);
