@@ -1,3 +1,11 @@
+@font-face {
+    font-family: "RC_fonts";
+    src: url("/static/fonts/Reality_Clubs.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -20,6 +28,11 @@ body {
     color: var(--ink);
     background-color: var(--paper);
     line-height: 1.6;
+    background-image: radial-gradient(
+        ellipse at top,
+        rgba(176, 148, 4, 0.12),
+        transparent 35%
+    );
 }
 
 h1, .brand {
@@ -33,6 +46,7 @@ h1, .brand {
 }
 
 .site-header {
+    opacity: 0.8;
     border-top: 8px solid var(--accent);
     box-shadow: 0 0 15px var(--accent-light);
     background-color: var(--paper-dark);
@@ -77,6 +91,93 @@ h1, .brand {
     height: 32px;
     width: 84px;
     display: block;
+}
+
+/* divider for each section to make it look nicer */
+.divider {
+    background-color: var(--paper-dark);
+    color: var(--ink);
+    border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    text-align: center;
+    padding: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+@keyframes slideFromTop {
+    from { opacity: 0; transform: translateY(-40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideFromBottom {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes catFromLeft {
+    from { opacity: 0; transform: translateX(-80px) rotate(-15deg); }
+    to   { opacity: 0.5; transform: translateX(0) rotate(45deg); }   /* end semi-transparent = subtle */
+}
+
+@keyframes catFromRight {
+    from { opacity: 0; transform: translateX(80px) rotate(15deg); }
+    to   { opacity: 0.5; transform: translateX(0) rotate(-45deg); }
+}
+
+.welcome {
+    margin-top: -10rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.welcome-text {
+    font-family: "RC_fonts", cursive;
+    font-size: clamp(2rem, 6vw, 5rem);
+    color: var(--ink);
+    margin-bottom: 50px;
+    opacity: 0;
+    animation: slideFromTop 1s ease forwards;
+    animation-delay: 0.2s;
+}
+
+.welcome-bottom {
+    width: 800px;
+    max-width: 90%;
+    height: auto;
+    margin-top: -4rem;
+    opacity: 0; /* start invisible for the animation */
+    animation: slideFromBottom 1s ease forwards;
+    animation-delay: 0.5s;
+}
+
+.decoration-cat {
+    position: absolute;
+    width: 320px;
+    height: auto;
+    filter: blur(3px);
+    opacity: 0; /* start invisible for the animation */
+    z-index: 0;
+    pointer-events: none;
+}
+
+.cat-banana {
+    top: 100px;
+    left: 120px;
+    animation: catFromLeft 1.2s ease forwards;
+    animation-delay: 0.5s;
+}
+
+.cat-milk {
+    bottom: 100px;
+    right: 120px;
+    animation: catFromRight 1.2s ease forwards;
+    animation-delay: 0.3s;
 }
 
 .hero {
@@ -193,6 +294,17 @@ h1, .brand {
     opacity: 1;
 }
 
+.hover-me {
+    position: absolute;
+    width: 160px;
+    height: auto;
+    top: -30px;
+    right: -140px;
+    z-index: 2; /* avatar z =1 */
+    pointer-events: none; /* so its not blocking the hover on avatar*/
+    transform: rotate(-10deg); 
+}
+
 .site-footer {
     padding: 1.5rem;
     color: var(--text-muted);
@@ -220,7 +332,6 @@ h1, .brand {
 
 .skills {
     padding: 4.5rem 0 5rem;
-    border-top: 1px solid var(--line);
 }
 
 .skills-grid{
@@ -240,13 +351,12 @@ h1, .brand {
     background-color: var(--paper-dark);
     border: 1px solid var(--accent);
     border-radius: 2px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .skills-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 0 15px rgba(4, 64, 128, 0.8);
+        box-shadow: 0 6px 12px var(--accent);
 }
 
 .skills-card img {
@@ -274,3 +384,4 @@ h1, .brand {
     border-radius: 2px;
     margin: 0.75rem auto 0;
 }
+
