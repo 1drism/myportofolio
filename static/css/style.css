@@ -227,9 +227,9 @@ h1, .brand {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    background-color: var(--accent);
-    border: 1px solid var(--line);
+    gap: 16px;
+    background-color: var(--accent-dark);
+    border: 1px solid var(--accent);
     border-radius: 2px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -237,12 +237,12 @@ h1, .brand {
 
 .skills-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 0 15px rgba(0, 123, 255, 0.8);
+    box-shadow: 0 0 15px rgba(4, 64, 128, 0.8);
 }
 
 .skills-card img {
-    width: 120px;
-    height: 120px;
+    width: 96px;
+    height: 96px;
     object-fit: contain;
 }
 
