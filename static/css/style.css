@@ -6,11 +6,11 @@
 
 :root {
     --ink: #fbfbfb;
-    --paper: #0a1927;
-    --accent: #002548a1;
-    --accent-dark: #010e1ba1;
-    --accent-light: #4787c4a1;
-    --line: #4787c4a1;
+    --paper: #222121;
+    --accent: #FFE043;
+    --paper-dark: #151515;
+    --accent-light: #ebd357;
+    --line: #c19e14a1;
     --text-muted: #b8b5b2;
     --radius: 4px;
 }
@@ -35,7 +35,7 @@ h1, .brand {
 .site-header {
     border-top: 8px solid var(--line);
     box-shadow: 0 0 15px var(--accent-light);
-    background-color: var(--accent-dark);
+    background-color: var(--paper-dark);
     border-bottom: 1px solid var(--line);
     position: sticky;
     top: 0;
@@ -149,16 +149,18 @@ h1, .brand {
     font-size: 0.85rem;
     font-weight: 600;
     text-decoration: none;
-    color: var(--paper);
-    background-color: var(--ink);
+    color: var(--accent);
+    background-color: transparent;
     border-radius: var(--radius);
+    border: 2px solid var(--accent);
     padding: 0.5rem 1.1rem;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .social-link:hover {
     background-color: var(--accent);
-    color: var(--ink)
+    color: var(--paper-dark);
+    box-shadow: 0 0 15px var(--accent-light);
 }
 
 .hero-photo {
@@ -235,7 +237,7 @@ h1, .brand {
     flex-direction: column;
     align-items: center;
     gap: 16px;
-    background-color: var(--accent-dark);
+    background-color: var(--paper-dark);
     border: 1px solid var(--accent);
     border-radius: 2px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
