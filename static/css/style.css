@@ -148,7 +148,9 @@ h1, .brand {
     position: relative;
 }
 
+/* currently disabled using display: none */
 .photo-block {
+    display: none; 
     position: absolute;
     top: 1.25rem;
     left: 1.25rem;
@@ -167,6 +169,8 @@ h1, .brand {
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: var(--rad);
+    border: 3px solid var(--accent-light);
+    box-shadow: 0 0 15px var(--accent-light);
 }
 
 .site-footer {
@@ -196,6 +200,7 @@ h1, .brand {
 
 .skills {
     padding: 4.5rem 0 5rem;
+    border-top: 1px solid var(--line);
 }
 
 .skills-grid{
