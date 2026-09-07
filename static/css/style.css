@@ -72,6 +72,13 @@ h1, .brand {
     font-size: 0.95rem;
 }
 
+.brand-logo {
+    width: 50px;
+    height: 32px;
+    width: auto;
+    display: block;
+}
+
 .hero {
     padding: 4.5rem 0 5rem;
 }
