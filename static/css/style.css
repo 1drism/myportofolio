@@ -6,8 +6,9 @@
 
 :root {
     --ink: #fbfbfb;
-    --paper: #00101f;
+    --paper: #0a1927;
     --accent: #002548a1;
+    --accent-dark: #010e1ba1;
     --accent-light: #4787c4a1;
     --line: #4787c4a1;
     --text-muted: #b8b5b2;
@@ -32,7 +33,13 @@ h1, .brand {
 }
 
 .site-header {
+    border-top: 8px solid var(--line);
+    box-shadow: 0 0 15px var(--accent-light);
+    background-color: var(--accent-dark);
     border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .site-header .container {
@@ -40,6 +47,11 @@ h1, .brand {
     justify-content: space-between;
     align-items: center;
     padding: 1.25rem 1.5rem;
+}
+
+.site-header nav a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
 }
 
 .brand {
@@ -148,17 +160,6 @@ h1, .brand {
     position: relative;
 }
 
-.photo-block {
-    position: absolute;
-    top: 1.25rem;
-    left: 1.25rem;
-    width: 100%;
-    height: 100%;
-    background-color: var(--accent);
-    border-radius: var(--radius);
-    z-index: 0;
-}
-
 .avatar {
     position: relative;
     z-index: 1;
@@ -167,6 +168,20 @@ h1, .brand {
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: var(--rad);
+    border: 3px solid var(--accent-light);
+    box-shadow: 0 0 15px var(--accent-light);
+}
+
+.avatar-hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.hero-photo:hover .avatar-hover {
+    opacity: 1;
 }
 
 .site-footer {
@@ -196,6 +211,7 @@ h1, .brand {
 
 .skills {
     padding: 4.5rem 0 5rem;
+    border-top: 1px solid var(--line);
 }
 
 .skills-grid{
@@ -211,9 +227,9 @@ h1, .brand {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    background-color: var(--accent);
-    border: 1px solid var(--line);
+    gap: 16px;
+    background-color: var(--accent-dark);
+    border: 1px solid var(--accent);
     border-radius: 2px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -221,12 +237,12 @@ h1, .brand {
 
 .skills-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 0 15px rgba(0, 123, 255, 0.8);
+    box-shadow: 0 0 15px rgba(4, 64, 128, 0.8);
 }
 
 .skills-card img {
-    width: 120px;
-    height: 120px;
+    width: 96px;
+    height: 96px;
     object-fit: contain;
 }
 
