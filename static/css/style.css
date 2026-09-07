@@ -6,8 +6,9 @@
 
 :root {
     --ink: #fbfbfb;
-    --paper: #00101f;
+    --paper: #0a1927;
     --accent: #002548a1;
+    --accent-dark: #010e1ba1;
     --accent-light: #4787c4a1;
     --line: #4787c4a1;
     --text-muted: #b8b5b2;
@@ -32,7 +33,13 @@ h1, .brand {
 }
 
 .site-header {
+    border-top: 8px solid var(--line);
+    box-shadow: 0 0 15px var(--accent-light);
+    background-color: var(--accent-dark);
     border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .site-header .container {
