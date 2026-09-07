@@ -1,3 +1,11 @@
+@font-face {
+    font-family: "RC_fonts";
+    src: url("/static/fonts/Reality_Clubs.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -33,6 +41,7 @@ h1, .brand {
 }
 
 .site-header {
+    opacity: 0.8;
     border-top: 8px solid var(--accent);
     box-shadow: 0 0 15px var(--accent-light);
     background-color: var(--paper-dark);
@@ -77,6 +86,56 @@ h1, .brand {
     height: 32px;
     width: 84px;
     display: block;
+}
+
+/* divider for each section to make it look nicer */
+.divider {
+    background-color: var(--paper-dark);
+    color: var(--ink);
+    border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
+    text-align: center;
+    padding: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+@keyframes slideFromTop {
+    from { opacity: 0; transform: translateY(-40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideFromBottom {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.welcome {
+    margin-top: -10rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.welcome-text {
+    font-family: "RC_fonts", cursive;
+    font-size: clamp(2rem, 6vw, 5rem);
+    color: var(--ink);
+    margin-bottom: 50px;
+    animation: slideFromTop 1s ease forwards;
+}
+
+.welcome-bottom {
+    width: 800px;
+    max-width: 90%;
+    height: auto;
+    margin-top: -4rem;
+    opacity: 0;
+    animation: slideFromBottom 1s ease forwards;
+    animation-delay: 0.4s;
 }
 
 .hero {
@@ -220,7 +279,6 @@ h1, .brand {
 
 .skills {
     padding: 4.5rem 0 5rem;
-    border-top: 1px solid var(--line);
 }
 
 .skills-grid{
@@ -274,3 +332,4 @@ h1, .brand {
     border-radius: 2px;
     margin: 0.75rem auto 0;
 }
+
