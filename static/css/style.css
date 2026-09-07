@@ -33,7 +33,7 @@ h1, .brand {
 }
 
 .site-header {
-    border-top: 8px solid var(--line);
+    border-top: 8px solid var(--accent);
     box-shadow: 0 0 15px var(--accent-light);
     background-color: var(--paper-dark);
     border-bottom: 1px solid var(--line);
@@ -52,6 +52,7 @@ h1, .brand {
 .site-header nav a:hover {
     text-decoration: underline;
     text-underline-offset: 4px;
+    color: var(--accent);
 }
 
 .brand {
@@ -73,9 +74,8 @@ h1, .brand {
 }
 
 .brand-logo {
-    width: 50px;
     height: 32px;
-    width: auto;
+    width: 84px;
     display: block;
 }
 
@@ -176,7 +176,7 @@ h1, .brand {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: var(--rad);
+    border-radius: var(--radius);
     border: 3px solid var(--accent-light);
     box-shadow: 0 0 15px var(--accent-light);
 }
