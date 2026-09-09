@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Idris - Portfolio</title>
+    <title>{{ name }} - Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -12,12 +12,12 @@
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="#profile" class="brand">
+            <a href="{% url 'main:show_main' %}" class="brand">
                 <img src="/static/img/dsr-logo.png" alt="Idris" class="brand-logo">
             </a>
             <nav>
-                <a href="#profile">Profile</a>
-                <a href="#skills">Skills</a>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
             </nav>
         </div>
     </header>
@@ -34,23 +34,23 @@
             <div class="container hero-grid">
                 <div class="hero-identity">
                     <p class="hero-kicker">Computer Science &middot; Universitas Indonesia</p>
-                    <h1>Muhamad Idris Kamal</h1>
+                    <h1>{{ name }}</h1>
                 </div>
                 <div class="hero-photo">
-                    <img class="avatar avatar-default" src="/static/img/avatar-image.jpg" alt="Photo of silly me">
+                    <img class="avatar avatar-default" src="/static/img/avatar-image.jpg" alt="Photo of {{ name }}">
                     <img class="avatar avatar-hover" src="/static/img/hover-image.png" alt=" :)">
                     <img class="hover-me" src="/static/img/try-hover-me.png" alt="Try hovering the photo">
                 </div>
                 <div class="hero-details">
-                    <p class="bio">Hi, I'm Idris! I'm a CS student at Universitas Indonesia (Fasilkom UI) who is deeply interested in the world of cybersecurity. I love learning about how systems and software work under the hood, and I'm eager to learn more about how to keep those systems secure. Outside of tech, I'm a fan of Reality Club and will always be Burhan lover #1 (definitely not a hater).</p>
+                    <p class="bio">{{ bio }}</p>
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
-                            <dd>2506637073</dd>
+                            <dd>{{ npm }}</dd>
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
-                            <dd>S1 Ilmu Komputer KKI</dd>
+                            <dd>{{ study_program }}</dd>
                         </div>
                     </dl>
                     <div class="social-links">
@@ -94,7 +94,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 Idris. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
 </body>
