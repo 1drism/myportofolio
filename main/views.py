@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from main.models import Experience
-
+from main.models import Education
 
 def show_main(request):
     context = {
