@@ -34,7 +34,17 @@ body {
         rgba(176, 148, 4, 0.12),
         transparent 35%
     );
+    /* makes the footer sticky on the bottom of the screen */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
+/* makes the footer sticky on the bottom of the screen */
+main {
+    flex: 1;
+}
+
 
 h1, .brand {
     font-family: "Space Grotesk", -apple-system, sans-serif;
