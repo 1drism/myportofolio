@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Education - {{ name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css"> 
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="{% url 'main:show_main' %}" class="brand">
+                <img src="/static/img/dsr-logo.png" alt="Idris" class="brand-logo">
+            </a>
+            <nav>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
+                <a href="{% url 'main:show_education' %}">Education</a>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <section class="education-section" id="education">
+            <div class="container">
+                <p class="section-kicker">Where I've studied</p>
+                <h1>Education</h1>
+
+                <div class="education-grid">
+                    {% for education in education_list %}
+                        <article class="education-card">
+                            <span class="education-degree">
+                                {{ education.degree }}
+                            </span>
+                            <h2>{{ education.institution }}</h2>
+                            <p class="education-major">
+                                {{ education.faculty_or_major }}
+                            </p>
+                            <p class="education-description">
+                                {{ education.description }}
+                            </p>
+                            <p class="education-date">
+                                {{ education.started_at }}
+                            </p>
+                            {% if education.is_ongoing %}
+                                <p class="education-status">Ongoing</p>
+                            {% else %}
+                                <p class="education-status">Completed</p>
+                            {% endif %}
+                        </article>
+                    {% empty %}
+                        <p class="empty-state">
+                            No education has been added yet.
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        </div>
+    </footer>
+</body>
+</html>
