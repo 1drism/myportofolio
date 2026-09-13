@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience - {{ name }}</title>
+    <title>Education - {{ name }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -23,31 +23,36 @@
         </div>
     </header>
     <main>
-        <section class="experience-section" id="experience">
+        <section class="education-section" id="education">
             <div class="container">
-                <p class="section-kicker">My journey so far</p>
-                <h1>Experience</h1>
+                <p class="section-kicker">Where I've studied</p>
+                <h1>Education</h1>
 
-                <div class="experience-grid">
-                    {% for experience in experience_list %}
-                        <article class="experience-card">
-                            <span class="experience-category">
-                                {{ experience.get_category_display }}
+                <div class="education-grid">
+                    {% for education in education_list %}
+                        <article class="education-card">
+                            <span class="education-degree">
+                                {{ education.degree }}
                             </span>
-                            <h2>{{ experience.title }}</h2>
-                            <p class="experience-description">
-                                {{ experience.description }}
+                            <h2>{{ education.institution }}</h2>
+                            <p class="education-major">
+                                {{ education.faculty_or_major }}
                             </p>
-
-                            {% if experience.is_ongoing %}
-                                <p class="experience-status">Ongoing</p>
+                            <p class="education-description">
+                                {{ education.description }}
+                            </p>
+                            <p class="education-date">
+                                {{ education.started_at }}
+                            </p>
+                            {% if education.is_ongoing %}
+                                <p class="education-status">Ongoing</p>
                             {% else %}
-                                <p class="experience-status">Completed</p>
+                                <p class="education-status">Completed</p>
                             {% endif %}
                         </article>
                     {% empty %}
                         <p class="empty-state">
-                            No experience has been added yet.
+                            No education has been added yet.
                         </p>
                     {% endfor %}
                 </div>

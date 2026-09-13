@@ -18,6 +18,7 @@
     --accent: #FFE043;
     --paper-dark: #151515;
     --accent-light: #ebd357;
+    --accent-light: #b8962e;
     --line: #c19e14a1;
     --text-muted: #b8b5b2;
     --radius: 4px;
@@ -33,7 +34,17 @@ body {
         rgba(176, 148, 4, 0.12),
         transparent 35%
     );
+    /* makes the footer sticky on the bottom of the screen */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
+
+/* makes the footer sticky on the bottom of the screen */
+main {
+    flex: 1;
+}
+
 
 h1, .brand {
     font-family: "Space Grotesk", -apple-system, sans-serif;
@@ -435,6 +446,65 @@ h1, .brand {
 }
 
 .experience-status {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Education css below */
+.education-section {
+    padding: 4rem 0;
+    border-top: 1px solid var(--line);
+}
+
+.education-section h1 {
+    margin: 0.4rem 0 1.5rem;
+    font-size: 2rem;
+}
+
+.education-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.education-card {
+    padding: 1.25rem;
+    background-color: var(--paper-dark);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.education-degree {
+    color: var(--accent-light);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.education-card h2 {
+    margin: 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.education-major {
+    color: var(--accent-light);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.education-description {
+    color: var(--text-muted);
+}
+
+.education-date {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.75rem;
+}
+
+.education-status {
     margin-top: 1rem;
     font-size: 0.85rem;
     font-weight: 600;
