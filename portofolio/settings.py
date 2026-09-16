@@ -60,7 +60,7 @@ ROOT_URLCONF = 'portofolio.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'],   
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,6 +80,9 @@ WHITENOISE_USE_FINDERS = True
 
 WSGI_APPLICATION = 'portofolio.wsgi.application'
 
+
+# gunakan https:// trailing the url
+CSRF_TRUSTED_ORIGINS = ["https://muhamad-idris51-myportofolio.pws.cs.ui.ac.id/"]
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
