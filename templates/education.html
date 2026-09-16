@@ -1,33 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends 'base.html' %}
+{% block meta %}
     <title>Education - {{ name }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css"> 
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">
-                <img src="/static/img/dsr-logo.png" alt="Idris" class="brand-logo">
-            </a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-            </nav>
-        </div>
-    </header>
+{% endblock meta %}
+{% block content %}
     <main>
         <section class="education-section" id="education">
             <div class="container">
                 <p class="section-kicker">Where I've studied</p>
                 <h1>Education</h1>
-
+                <form method="get"
+                    action="{% url 'main:show_education' %}"
+                    class="search-form">
+                    <input type="search"
+                        name="institution"
+                        value="{{ institution_query }}"
+                        placeholder="Search by institution"
+                        class="search-input">
+                    <button type="submit" class="button">Search</button>
+                </form>
+                
                 <div class="education-grid">
                     {% for education in education_list %}
                         <article class="education-card">
@@ -49,6 +41,7 @@
                             {% else %}
                                 <p class="education-status">Completed</p>
                             {% endif %}
+                            {% include "components/education_delete_modal.html" with education=education %}
                         </article>
                     {% empty %}
                         <p class="empty-state">
@@ -59,11 +52,4 @@
             </div>
         </section>
     </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-</body>
-</html>
+{% endblock content %}

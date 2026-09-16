@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block meta %}
+    <title>Projects - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
+    <main>
+        <section class="project-section" id="projects">
+            <div class="container">
+                <p class="section-kicker">What I've built</p>
+                <h1>Projects</h1>
+                <form method="get"
+                    action="{% url 'main:show_projects' %}"
+                    class="search-form">
+                    <input type="search"
+                        name="title"
+                        value="{{ title_query }}"
+                        placeholder="Search by project name"
+                        class="search-input">
+                    <button type="submit" class="button">Search</button>
+                </form>
+
+                <div class="project-grid">
+                    {% for project in project_list %}
+                        <article class="project-card">
+                            {% if project.project_image_url %}
+                                <img src="{{ project.project_image_url }}"
+                                     alt="{{ project.title }}"
+                                     class="project-image">
+                            {% endif %}
+                            <h2>{{ project.title }}</h2>
+                            <span class="project-tech">
+                                {{ project.tech_stack }}
+                            </span>
+                            <p class="project-description">
+                                {{ project.description }}
+                            </p>
+                            {% if project.project_url %}
+                                <p class="project-link">
+                                    <a href="{{ project.project_url }}">View Project</a>
+                                </p>
+                            {% endif %}
+                            {% include "components/project_delete_modal.html" with project=project %}
+                        </article>
+                    {% empty %}
+                        <p class="empty-state">
+                            No projects have been added yet.
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock content %}
