@@ -26,20 +26,6 @@ def show_experience(request):
     }
     return render(request, "experience.html", context)
 
-def show_education(request):
-    context = {
-        "name": "Idris",
-        "education_list": Education.objects.all(),
-    }
-    return render(request, "education.html", context)
-
-def show_projects(request):
-    context = {
-        "name": "Idris",
-        "project_list": Project.objects.all(),
-    }
-    return render(request, "project.html", context)
-
 def create_education(request):
     form = EducationForm(request.POST or None)
 
@@ -159,3 +145,19 @@ def edit_education(request, education_id):
         "education": education,
     }
     return render(request, "education_edit_form.html", context)
+
+def edit_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    form = ProjectForm(request.POST or None, instance=project)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Project updated!")
+        return redirect("main:show_projects")
+
+    context = {
+        "name": "Idris",
+        "form": form,
+        "project": project,
+    }
+    return render(request, "project_edit_form.html", context)
