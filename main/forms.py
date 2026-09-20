@@ -1,5 +1,5 @@
 from django.forms import ModelForm, TextInput, Textarea, DateInput, URLInput
-from main.models import Education,Project
+from main.models import Education,Project,Experience
 
 class EducationForm(ModelForm):
     class Meta:
@@ -105,6 +105,49 @@ class ProjectForm(ModelForm):
             "project_image_url": URLInput(
                 attrs={
                     "placeholder": "https://drive.google.com/thumbnail?id=...&sz=w1000",
+                }
+            ),
+        }
+class ExperienceForm(ModelForm):
+    class Meta:
+        model = Experience
+        fields = [
+            "title",
+            "description",
+            "category",
+            "thumbnail",
+            "ended_at",
+        ]
+
+        labels = {
+            "title": "Title",
+            "description": "Description",
+            "category": "Category",
+            "thumbnail": "Thumbnail URL",
+            "ended_at": "End Date",
+        }
+
+        widgets = {
+            "title": TextInput(
+                attrs={
+                    "placeholder": "PBP Teaching Assistant",
+                    "maxlength": 255,
+                }
+            ),
+            "description": Textarea(
+                attrs={
+                    "placeholder": "Describe your experience",
+                    "rows": 3,
+                }
+            ),
+            "thumbnail": URLInput(
+                attrs={
+                    "placeholder": "https://drive.google.com/thumbnail?id=1hjTmJl-OVPMb2qtBKgc6U-88pMSx2rWD&sz=w1000",
+                }
+            ),
+            "ended_at": DateInput(
+                attrs={
+                    "type": "date",
                 }
             ),
         }
