@@ -807,6 +807,45 @@ h1, .brand {
     }
 }
 
+/* Search form */
+.search-form {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    max-width: 480px;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.9rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper-dark);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
+}
+
+@media (max-width: 600px) {
+    .search-form {
+        max-width: 100%;
+    }
+}
+
 /* Page header with add button */
 .page-header {
     display: flex;
