@@ -41,8 +41,11 @@
                             {% else %}
                                 <p class="education-status">Completed</p>
                             {% endif %}
-                            <a href="{% url 'main:edit_education' education.id %}" class="button">Edit</a>
-                            {% include "components/education_delete_modal.html" with education=education %}
+                            <div class="card-actions">
+                                <a href="{% url 'main:edit_education' education.id %}"
+                                   class="button button-secondary">Edit</a>
+                                {% include "components/education_delete_modal.html" with education=education %}
+                            </div>
                         </article>
                     {% empty %}
                         <p class="empty-state">

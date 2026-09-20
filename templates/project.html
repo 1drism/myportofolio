@@ -39,7 +39,9 @@
                                     <a href="{{ project.project_url }}">View Project</a>
                                 </p>
                             {% endif %}
-                            {% include "components/project_delete_modal.html" with project=project %}
+                            <div class="card-actions">
+                                {% include "components/project_delete_modal.html" with project=project %}
+                            </div>
                         </article>
                     {% empty %}
                         <p class="empty-state">
