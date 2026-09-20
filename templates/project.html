@@ -7,7 +7,12 @@
         <section class="project-section" id="projects">
             <div class="container">
                 <p class="section-kicker">What I've built</p>
-                <h1>Projects</h1>
+                <div class="page-header">
+                    <h1>Projects</h1>
+                    <a href="{% url 'main:create_project' %}" class="button">
+                        <span aria-hidden="true">+</span> Add Project
+                    </a>
+                </div>
                 <form method="get"
                     action="{% url 'main:show_projects' %}"
                     class="search-form">
@@ -39,7 +44,10 @@
                                     <a href="{{ project.project_url }}">View Project</a>
                                 </p>
                             {% endif %}
-                            {% include "components/project_delete_modal.html" with project=project %}
+                            <div class="card-actions">
+                                <a href="{% url 'main:edit_project' project.id %}" class="button button-secondary">Edit</a>
+                                {% include "components/project_delete_modal.html" with project=project %}
+                            </div>
                         </article>
                     {% empty %}
                         <p class="empty-state">

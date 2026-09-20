@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 {% extends 'base.html' %}
 {% block meta %}
     <title>Education - {{ name }}</title>
@@ -8,7 +7,12 @@
         <section class="education-section" id="education">
             <div class="container">
                 <p class="section-kicker">Where I've studied</p>
-                <h1>Education</h1>
+                <div class="page-header">
+                    <h1>Education</h1>
+                    <a href="{% url 'main:create_education' %}" class="button">
+                        <span aria-hidden="true">+</span> Add Education
+                    </a>
+                </div>
                 <form method="get"
                     action="{% url 'main:show_education' %}"
                     class="search-form">
@@ -41,7 +45,10 @@
                             {% else %}
                                 <p class="education-status">Completed</p>
                             {% endif %}
-                            {% include "components/education_delete_modal.html" with education=education %}
+                            <div class="card-actions">
+                                <a href="{% url 'main:edit_education' education.id %}" class="button button-secondary">Edit</a>
+                                {% include "components/education_delete_modal.html" with education=education %}
+                            </div>
                         </article>
                     {% empty %}
                         <p class="empty-state">

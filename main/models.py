@@ -20,7 +20,6 @@ class Experience(models.Model):
         choices=EXPERIENCE_CHOICES,
         default="full-time",
     )
-    thumbnail = models.URLField(blank=True, default="")
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(blank=True, null=True)
 

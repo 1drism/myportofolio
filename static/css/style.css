@@ -19,6 +19,8 @@
     --paper-dark: #151515;
     --accent-light: #ebd357;
     --accent-dark: #b8962e;
+    --danger: #b42318;
+    --danger-light: #e0695e;
     --line: #c19e14a1;
     --text-muted: #b8b5b2;
     --radius: 4px;
@@ -426,6 +428,8 @@ h1, .brand {
     background-color: var(--paper-dark);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
 }
 
 .experience-category {
@@ -473,6 +477,8 @@ h1, .brand {
     background-color: var(--paper-dark);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
 }
 
 .education-degree {
@@ -512,7 +518,8 @@ h1, .brand {
 
 /* Education and Project form css below */
 .education-form,
-.project-form {
+.project-form,
+.experience-form {
     width: 100%;
     max-width: 100%;
     margin-top: 1.5rem;
@@ -548,28 +555,72 @@ h1, .brand {
     border-color: var(--accent);
 }
 
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--paper-dark);
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        outline-color 0.2s ease;
+}
+
+.form-group select:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
+}
+
 .form-error {
-    color: #b42318;
+    color: var(--danger);
     font-size: 0.85rem;
     margin-top: 0.35rem;
 }
 
 .button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     height: fit-content;
-    border: 0;
+    border: 2px solid var(--accent);
     border-radius: var(--radius);
-    padding: 0.65rem 1rem;
+    padding: 0.55rem 1.1rem;
     background: var(--accent);
-    color: white;
+    color: var(--paper-dark);
     cursor: pointer;
     font: inherit;
+    font-size: 0.85rem;
     font-weight: 700;
+    line-height: 1.2;
     text-decoration: none;
+    transition:
+        background-color 0.1s ease,
+        color 0.1s ease,
+        box-shadow 0.1s ease;
 }
 
+.button:hover {
+    background-color: transparent;
+    color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-light);
+}
+
+
 .button-secondary {
-    background: var(--ink);
+    background: transparent;
+    border-color: var(--accent-dark);
+    color: var(--ink);
+}
+
+.button-secondary:hover {
+    background-color: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-light);
 }
 
 /* Project css below */
@@ -635,19 +686,33 @@ h1, .brand {
 
 /* Shared delete modal styles for education and project */
 .button-danger {
-    background: #b42318;
+    background: var(--paper-dark);
+    border-color: var(--danger);
+    color: var(--ink);
+    transition: box-shadow 0.1s ease,
+    border-color 0.1s ease;
 }
 
-.delete-trigger {
-    margin-top: 1rem;
+.button-danger:hover {
+    background-color: transparent;
+    color: var(--danger-light);
+    box-shadow: 0 0 15px var(--danger-light);
 }
+
 
 .card-actions {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.6rem;
     margin-top: auto;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+}
+
+.card-actions .button {
+    flex: 1;
+    min-width: 0;
 }
 
 .delete-modal {
@@ -662,6 +727,7 @@ h1, .brand {
     padding: 1rem;
     border: 0;
     background: transparent;
+    color: var(--ink);
     z-index: 20;
     align-items: center;
     justify-content: center;
@@ -738,5 +804,77 @@ h1, .brand {
     .delete-modal__actions .button {
         width: 100%;
         text-align: center;
+    }
+}
+
+/* Search form */
+.search-form {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    max-width: 480px;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.9rem;
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper-dark);
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.9rem;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
+}
+
+@media (max-width: 600px) {
+    .search-form {
+        max-width: 100%;
+    }
+}
+
+/* Page header with add button */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.4rem 0 1.5rem;
+}
+
+.page-header h1 {
+    margin: 0;
+}
+
+.page-header .button {
+    gap: 0.4rem;
+}
+
+.page-header .button span {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+@media (max-width: 600px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header .button {
+        width: 100%;
     }
 }
