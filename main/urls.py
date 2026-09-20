@@ -3,7 +3,8 @@ from django.urls import path
 from main.views import (show_main, show_experience,show_education,
                         create_education, show_projects,create_project,
                         get_education_json,get_projects_json,delete_project,
-                        delete_education,edit_education,edit_project)
+                        delete_education,edit_education,edit_project,
+                        create_experience,edit_experience,delete_experience)
 
 app_name = "main"
 
@@ -20,4 +21,7 @@ urlpatterns = [
     path("education/<uuid:education_id>/delete/", delete_education, name="delete_education"),
     path("education/<uuid:education_id>/edit/", edit_education, name="edit_education"),
     path("projects/<uuid:project_id>/edit/", edit_project, name="edit_project"),
+    path("experience/add/", create_experience, name="create_experience"),
+    path("experience/<uuid:experience_id>/edit/", edit_experience, name="edit_experience"),
+    path("experience/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
 ]
