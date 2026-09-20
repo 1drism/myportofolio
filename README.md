@@ -43,3 +43,18 @@ Example usage for example, if I add a new field gpa = models.FloatField(default=
 
 ### AI Usage Disclosure
 For this specific assignment i only use gemini to explain me better how the concept works like model,view,template also it helps me pointing out bugs in your test code (wrong URL names).
+
+## Assignment 3
+
+### 1. Why we use Django’s ModelForm
+A ModelForm builds the form straight from the model, so the form structure stays in sync with the model definition. In EducationForm I only declare model = Education and list the fields, and Django generates the inputs, labels, and validation from the model itself max_length=100 on institution is enforced, and started_at is parsed into a real Python date. Building it by hand would mean writing every <input> and then pulling each value out of request.POST, checking types, and converting the date strings myself, and every model change would mean editing the template and the view too. The same form class also handles updates, edit_education passes instance=education so save() updates the row instead of inserting a new one.
+
+The {% csrf_token %} acts like a secret handshake between my website and users to stop unwanted infiltrators from making unauthorized changes. Browsers attach cookies based on where a request is going, not where it came from, so another site could submit a form to my education/<id>/delete/ URL and the browser would send my session cookie along with it. Django puts a secret token in the form and checks it against the one tied to my session, and the same origin policy stops an attacker's page from reading it.
+
+### 2.  Why JSON is preferred over XML
+I think JSON is preferred over XML in modern web development primarily because its syntax is easier to read and its seamless integration with JavaScript which make data transfer faster and significantly easier to process. While XML is highly repetitive forcing every field name to be written twice (like <name>Idris</name> instead of "name": "Idris")—JSON keeps payloads small, which saves time and data. Furthermore, JSON maps directly onto native data structures like Python dictionaries or JavaScript objects, making parsing much faster than XML.
+
+### 3. JSON flow, and why serialization is needed
+When the browser requests /api/education/, the project urls.py hands the path to the app urls.py, which matches it and calls get_education_json. The view searches for a term, filters the database records, and converts the results into JSON using Django's serializer before sending it back as an HTTP response. Another view, show_education, reuses this exact JSON. It fetches the data, unpacks it back into actual Python objects using serializers.deserialize, and sends those objects to the template.
+
+Serialization is necessary because a live Python object exists only in the server memory as a reference to allocated data, meaning it cannot travel over a network in its native form. Serialization converts these complex objects into a self contained text representation which translating dates into ISO strings and UUIDs into plain strings so that any client, regardless of the programming language it uses, can receive the data and parse it back into its own native structures.
