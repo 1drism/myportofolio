@@ -1,12 +1,10 @@
-<p class="delete-trigger">
-    <button type="button"
-            class="button button-danger"
-            popovertarget="delete-project-{{ project.id }}"
-            aria-label="Delete {{ project.title }}"
-            title="Delete project">
-        Delete
-    </button>
-</p>
+<button type="button"
+        class="button button-danger"
+        popovertarget="delete-project-{{ project.id }}"
+        aria-label="Delete {{ project.title }}"
+        title="Delete project">
+    Delete
+</button>
 <div id="delete-project-{{ project.id }}"
      class="delete-modal"
      popover="auto"
