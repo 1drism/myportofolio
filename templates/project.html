@@ -40,6 +40,7 @@
                                 </p>
                             {% endif %}
                             <div class="card-actions">
+                                <a href="{% url 'main:edit_project' project.id %}" class="button button-secondary">Edit</a>
                                 {% include "components/project_delete_modal.html" with project=project %}
                             </div>
                         </article>
