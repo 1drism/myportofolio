@@ -58,3 +58,6 @@ I think JSON is preferred over XML in modern web development primarily because i
 When the browser requests /api/education/, the project urls.py hands the path to the app urls.py, which matches it and calls get_education_json. The view searches for a term, filters the database records, and converts the results into JSON using Django's serializer before sending it back as an HTTP response. Another view, show_education, reuses this exact JSON. It fetches the data, unpacks it back into actual Python objects using serializers.deserialize, and sends those objects to the template.
 
 Serialization is necessary because a live Python object exists only in the server memory as a reference to allocated data, meaning it cannot travel over a network in its native form. Serialization converts these complex objects into a self contained text representation which translating dates into ISO strings and UUIDs into plain strings so that any client, regardless of the programming language it uses, can receive the data and parse it back into its own native structures.
+
+### AI Usage Disclosure
+I didn't use AI for this week's task, i referenced the result from Tutorial 3, then changed the structure of it to match my original education,experience,and project html.
