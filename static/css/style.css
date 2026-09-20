@@ -806,3 +806,36 @@ h1, .brand {
         text-align: center;
     }
 }
+
+/* Page header with add button */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.4rem 0 1.5rem;
+}
+
+.page-header h1 {
+    margin: 0;
+}
+
+.page-header .button {
+    gap: 0.4rem;
+}
+
+.page-header .button span {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+@media (max-width: 600px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header .button {
+        width: 100%;
+    }
+}
