@@ -115,7 +115,6 @@ class ExperienceForm(ModelForm):
             "title",
             "description",
             "category",
-            "thumbnail",
             "ended_at",
         ]
 
@@ -123,7 +122,6 @@ class ExperienceForm(ModelForm):
             "title": "Title",
             "description": "Description",
             "category": "Category",
-            "thumbnail": "Thumbnail URL",
             "ended_at": "End Date",
         }
 
@@ -138,11 +136,6 @@ class ExperienceForm(ModelForm):
                 attrs={
                     "placeholder": "Describe your experience",
                     "rows": 3,
-                }
-            ),
-            "thumbnail": URLInput(
-                attrs={
-                    "placeholder": "https://drive.google.com/thumbnail?id=1hjTmJl-OVPMb2qtBKgc6U-88pMSx2rWD&sz=w1000",
                 }
             ),
             "ended_at": DateInput(
