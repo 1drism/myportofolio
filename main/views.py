@@ -143,3 +143,19 @@ def delete_education(request, education_id):
         return redirect("main:show_education")
 
     return redirect("main:show_education")
+
+def edit_education(request, education_id):
+    education = get_object_or_404(Education, pk=education_id)
+    form = EducationForm(request.POST or None, instance=education)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Education updated!")
+        return redirect("main:show_education")
+
+    context = {
+        "name": "Idris",
+        "form": form,
+        "education": education,
+    }
+    return render(request, "education_edit_form.html", context)
