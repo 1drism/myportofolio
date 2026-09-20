@@ -428,6 +428,8 @@ h1, .brand {
     background-color: var(--paper-dark);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
 }
 
 .experience-category {
@@ -516,7 +518,8 @@ h1, .brand {
 
 /* Education and Project form css below */
 .education-form,
-.project-form {
+.project-form,
+.experience-form {
     width: 100%;
     max-width: 100%;
     margin-top: 1.5rem;
@@ -548,6 +551,26 @@ h1, .brand {
 
 .form-group input:focus,
 .form-group textarea:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
+}
+
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--paper-dark);
+    color: var(--ink);
+    font: inherit;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        outline-color 0.2s ease;
+}
+
+.form-group select:focus {
     outline: 2px solid var(--accent);
     border-color: var(--accent);
 }
@@ -704,6 +727,7 @@ h1, .brand {
     padding: 1rem;
     border: 0;
     background: transparent;
+    color: var(--ink);
     z-index: 20;
     align-items: center;
     justify-content: center;
