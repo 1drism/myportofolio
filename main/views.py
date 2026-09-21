@@ -3,6 +3,9 @@ from django.shortcuts import render
 from main.models import Experience,Education,Project
 from main.forms import EducationForm,ProjectForm,ExperienceForm
 
+from django.contrib.auth import login, logout
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+
 from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
@@ -194,3 +197,34 @@ def edit_experience(request, experience_id):
 
     context = {"name": "Idris", "form": form, "experience": experience}
     return render(request, "experience_edit_form.html", context)
+
+def register(request):
+    form = UserCreationForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Account created successfully. Please log in.")
+        return redirect("main:login")
+
+    context = {
+        "name": "Burhan",
+        "form": form,
+    }
+    return render(request, "register.html", context)
+
+def login_user(request):
+    form = AuthenticationForm(request, data=request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        login(request, form.get_user())
+        return redirect("main:show_main")
+
+    context = {
+        "name": "Burhan",
+        "form": form,
+    }
+    return render(request, "login.html", context)
+
+def logout_user(request):
+    logout(request)
+    return redirect("main:show_main")
