@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'portofolio.wsgi.application'
 
 
 # gunakan https:// trailing the url
-CSRF_TRUSTED_ORIGINS = ["https://muhamad-idris51-myportofolio.pws.cs.ui.ac.id/"]
+CSRF_TRUSTED_ORIGINS = ["https://muhamad-idris51-myportofolio.pws.cs.ui.ac.id"]
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
