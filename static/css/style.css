@@ -521,11 +521,14 @@ h1, .brand {
 .project-form,
 .experience-form {
     width: 100%;
-    max-width: 100%;
+    max-width: 640px;
     margin-top: 1.5rem;
+    padding: 1.75rem;
+    background: var(--paper-dark);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
 }
 
-/* Style for forms below */
 .form-group {
     margin-bottom: 1.25rem;
 }
@@ -533,52 +536,116 @@ h1, .brand {
 .form-group label {
     display: block;
     margin-bottom: 0.4rem;
+    color: var(--accent-light);
+    font-size: 0.8rem;
     font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
     width: 100%;
-    box-sizing: border-box;
-    padding: 0.7rem;
-    border: 1px solid var(--accent);
+    padding: 0.7rem 0.9rem;
+    border: 2px solid var(--line);
     border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
     font: inherit;
+    font-size: 0.95rem;
+    color-scheme: dark;
     transition:
         border-color 0.2s ease,
-        outline-color 0.2s ease;
+        box-shadow 0.2s ease;
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
-    outline: 2px solid var(--accent);
-    border-color: var(--accent);
+.form-group textarea {
+    resize: vertical;
+    min-height: 6rem;
 }
 
 .form-group select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 0.7rem;
-    border: 1px solid var(--accent);
-    border-radius: var(--radius);
-    background: var(--paper-dark);
-    color: var(--ink);
-    font: inherit;
     cursor: pointer;
-    transition:
-        border-color 0.2s ease,
-        outline-color 0.2s ease;
 }
 
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
 .form-group select:focus {
-    outline: 2px solid var(--accent);
+    outline: none;
     border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
+}
+
+.form-help {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.form-help ul {
+    padding-left: 1.2rem;
 }
 
 .form-error {
-    color: var(--danger);
-    font-size: 0.85rem;
     margin-top: 0.35rem;
+    color: var(--danger-light);
+    font-size: 0.85rem;
+}
+
+.form-message {
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    background: rgba(255, 224, 67, 0.08);
+    color: var(--accent-light);
+    font-size: 0.9rem;
+}
+
+.education-form .button,
+.project-form .button,
+.experience-form .button {
+    margin-top: 0.5rem;
+    margin-right: 0.5rem;
+}
+/* Form with live preview */
+.form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 2rem;
+    align-items: start;
+    margin-top: 1.5rem;
+}
+
+.form-layout form {
+    max-width: 100%;
+    margin-top: 0;
+}
+
+.form-preview {
+    position: sticky;
+    top: 7rem;
+}
+
+.form-preview .section-kicker {
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 800px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .form-preview {
+        position: static;
+    }
 }
 
 .button {
@@ -655,6 +722,10 @@ h1, .brand {
     height: auto;
     border-radius: var(--radius);
     margin-bottom: 0.75rem;
+}
+/* so it doesnt override the hidden atributes */
+[hidden] {
+    display: none !important;
 }
 
 .project-card h2 {
@@ -879,25 +950,3 @@ h1, .brand {
     }
 }
 
-/* Star css */
-.star-form {
-    display: inline;
-}
-
-.button-star {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    background: var(--ink);
-}
-
-.button-star.is-starred {
-    background: var(--accent);
-}
-
-.star-count {
-    padding: 0.05rem 0.4rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.25);
-    font-size: 0.8rem;
-}

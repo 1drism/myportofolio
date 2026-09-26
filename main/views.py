@@ -13,6 +13,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 import datetime
 
+# Helper function to check is the user editor
+def is_editor(user):
+    return user.groups.filter(name='Editor').exists()
+    
+    
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'No active login session / Cookie not found')
     
@@ -31,6 +36,7 @@ def show_experience(request):
     context = {
         "name": "Idris",
         "experience_list": Experience.objects.all(),
+        "is_editor": is_editor(request.user),
     }
     return render(request, "experience.html", context)
 
@@ -101,7 +107,7 @@ def get_education_json(request):
     if institution_query:
         education = education.filter(institution__icontains=institution_query)
 
-    education_json = serializers.serialize("json", education)
+    education_json = serializers.serialize("json", education, use_natural_foreign_keys=True)
     return HttpResponse(education_json, content_type="application/json")
 
 def show_projects(request):
@@ -118,6 +124,7 @@ def show_projects(request):
         "name": "Idris",
         "project_list": projects,
         "title_query": title_query,
+        "is_editor": is_editor(request.user),
     }
     return render(request, "project.html", context)
 
@@ -135,6 +142,7 @@ def show_education(request):
         "name": "Idris",
         "education_list": education_list,
         "institution_query": institution_query,
+        "is_editor": is_editor(request.user),
     }
     return render(request, "education.html", context)
 
@@ -182,7 +190,7 @@ def delete_experience(request, experience_id):
 
 @login_required(login_url="/login/")
 def edit_education(request, education_id):
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or is_editor(request.user)):
         raise PermissionDenied
     education = get_object_or_404(Education, pk=education_id)
     form = EducationForm(request.POST or None, instance=education)
@@ -201,7 +209,7 @@ def edit_education(request, education_id):
 
 @login_required(login_url="/login/")
 def edit_project(request, project_id):
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or is_editor(request.user)):
         raise PermissionDenied
     
     project = get_object_or_404(Project, pk=project_id)
@@ -221,7 +229,7 @@ def edit_project(request, project_id):
 
 @login_required(login_url="/login/")
 def edit_experience(request, experience_id):
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or is_editor(request.user)):
         raise PermissionDenied
     
     experience = get_object_or_404(Experience, pk=experience_id)
@@ -232,7 +240,10 @@ def edit_experience(request, experience_id):
         messages.success(request, "Experience updated!")
         return redirect("main:show_experience")
 
-    context = {"name": "Idris", "form": form, "experience": experience}
+    context = { "name": "Idris",
+               "form": form,
+               "experience": experience,
+    }
     return render(request, "experience_form.html", context)
 
 
@@ -275,7 +286,7 @@ def logout_user(request):
 
 # Star button
 @login_required(login_url="/login/")
-def toggle_star(request, project_id):
+def toggle_project_star(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
@@ -285,3 +296,15 @@ def toggle_star(request, project_id):
             project.starred_by.add(request.user)
 
     return redirect("main:show_projects")
+
+@login_required(login_url="/login/")
+def toggle_education_star(request, education_id):
+    education = get_object_or_404(Education, pk=education_id)
+
+    if request.method == "POST":
+        if request.user in education.starred_by.all():
+            education.starred_by.remove(request.user)
+        else:
+            education.starred_by.add(request.user)
+
+    return redirect("main:show_education")

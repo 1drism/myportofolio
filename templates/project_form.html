@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block meta %}
     <title>{% if project %}Edit{% else %}Add{% endif %} Project - {{ name }}</title>
 {% endblock meta %}
@@ -7,23 +9,42 @@
         <section class="project-section">
             <div class="container">
                 <h1>{% if project %}Edit Project{% else %}Add New Project{% endif %}</h1>
-                <form method="post" class="project-form">
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div class="form-group">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% for error in field.errors %}
-                                <p class="form-error">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="button">
-                        {% if project %}Save Changes{% else %}Add Project{% endif %}
-                    </button>
-                    <a href="{% url 'main:show_projects' %}" class="button button-secondary">Cancel</a>
-                </form>
+                <div class="form-layout">
+                    <form method="post" class="project-form" data-preview-form>
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                    <p class="form-error">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                        <button type="submit" class="button">
+                            {% if project %}Save Changes{% else %}Add Project{% endif %}
+                        </button>
+                        <a href="{% url 'main:show_projects' %}" class="button button-secondary">Cancel</a>
+                    </form>
+
+                    <aside class="form-preview" aria-label="Live preview">
+                        <p class="section-kicker">Live preview</p>
+                        <article class="project-card" data-preview-card>
+                            <img class="project-image" alt="" data-preview-src="project_image_url" hidden>
+                            <h2 data-preview="title" data-placeholder="Project title"></h2>
+                            <span class="project-tech" data-preview="tech_stack" data-placeholder="Tech stack"></span>
+                            <p class="project-description" data-preview="description"></p>
+                            <p class="project-link" data-preview-link="project_url" hidden>
+                                <a href="#">View Project</a>
+                            </p>
+                        </article>
+                    </aside>
+                </div> 
             </div>
         </section>
     </main>
 {% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'js/form-preview.js' %}" defer></script>
+{% endblock scripts %}
