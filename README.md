@@ -61,3 +61,33 @@ Serialization is necessary because a live Python object exists only in the serve
 
 ### AI Usage Disclosure
 I didn't use AI for this week's task, i referenced the result from Tutorial 3, then changed the structure of it to match my original education,experience,and project html.
+
+## Assignment 4
+| Role | View portfolio & API | Star / unstar | Edit data | Create / delete data |
+|---|---|---|---|---|
+| Visitor (not logged in) | Yes | No (redirected to login) | No (redirected to login) | No (redirected to login) |
+| Regular user | Yes | Yes | No (403) | No (403) |
+| Editor | Yes | Yes | Yes | No (403) |
+| Portfolio owner (superuser) | Yes | Yes | Yes | Yes |
+
+This applies to all three sections Education, Projects, and Experience. Stars are available on Education and Projects.
+
+### How I implemented it
+
+**Editor role**
+I created a group called Editor in Django Admin and added test accounts to it from the Users page, so the role can only be assigned through admin. In views.py I made a small helper, `is_editor(user)`, which returns user.groups.filter(name='Editor').exists(). The edit views (`edit_education`, `edit_project`, `edit_experience`) let a user through if they are a superuser or an editor. The create and delete views still only allow the superuser.
+
+**Server-side checks**
+Every view that changes data uses @login_required(login_url="/login/"), so a visitor who isn't logged in gets redirected to the login page instead of seeing an error. After that, each view checks the role and raises `PermissionDenied` if the user isn't allowed, which makes Django return 403 Forbidden. I do the check on the server because hiding a button doesn't stop anyone from typing the URL or sending the POST request themselves.
+
+**Hiding controls in templates**
+`show_education`, `show_projects`, and `show_experience` pass `is_editor` into the template context. The Edit button is wrapped in {% if user.is_superuser or is_editor %}, while the Add button and the delete modal stay inside {% if user.is_superuser %}`. This way each role only sees the buttons it can actually use. This is just for the user experience; the real protection is still the server-side check.
+
+**Star feature**
+I added `starred_by = models.ManyToManyField(User, related_name="starred_education", blank=True)` to Education (and elated_name="starred_projects" on Project) and ran the migrations. The toggle_education_star and toggle_project_star views only act on POST requests, and the form includes {% csrf_token %}. If the user is already in `starred_by` they get removed, otherwise they get added. A ManyToMany relation can only store each user–item pair once, so one user can only give one star per item. The button shows the total count with `starred_by.count`, says "Star" or "Unstar" depending on whether the current user already starred it, and changes color when starred. Visitors who aren't logged in get redirected to login when they click it.
+
+**JSON endpoint**
+Once I added `starred_by`, the serializer started including it in /api/education/. By default that would be a list of raw user IDs, which exposes internal database IDs. I added use_natural_foreign_keys=True to serializers.serialize(...) so it shows usernames instead. The User model itself is never serialized, so passwords and emails never appear in the api.
+
+### AI usage disclosure
+I used Claude as a guide throughout Tutorial 4 and this assignment. It explained the concepts step by step and gave me hints for the Editor role and the Education star feature, which I then wrote and adapted myself in `views.py`, `models.py`, `urls.py`, and the templates. It also reviewed my code and caught bugs, such as my `is_editor` helper expecting a `request` while I was calling it with `request.user`. For the extra features, the `form-preview.js` live preview script claude teaches me step by step on how to write it without giving direct answer. I asked it to explain JavaScript line by line so I understood the script before using it, and I integrated it into my templates and fixed the empty preview myself once I found the missing `data-preview-form` attributes. The AI was not always right, so I verified its suggestions against my own code and the course pages.
