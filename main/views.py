@@ -165,7 +165,7 @@ def edit_education(request, education_id):
         "form": form,
         "education": education,
     }
-    return render(request, "education_edit_form.html", context)
+    return render(request, "education_form.html", context)
 
 def edit_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
@@ -181,7 +181,7 @@ def edit_project(request, project_id):
         "form": form,
         "project": project,
     }
-    return render(request, "project_edit_form.html", context)
+    return render(request, "project_form.html", context)
 
 def edit_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
@@ -193,4 +193,4 @@ def edit_experience(request, experience_id):
         return redirect("main:show_experience")
 
     context = {"name": "Idris", "form": form, "experience": experience}
-    return render(request, "experience_edit_form.html", context)
+    return render(request, "experience_form.html", context)
