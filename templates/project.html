@@ -9,9 +9,11 @@
                 <p class="section-kicker">What I've built</p>
                 <div class="page-header">
                     <h1>Projects</h1>
-                    <a href="{% url 'main:create_project' %}" class="button">
-                        <span aria-hidden="true">+</span> Add Project
-                    </a>
+                        {% if user.is_superuser %}
+                            <a href="{% url 'main:create_project' %}" class="button">
+                                <span aria-hidden="true">+</span> Add Project
+                            </a>
+                        {% endif %}
                 </div>
                 <form method="get"
                     action="{% url 'main:show_projects' %}"
@@ -45,9 +47,12 @@
                                 </p>
                             {% endif %}
                             <div class="card-actions">
-                                <a href="{% url 'main:edit_project' project.id %}" class="button button-secondary">Edit</a>
-                                {% include "components/project_delete_modal.html" with project=project %}
-                            </div>
+                                {% include "components/project_star.html" with project=project %}
+                                {% if user.is_superuser %}
+                                    <a href="{% url 'main:edit_project' project.id %}" class="button button-secondary">Edit</a>
+                                    {% include "components/project_delete_modal.html" with project=project %}
+                                {% endif %}
+                                </div>
                         </article>
                     {% empty %}
                         <p class="empty-state">
