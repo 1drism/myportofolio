@@ -615,6 +615,38 @@ h1, .brand {
     margin-top: 0.5rem;
     margin-right: 0.5rem;
 }
+/* Form with live preview */
+.form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 2rem;
+    align-items: start;
+    margin-top: 1.5rem;
+}
+
+.form-layout .education-form {
+    max-width: 100%;
+    margin-top: 0;
+}
+
+.form-preview {
+    position: sticky;
+    top: 7rem;
+}
+
+.form-preview .section-kicker {
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 800px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .form-preview {
+        position: static;
+    }
+}
 
 .button {
     display: inline-flex;
