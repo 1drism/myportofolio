@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 {% block meta %}
-    <title>Add Project - {{ name }}</title>
+    <title>{% if project %}Edit{% else %}Add{% endif %} Project - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
     <main>
         <section class="project-section">
             <div class="container">
-                <h1>Add New Project</h1>
-                <form method="post"
-                      action="{% url 'main:create_project' %}"
-                      class="project-form">
+                <h1>{% if project %}Edit Project{% else %}Add New Project{% endif %}</h1>
+                <form method="post" class="project-form">
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="form-group">
@@ -20,7 +18,9 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="button">Add Project</button>
+                    <button type="submit" class="button">
+                        {% if project %}Save Changes{% else %}Add Project{% endif %}
+                    </button>
                     <a href="{% url 'main:show_projects' %}" class="button button-secondary">Cancel</a>
                 </form>
             </div>
