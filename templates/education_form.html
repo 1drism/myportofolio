@@ -10,7 +10,7 @@
             <div class="container">
                 <h1>{% if education %}Edit Education{% else %}Add New Education{% endif %}</h1>
                 <div class="form-layout">
-                    <form method="post" class="education-form">
+                    <form method="post" class="education-form" data-preview-form>
                         {% csrf_token %}
                         {% for field in form %}
                             <div class="form-group">
@@ -28,13 +28,13 @@
                     </form>
                     <aside class="form-preview" aria-label="Live preview">
                         <p class="section-kicker">Live preview</p>
-                        <article class="education-card">
-                            <span class="education-degree" data-preview="degree"></span>
-                            <h2 data-preview="institution"></h2>
-                            <p class="education-major" data-preview="faculty_or_major"></p>
+                        <article class="education-card" data-preview-card>
+                            <span class="education-degree" data-preview="degree" data-placeholder="Degree"></span>
+                            <h2 data-preview="institution" data-placeholder="Institution"></h2>
+                            <p class="education-major" data-preview="faculty_or_major" data-placeholder="Faculty / Major"></p>
                             <p class="education-description" data-preview="description"></p>
-                            <p class="education-date" data-preview="started_at"></p>
-                            <p class="education-status" data-preview="status"></p>
+                            <p class="education-date" data-preview="started_at" data-format="date"></p>
+                            <p class="education-status" data-preview-status="ended_at"></p>
                         </article>
                     </aside>
                 </div>
@@ -42,6 +42,7 @@
         </section>
     </main>
 {% endblock content %}
+
 {% block scripts %}
-    <script src="{% static 'js/education-form-preview.js' %}" defer></script>
+    <script src="{% static 'js/form-preview.js' %}" defer></script>
 {% endblock scripts %}
