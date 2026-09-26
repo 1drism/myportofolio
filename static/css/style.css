@@ -624,7 +624,7 @@ h1, .brand {
     margin-top: 1.5rem;
 }
 
-.form-layout .education-form {
+.form-layout form {
     max-width: 100%;
     margin-top: 0;
 }
@@ -722,6 +722,10 @@ h1, .brand {
     height: auto;
     border-radius: var(--radius);
     margin-bottom: 0.75rem;
+}
+/* so it doesnt override the hidden atributes */
+[hidden] {
+    display: none !important;
 }
 
 .project-card h2 {
