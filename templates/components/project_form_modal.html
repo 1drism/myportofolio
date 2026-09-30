@@ -1,3 +1,4 @@
+<!-- Shared add/edit modal: JavaScript switches the title, button text and target endpoint -->
 <div id="add-project-modal"
      class="project-form-modal"
      popover="auto"
@@ -8,37 +9,53 @@
             class="project-form-modal__backdrop"
             popovertarget="add-project-modal"
             popovertargetaction="hide"
-            aria-label="Close add project form"></button>
+            aria-label="Close project form"></button>
 
     <div class="project-form-modal__content">
         <button type="button"
                 class="project-form-modal__close"
                 popovertarget="add-project-modal"
                 popovertargetaction="hide"
-                aria-label="Close add project form">×</button>
+                aria-label="Close project form">×</button>
 
         <h2 id="add-project-modal-title">Add a New Project</h2>
-        <form id="project-form"
-              method="post"
-              action="{% url 'main:create_project' %}"
-              class="project-form">
-            {% csrf_token %}
-            {% for field in form %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% for error in field.errors %}
-                        <p class="form-error">{{ error }}</p>
-                    {% endfor %}
+        <div class="form-layout">
+            <form id="project-form"
+                  method="post"
+                  action="{% url 'main:create_project' %}"
+                  class="project-form"
+                  data-preview-form>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="project-form-modal__actions">
+                    <button type="button"
+                            class="button button-secondary"
+                            popovertarget="add-project-modal"
+                            popovertargetaction="hide">Cancel</button>
+                    <button type="submit" class="button">Add Project</button>
                 </div>
-            {% endfor %}
-            <div class="project-form-modal__actions">
-                <button type="button"
-                        class="button button-secondary"
-                        popovertarget="add-project-modal"
-                        popovertargetaction="hide">Cancel</button>
-                <button type="submit" class="button">Add Project</button>
-            </div>
-        </form>
+            </form>
+
+            <aside class="form-preview" aria-label="Live preview">
+                <p class="section-kicker">Live preview</p>
+                <article class="project-card" data-preview-card>
+                    <img class="project-image" alt="" data-preview-src="project_image_url" hidden>
+                    <h2 data-preview="title" data-placeholder="Project title"></h2>
+                    <span class="project-tech" data-preview="tech_stack" data-placeholder="Tech stack"></span>
+                    <p class="project-description" data-preview="description"></p>
+                    <p class="project-link" data-preview-link="project_url" hidden>
+                        <a href="#">View Project</a>
+                    </p>
+                </article>
+            </aside>
+        </div>
     </div>
 </div>

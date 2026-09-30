@@ -1201,7 +1201,7 @@ h1, .brand {
     margin: 0;
 }
 
-.project-form-modal__content h2,
+.project-form-modal__content > h2,
 .education-form-modal__content > h2 {
     margin: 0 2.5rem 1.25rem 0;
     font-family: "Space Grotesk", -apple-system, sans-serif;
@@ -1264,15 +1264,18 @@ h1, .brand {
     }
 }
 
-/* Education modal is wider so the live preview fits beside the form */
+/* Form modals are wider so the live preview fits beside the form */
+.project-form-modal__content,
 .education-form-modal__content {
     width: min(100%, 980px);
 }
 
+.project-form-modal .form-layout,
 .education-form-modal .form-layout {
     margin-top: 0;
 }
 
+.project-form-modal .form-preview,
 .education-form-modal .form-preview {
     top: 0;
 }

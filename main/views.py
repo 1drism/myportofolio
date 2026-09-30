@@ -386,6 +386,27 @@ def create_project_ajax(request):
 
 
 @require_POST
+def edit_project_ajax(request, project_id):
+    # Superuser and Editor can edit (Assignment 4 roles); JSON 403 instead of a login redirect
+    if not (request.user.is_superuser or is_editor(request.user)):
+        return JsonResponse(
+            {"message": "Only the portfolio owner or an editor can edit projects."},
+            status=403,
+        )
+
+    project = Project.objects.filter(pk=project_id).first()
+    if project is None:
+        return JsonResponse({"message": "This project no longer exists."}, status=404)
+
+    form = ProjectForm(request.POST, instance=project)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"message": "Project updated successfully.", "pk": str(project.id)})
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
 def create_education_ajax(request):
     # No @login_required: it would redirect fetch to the login page (200 HTML) instead of a JSON 403
     if not request.user.is_superuser:
