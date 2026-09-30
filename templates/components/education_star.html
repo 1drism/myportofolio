@@ -2,9 +2,13 @@
     {% csrf_token %}
     <button type="submit"
             class="button button-star{% if user in education.starred_by.all %} is-starred{% endif %}"
+            aria-pressed="{% if user in education.starred_by.all %}true{% else %}false{% endif %}"
             title="{% if education.starred_by.all %}Starred by {{ education.starred_by.all|join:', ' }}{% else %}Be the first to star{% endif %}">
-        <span aria-hidden="true">★</span>
-        {% if user in education.starred_by.all %}Unstar{% else %}Star{% endif %}
+        <span class="star-icon" aria-hidden="true">★</span>
+        <span class="star-label">
+            <span class="star-label-off">Star</span>
+            <span class="star-label-on" aria-hidden="true">Starred</span>
+        </span>
         <span class="star-count">{{ education.starred_by.count }}</span>
     </button>
 </form>

@@ -138,6 +138,7 @@ def show_projects(request):
         "name": "Idris",
         "title_query": title_query,
         "form": ProjectForm(),
+        "is_editor": is_editor(request.user),
     }
     return render(request, "project.html", context)
 
@@ -168,6 +169,11 @@ def delete_project(request, project_id):
 
     if request.method == "POST":
         project.delete()
+
+        # AJAX request: the page shows its own toast, so just confirm with JSON
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"message": "Project deleted successfully."})
+
         messages.success(request, "Project deleted!")
         return redirect("main:show_projects")
 
@@ -331,10 +337,6 @@ def toggle_education_star(request, education_id):
 
     return redirect("main:show_education")
 
-
-from django.views.decorators.http import require_POST
-
-...
 
 @require_POST
 def create_project_ajax(request):
