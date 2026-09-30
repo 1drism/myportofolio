@@ -15,55 +15,203 @@
                         </a>
                     {% endif %}
                 </div>
-                <form method="get"
-                    action="{% url 'main:show_education' %}"
-                    class="search-form">
+
+                <!-- Search form: no method/action anymore, JavaScript handles it -->
+                <form id="education-search-form" class="search-form">
                     <input type="search"
-                        name="institution"
-                        value="{{ institution_query }}"
-                        placeholder="Search by institution"
-                        class="search-input">
+                           id="search-input"
+                           name="institution"
+                           value="{{ institution_query }}"
+                           placeholder="Search by institution"
+                           class="search-input"
+                           aria-label="Search by institution">
                     <button type="submit" class="button">Search</button>
                 </form>
-                
-                <div class="education-grid">
-                    {% for education in education_list %}
-                        <article class="education-card">
-                            <span class="education-degree">
-                                {{ education.degree }}
-                            </span>
-                            <h2>{{ education.institution }}</h2>
-                            <p class="education-major">
-                                {{ education.faculty_or_major }}
-                            </p>
-                            <p class="education-description">
-                                {{ education.description }}
-                            </p>
-                            <p class="education-date">
-                                {{ education.started_at }}
-                            </p>
-                            {% if education.is_ongoing %}
-                                <p class="education-status">Ongoing</p>
-                            {% else %}
-                                <p class="education-status">Completed</p>
-                            {% endif %}
-                            <div class="card-actions">
-                                {% include "components/education_star.html" with education=education %}
-                                {% if user.is_superuser or is_editor %}
-                                    <a href="{% url 'main:edit_education' education.id %}" class="button button-secondary">Edit</a>
-                                {% endif %}
-                                {% if user.is_superuser%}
-                                    {% include "components/education_delete_modal.html" with education=education %}
-                                {% endif %}
-                            </div>
-                        </article>
-                    {% empty %}
-                        <p class="empty-state">
-                            No education has been added yet.
-                        </p>
-                    {% endfor %}
+
+                <!-- Loading State -->
+                <div id="loading" class="empty-state hide">
+                    <p>Loading education...</p>
                 </div>
+
+                <!-- Error State -->
+                <div id="error" class="empty-state hide">
+                    <p>Failed to load education data. Please try again.</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty" class="empty-state hide">
+                    <p>No education has been added or found yet.</p>
+                </div>
+
+                <!-- Education Grid: JavaScript fills this in -->
+                <div id="grid" class="education-grid hide"></div>
             </div>
         </section>
     </main>
+
+    {% if user.is_superuser %}
+        {% include "components/education_delete_modal.html" %}
+    {% endif %}
+
+    <script>
+    // Configuration
+    const BASE_EDUCATION_ENDPOINT = "{% url 'main:get_education_json' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
+    const PLACEHOLDER_ID = "00000000-0000-0000-0000-000000000000";
+    let educationAbortController;
+
+    // DOM elements
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+    const searchForm = document.getElementById('education-search-form');
+    const searchInput = document.getElementById('search-input');
+
+    // Show/hide page sections
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    // Convert special HTML characters into entities so they display as text
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    // "2024-08-26" -> "Aug 26, 2024"
+    function formatDate(value) {
+        if (!value) return '';
+        return new Date(value + 'T00:00').toLocaleDateString('en-US', {
+            year: 'numeric', month: 'short', day: 'numeric',
+        });
+    }
+
+    // Build an education card element
+    function buildEducationCardElement(item) {
+        const education = item.fields;
+        const educationId = item.pk;
+
+        const articleElement = document.createElement('article');
+        articleElement.className = 'education-card';
+
+        // Django fills in the URL with a dummy UUID, JavaScript swaps in the real ID
+        const starUrl = "{% url 'main:toggle_education_star' '00000000-0000-0000-0000-000000000000' %}"
+            .replace(PLACEHOLDER_ID, educationId);
+        const editUrl = "{% url 'main:edit_education' '00000000-0000-0000-0000-000000000000' %}"
+            .replace(PLACEHOLDER_ID, educationId);
+        const deleteUrl = "{% url 'main:delete_education' '00000000-0000-0000-0000-000000000000' %}"
+            .replace(PLACEHOLDER_ID, educationId);
+
+        const editHtml = CAN_EDIT
+            ? `<a href="${editUrl}" class="button button-secondary">Edit</a>`
+            : '';
+
+        const deleteHtml = IS_SUPERUSER
+            ? `<button type="button" class="button button-danger delete-button"
+                       data-delete-url="${deleteUrl}">Delete</button>`
+            : '';
+
+        const isStarredClass = education.is_starred ? ' is-starred' : '';
+        const starTitle = education.star_count > 0
+            ? `Starred by ${escapeHtml(education.starred_by_names)}`
+            : 'Be the first to star';
+
+        articleElement.innerHTML = `
+            <span class="education-degree">${escapeHtml(education.degree)}</span>
+            <h2>${escapeHtml(education.institution)}</h2>
+            <p class="education-major">${escapeHtml(education.faculty_or_major)}</p>
+            <p class="education-description">${escapeHtml(education.description)}</p>
+            <p class="education-date">${escapeHtml(formatDate(education.started_at))}</p>
+            <p class="education-status">${education.is_ongoing ? 'Ongoing' : 'Completed'}</p>
+            <div class="card-actions">
+                <form method="post" action="${starUrl}" class="star-form">
+                    {% csrf_token %}
+                    <button type="submit" class="button button-star${isStarredClass}"
+                            aria-pressed="${education.is_starred}" title="${starTitle}">
+                        <span class="star-icon" aria-hidden="true">★</span>
+                        <span class="star-label">
+                            <span class="star-label-off">Star</span>
+                            <span class="star-label-on" aria-hidden="true">Starred</span>
+                        </span>
+                        <span class="star-count">${education.star_count}</span>
+                    </button>
+                </form>
+                ${editHtml}
+                ${deleteHtml}
+            </div>
+        `;
+
+        const deleteButton = articleElement.querySelector('.delete-button');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () =>
+                openDeleteModal(deleteButton.dataset.deleteUrl, education.institution));
+        }
+        return articleElement;
+    }
+
+    // Fetch education data
+    async function fetchEducation(searchQuery = "") {
+        if (educationAbortController) educationAbortController.abort();
+        educationAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery
+                ? `${BASE_EDUCATION_ENDPOINT}?institution=${encodeURIComponent(searchQuery)}`
+                : BASE_EDUCATION_ENDPOINT;
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: educationAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const educationData = await response.json();
+
+            if (educationData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                gridContainer.innerHTML = '';
+                educationData.forEach(item => {
+                    gridContainer.appendChild(buildEducationCardElement(item));
+                });
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading education:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    // Fill the shared delete modal with this education's details, then open it
+    const deleteModal = document.getElementById('delete-education-modal');
+    const deleteForm = document.getElementById('delete-education-form');
+
+    function openDeleteModal(deleteUrl, institution) {
+        deleteForm.action = deleteUrl;
+        document.getElementById('delete-education-name').textContent = institution;
+        deleteModal.showPopover();
+    }
+
+    // Search form event handler
+    searchForm.addEventListener('submit', function (e) {
+        e.preventDefault();                          // Prevent the page from reloading
+        fetchEducation(searchInput.value.trim());    // Run the search via AJAX
+    });
+
+    // Start the application
+    fetchEducation(searchInput.value.trim());
+    </script>
 {% endblock content %}

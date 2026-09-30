@@ -7,8 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 
 from django.contrib import messages
-from django.core import serializers
-from django.http import HttpResponse,JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -123,13 +122,35 @@ def get_projects_json(request):
 
 def get_education_json(request):
     institution_query = request.GET.get("institution", "").strip()
-    education = Education.objects.all()
+    education_list = Education.objects.prefetch_related('starred_by').all()
 
     if institution_query:
-        education = education.filter(institution__icontains=institution_query)
+        education_list = education_list.filter(institution__icontains=institution_query)
 
-    education_json = serializers.serialize("json", education, use_natural_foreign_keys=True)
-    return HttpResponse(education_json, content_type="application/json")
+    # Manually build the JSON data so we can add the Star logic
+    data = []
+    for education in education_list:
+        starred_users = education.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(education.id),
+            "fields": {
+                "institution": education.institution,
+                "faculty_or_major": education.faculty_or_major,
+                "degree": education.degree,
+                "description": education.description,
+                "started_at": education.started_at.isoformat(),
+                "ended_at": education.ended_at.isoformat() if education.ended_at else None,
+                "is_ongoing": education.is_ongoing,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 def show_projects(request):
     title_query = request.GET.get("title", "").strip()
@@ -143,18 +164,10 @@ def show_projects(request):
     return render(request, "project.html", context)
 
 def show_education(request):
-    json_response = get_education_json(request)
-
-    education_list = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    education_list = [item.object for item in education_list]
     institution_query = request.GET.get("institution", "").strip()
 
     context = {
         "name": "Idris",
-        "education_list": education_list,
         "institution_query": institution_query,
         "is_editor": is_editor(request.user),
     }
