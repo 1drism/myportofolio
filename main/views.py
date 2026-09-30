@@ -8,8 +8,9 @@ from django.core.exceptions import PermissionDenied
 
 from django.contrib import messages
 from django.core import serializers
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 import datetime
 
@@ -91,13 +92,33 @@ def create_experience(request):
 
 def get_projects_json(request):
     title_query = request.GET.get("title", "").strip()
-    projects = Project.objects.all()
+    projects = Project.objects.prefetch_related('starred_by').all()
 
     if title_query:
         projects = projects.filter(title__icontains=title_query)
 
-    projects_json = serializers.serialize("json", projects,use_natural_foreign_keys=True)
-    return HttpResponse(projects_json, content_type="application/json")
+    # Manually build the JSON data so we can add the Star logic
+    data = []
+    for project in projects:
+        starred_users = project.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(project.id),
+            "fields": {
+                "title": project.title,
+                "description": project.description,
+                "tech_stack": project.tech_stack,
+                "project_url": project.project_url,
+                "project_image_url": project.project_image_url,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 
 def get_education_json(request):
@@ -111,20 +132,12 @@ def get_education_json(request):
     return HttpResponse(education_json, content_type="application/json")
 
 def show_projects(request):
-    json_response = get_projects_json(request)
-
-    projects = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    projects = [project.object for project in projects]
     title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Idris",
-        "project_list": projects,
         "title_query": title_query,
-        "is_editor": is_editor(request.user),
+        "form": ProjectForm(),
     }
     return render(request, "project.html", context)
 
@@ -295,6 +308,15 @@ def toggle_project_star(request, project_id):
         else:
             project.starred_by.add(request.user)
 
+    # Ajax send back new star state instead of redirecting
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        starred_users = project.starred_by.all()
+        return JsonResponse({
+            "is_starred": request.user in starred_users,
+            "star_count": starred_users.count(),
+            "starred_by_names": ", ".join([u.username for u in starred_users]),
+        })
+
     return redirect("main:show_projects")
 
 @login_required(login_url="/login/")
@@ -308,3 +330,26 @@ def toggle_education_star(request, education_id):
             education.starred_by.add(request.user)
 
     return redirect("main:show_education")
+
+
+from django.views.decorators.http import require_POST
+
+...
+
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Only the portfolio owner can add projects."},
+            status=403,
+        )
+
+    form = ProjectForm(request.POST)
+    if form.is_valid():
+        project = form.save()
+        return JsonResponse(
+            {"message": "Project added successfully.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
