@@ -603,16 +603,6 @@ h1, .brand {
     font-size: 0.85rem;
 }
 
-.form-message {
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius);
-    background: rgba(255, 224, 67, 0.08);
-    color: var(--accent-light);
-    font-size: 0.9rem;
-}
-
 .education-form .button,
 .project-form .button,
 .experience-form .button {
