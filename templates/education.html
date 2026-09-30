@@ -63,6 +63,7 @@
     const BASE_EDUCATION_ENDPOINT = "{% url 'main:get_education_json' %}";
     const CREATE_EDUCATION_ENDPOINT = "{% url 'main:create_education_ajax' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
     const PLACEHOLDER_ID = "00000000-0000-0000-0000-000000000000";
     let educationAbortController;
@@ -129,11 +130,6 @@
                        data-delete-url="${deleteUrl}">Delete</button>`
             : '';
 
-        const isStarredClass = education.is_starred ? ' is-starred' : '';
-        const starTitle = education.star_count > 0
-            ? `Starred by ${escapeHtml(education.starred_by_names)}`
-            : 'Be the first to star';
-
         articleElement.innerHTML = `
             <span class="education-degree">${escapeHtml(education.degree)}</span>
             <h2>${escapeHtml(education.institution)}</h2>
@@ -144,14 +140,13 @@
             <div class="card-actions">
                 <form method="post" action="${starUrl}" class="star-form">
                     {% csrf_token %}
-                    <button type="submit" class="button button-star${isStarredClass}"
-                            aria-pressed="${education.is_starred}" title="${starTitle}">
+                    <button type="submit" class="button button-star">
                         <span class="star-icon" aria-hidden="true">★</span>
                         <span class="star-label">
                             <span class="star-label-off">Star</span>
                             <span class="star-label-on" aria-hidden="true">Starred</span>
                         </span>
-                        <span class="star-count">${education.star_count}</span>
+                        <span class="star-count"></span>
                     </button>
                 </form>
                 ${editHtml}
@@ -159,12 +154,70 @@
             </div>
         `;
 
+        const starForm = articleElement.querySelector('.star-form');
+        renderStarButton(starForm.querySelector('.button-star'), education);
+        starForm.addEventListener('submit', handleStarSubmit);
+
         const deleteButton = articleElement.querySelector('.delete-button');
         if (deleteButton) {
             deleteButton.addEventListener('click', () =>
                 openDeleteModal(deleteButton.dataset.deleteUrl, education.institution));
         }
         return articleElement;
+    }
+
+    // Update the star button to match the current star state
+    function renderStarButton(button, { is_starred, star_count, starred_by_names }) {
+        button.classList.toggle('is-starred', is_starred);
+        button.setAttribute('aria-pressed', is_starred);  // CSS swaps the icon fill and label from this state
+        button.querySelector('.star-count').textContent = star_count;
+        button.title = star_count > 0 ? `Starred by ${starred_by_names}` : 'Be the first to star';
+    }
+
+    // Toggle a star via AJAX so the page doesn't reload
+    async function handleStarSubmit(e) {
+        if (!IS_AUTHENTICATED) return;   // Let the normal submit send guests to the login page
+        e.preventDefault();
+
+        const form = e.currentTarget;
+        const button = form.querySelector('.button-star');
+        const institution = form.closest('.education-card').querySelector('h2').textContent;
+        if (button.disabled) return;
+        button.disabled = true;
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            // Session expired: @login_required redirected fetch to the login page
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+            if (!response.ok) {
+                showToast('Failed to update star', `Something went wrong (status ${response.status}).`, 'error');
+                return;
+            }
+
+            const starData = await response.json();
+            renderStarButton(button, starData);
+            if (starData.is_starred) {
+                button.classList.remove('star-pop');
+                void button.offsetWidth;  // restart the animation
+                button.classList.add('star-pop');
+                showToast('Starred', `You starred "${institution}".`, 'success');
+            } else {
+                showToast('Unstarred', `You removed your star from "${institution}".`, 'normal');
+            }
+        } catch (error) {
+            console.error('Error toggling star:', error);
+            showToast('Failed to update star', 'Could not reach the server. Please try again.', 'error');
+        } finally {
+            button.disabled = false;
+        }
     }
 
     // Fetch education data
@@ -212,6 +265,49 @@
         deleteForm.action = deleteUrl;
         document.getElementById('delete-education-name').textContent = institution;
         deleteModal.showPopover();
+    }
+
+    // Delete an education entry via AJAX so the page doesn't reload
+    async function deleteEducation(event) {
+        event.preventDefault();
+
+        const submitButton = deleteForm.querySelector('button[type="submit"]');
+        const institution = document.getElementById('delete-education-name').textContent;
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(deleteForm.action, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: new FormData(deleteForm),
+            });
+
+            // Session expired: @login_required redirected fetch to the login page
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+            if (!response.ok) {
+                const message = response.status === 403
+                    ? 'Only the portfolio owner can delete education.'
+                    : `Something went wrong (status ${response.status}).`;
+                showToast('Failed to delete education', message, 'error');
+                return;
+            }
+
+            deleteModal.hidePopover();
+            showToast('Education deleted', `"${institution}" has been removed.`, 'success');
+            fetchEducation(searchInput.value.trim());
+        } catch (error) {
+            console.error('Error deleting education:', error);
+            showToast('Failed to delete education', 'Could not reach the server. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', deleteEducation);
     }
 
     function closeEducationModal() {

@@ -202,6 +202,11 @@ def delete_education(request, education_id):
 
     if request.method == "POST":
         education.delete()
+
+        # AJAX request: the page shows its own toast, so just confirm with JSON
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"message": "Education deleted successfully."})
+
         messages.success(request, "Education deleted!")
         return redirect("main:show_education")
 
@@ -348,6 +353,15 @@ def toggle_education_star(request, education_id):
             education.starred_by.remove(request.user)
         else:
             education.starred_by.add(request.user)
+
+    # AJAX request: send back the new star state instead of redirecting
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        starred_users = education.starred_by.all()
+        return JsonResponse({
+            "is_starred": request.user in starred_users,
+            "star_count": starred_users.count(),
+            "starred_by_names": ", ".join([u.username for u in starred_users]),
+        })
 
     return redirect("main:show_education")
 
