@@ -1,32 +1,36 @@
-<!-- One shared modal: JavaScript fills in the project title and delete URL -->
-<div id="delete-project-modal"
+{% comment %}
+Shared delete confirmation modal. JavaScript fills in the item name and delete URL.
+Usage: {% include "components/delete_modal.html" with name="project" title="Delete Project?" %}
+Creates the ids delete-<name>-modal, delete-<name>-form and delete-<name>-name.
+{% endcomment %}
+<div id="delete-{{ name }}-modal"
      class="delete-modal"
      popover="auto"
      role="dialog"
      aria-modal="true"
-     aria-labelledby="delete-project-modal-title">
+     aria-labelledby="delete-{{ name }}-modal-title">
     <button type="button"
             class="delete-modal__backdrop"
-            popovertarget="delete-project-modal"
+            popovertarget="delete-{{ name }}-modal"
             popovertargetaction="hide"
             aria-label="Close confirmation"></button>
     <div class="delete-modal__content">
         <button type="button"
                 class="delete-modal__close"
-                popovertarget="delete-project-modal"
+                popovertarget="delete-{{ name }}-modal"
                 popovertargetaction="hide"
                 aria-label="Close confirmation">×</button>
-        <h2 id="delete-project-modal-title">Delete Project?</h2>
+        <h2 id="delete-{{ name }}-modal-title">{{ title }}</h2>
         <p>
             Are you sure you want to delete
-            <strong id="delete-project-name"></strong>?
+            <strong id="delete-{{ name }}-name"></strong>?
         </p>
         <div class="delete-modal__actions">
             <button type="button"
                     class="button button-secondary"
-                    popovertarget="delete-project-modal"
+                    popovertarget="delete-{{ name }}-modal"
                     popovertargetaction="hide">Cancel</button>
-            <form id="delete-project-form" method="post" action="">
+            <form id="delete-{{ name }}-form" method="post" action="">
                 {% csrf_token %}
                 <button type="submit" class="button button-danger">Yes, Delete</button>
             </form>

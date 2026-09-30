@@ -54,10 +54,11 @@
     </main>
 
     {% if user.is_superuser or is_editor %}
-        {% include "components/project_form_modal.html" %}
+        {% url 'main:create_project' as create_url %}
+        {% include "components/form_modal.html" with name="project" title="Add a New Project" submit_label="Add Project" action=create_url preview="components/previews/project_preview.html" %}
     {% endif %}
     {% if user.is_superuser %}
-        {% include "components/project_delete_modal.html" %}
+        {% include "components/delete_modal.html" with name="project" title="Delete Project?" %}
     {% endif %}
 
     <script>

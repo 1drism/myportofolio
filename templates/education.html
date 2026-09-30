@@ -54,10 +54,11 @@
     </main>
 
     {% if user.is_superuser or is_editor %}
-        {% include "components/education_form_modal.html" %}
+        {% url 'main:create_education' as create_url %}
+        {% include "components/form_modal.html" with name="education" title="Add New Education" submit_label="Add Education" action=create_url preview="components/previews/education_preview.html" %}
     {% endif %}
     {% if user.is_superuser %}
-        {% include "components/education_delete_modal.html" %}
+        {% include "components/delete_modal.html" with name="education" title="Delete Education?" %}
     {% endif %}
 
     <script>
