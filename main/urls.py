@@ -7,7 +7,8 @@ from main.views import (show_main, show_experience,show_education,
                         create_experience,edit_experience,delete_experience,
                         register,login_user,logout_user,toggle_project_star,
                         toggle_education_star,create_project_ajax,
-                        create_education_ajax,edit_project_ajax)
+                        create_education_ajax,edit_project_ajax,
+                        edit_education_ajax)
 
 app_name = "main"
 
@@ -35,4 +36,5 @@ urlpatterns = [
     path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
     path("projects/<uuid:project_id>/edit-ajax/", edit_project_ajax, name="edit_project_ajax"),
     path("education/add-ajax/", create_education_ajax, name="create_education_ajax"),
+    path("education/<uuid:education_id>/edit-ajax/", edit_education_ajax, name="edit_education_ajax"),
 ]

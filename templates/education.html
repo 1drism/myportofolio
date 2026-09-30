@@ -12,7 +12,7 @@
                     <h1>Education</h1>
                     {% if user.is_superuser %}
                         <button type="button"
-                                class="button"
+                                class="button education-add-button"
                                 popovertarget="add-education-modal">
                             <span aria-hidden="true">+</span>
                             Add Education
@@ -53,8 +53,10 @@
         </section>
     </main>
 
-    {% if user.is_superuser %}
+    {% if user.is_superuser or is_editor %}
         {% include "components/education_form_modal.html" %}
+    {% endif %}
+    {% if user.is_superuser %}
         {% include "components/education_delete_modal.html" %}
     {% endif %}
 
@@ -62,11 +64,13 @@
     // Configuration
     const BASE_EDUCATION_ENDPOINT = "{% url 'main:get_education_json' %}";
     const CREATE_EDUCATION_ENDPOINT = "{% url 'main:create_education_ajax' %}";
+    const EDIT_EDUCATION_ENDPOINT = "{% url 'main:edit_education_ajax' '00000000-0000-0000-0000-000000000000' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
     const PLACEHOLDER_ID = "00000000-0000-0000-0000-000000000000";
     let educationAbortController;
+    let editingEducationId = null;   // null = the modal is adding, otherwise the ID being edited
 
     // DOM elements
     const loadingState = document.getElementById('loading');
@@ -116,13 +120,11 @@
         // Django fills in the URL with a dummy UUID, JavaScript swaps in the real ID
         const starUrl = "{% url 'main:toggle_education_star' '00000000-0000-0000-0000-000000000000' %}"
             .replace(PLACEHOLDER_ID, educationId);
-        const editUrl = "{% url 'main:edit_education' '00000000-0000-0000-0000-000000000000' %}"
-            .replace(PLACEHOLDER_ID, educationId);
         const deleteUrl = "{% url 'main:delete_education' '00000000-0000-0000-0000-000000000000' %}"
             .replace(PLACEHOLDER_ID, educationId);
 
         const editHtml = CAN_EDIT
-            ? `<a href="${editUrl}" class="button button-secondary">Edit</a>`
+            ? `<button type="button" class="button button-secondary edit-button">Edit</button>`
             : '';
 
         const deleteHtml = IS_SUPERUSER
@@ -157,6 +159,11 @@
         const starForm = articleElement.querySelector('.star-form');
         renderStarButton(starForm.querySelector('.button-star'), education);
         starForm.addEventListener('submit', handleStarSubmit);
+
+        const editButton = articleElement.querySelector('.edit-button');
+        if (editButton) {
+            editButton.addEventListener('click', () => openEditEducationModal(educationId, education));
+        }
 
         const deleteButton = articleElement.querySelector('.delete-button');
         if (deleteButton) {
@@ -314,6 +321,36 @@
         document.getElementById('add-education-modal').hidePopover();
     }
 
+    // Switch the shared modal between "add" and "edit" mode
+    function setEducationModalMode(educationId) {
+        editingEducationId = educationId;
+        document.getElementById('add-education-modal-title').textContent =
+            educationId ? 'Edit Education' : 'Add New Education';
+        educationForm.querySelector('button[type="submit"]').textContent =
+            educationId ? 'Save Changes' : 'Add Education';
+    }
+
+    // Add button: start from an empty form (the button itself opens the popover)
+    function openAddEducationModal() {
+        educationForm.reset();
+        setEducationModalMode(null);
+    }
+
+    // Edit button: fill the form with this entry's current data, then open the modal
+    function openEditEducationModal(educationId, education) {
+        setEducationModalMode(educationId);
+        ['institution', 'faculty_or_major', 'degree', 'started_at', 'ended_at', 'description'].forEach(name => {
+            educationForm.elements[name].value = education[name] ?? '';   // dates are "YYYY-MM-DD", as <input type="date"> expects
+        });
+        educationForm.dispatchEvent(new Event('input'));   // refresh the live preview
+        document.getElementById('add-education-modal').showPopover();
+    }
+
+    const addEducationButton = document.querySelector('.education-add-button');
+    if (addEducationButton) {
+        addEducationButton.addEventListener('click', openAddEducationModal);
+    }
+
     // Read a cookie value, used to get the CSRF token
     function getCookie(name) {
         let cookieValue = null;
@@ -339,15 +376,21 @@
         });
     }
 
-    // Send the form data to the server
-    async function addEducation(event) {
+    // Send the form data to the server (add or edit, depending on the modal mode)
+    async function saveEducation(event) {
         event.preventDefault();
+
+        const isEditing = editingEducationId !== null;
+        const endpoint = isEditing
+            ? EDIT_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, editingEducationId)
+            : CREATE_EDUCATION_ENDPOINT;
+        const failTitle = isEditing ? 'Failed to update education' : 'Failed to add education';
 
         const submitButton = educationForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(CREATE_EDUCATION_ENDPOINT, {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'X-CSRFToken': getCookie('csrftoken') },
                 body: new FormData(educationForm),
@@ -356,25 +399,26 @@
 
             if (response.ok) {
                 educationForm.reset();
+                setEducationModalMode(null);
                 closeEducationModal();
-                showToast('Success', 'New education added successfully!', 'success');
+                showToast('Success', isEditing ? 'Education updated successfully!' : 'New education added successfully!', 'success');
                 fetchEducation(searchInput.value.trim());
             } else {
                 const errorMessages = result.errors
                     ? formatFieldErrors(result.errors)
                     : [result.message || `Something went wrong (status ${response.status}).`];
-                showToast('Failed to add education', errorMessages.join(' '), 'error');
+                showToast(failTitle, errorMessages.join(' '), 'error');
             }
         } catch (error) {
-            console.error('Error adding education:', error);
-            showToast('Failed to add education', 'Could not reach the server. Please try again.', 'error');
+            console.error('Error saving education:', error);
+            showToast(failTitle, 'Could not reach the server. Please try again.', 'error');
         } finally {
             submitButton.disabled = false;
         }
     }
 
     if (educationForm) {
-        educationForm.addEventListener('submit', addEducation);
+        educationForm.addEventListener('submit', saveEducation);
     }
 
     function searchEducation() {

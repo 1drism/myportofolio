@@ -424,3 +424,24 @@ def create_education_ajax(request):
         )
 
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def edit_education_ajax(request, education_id):
+    # Superuser and Editor can edit (Assignment 4 roles); JSON 403 instead of a login redirect
+    if not (request.user.is_superuser or is_editor(request.user)):
+        return JsonResponse(
+            {"message": "Only the portfolio owner or an editor can edit education."},
+            status=403,
+        )
+
+    education = Education.objects.filter(pk=education_id).first()
+    if education is None:
+        return JsonResponse({"message": "This education entry no longer exists."}, status=404)
+
+    form = EducationForm(request.POST, instance=education)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"message": "Education updated successfully.", "pk": str(education.id)})
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
