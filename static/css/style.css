@@ -26,7 +26,9 @@
     --radius: 4px;
 }
 
-.hide {
+/* .hide is toggled by JavaScript; [hidden] must also win over classes that set display */
+.hide,
+[hidden] {
     display: none !important;
 }
 
@@ -197,7 +199,8 @@ h1, .brand {
     animation-delay: 0.3s;
 }
 
-.hero {
+.hero,
+.skills {
     padding: 4.5rem 0 5rem;
 }
 
@@ -347,10 +350,6 @@ h1, .brand {
     }
 }
 
-.skills {
-    padding: 4.5rem 0 5rem;
-}
-
 .skills-grid{
     list-style: none;
     display: grid;
@@ -402,38 +401,68 @@ h1, .brand {
     margin: 0.75rem auto 0;
 }
 
-/* Experience css below */
-.experience-section {
+/* Shared section, grid and card styles for experience, education and project */
+.experience-section,
+.education-section,
+.project-section {
     padding: 4rem 0;
     border-top: 1px solid var(--line);
 }
 
-.section-kicker {
-    color: var(--accent-dark);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.experience-section h1 {
+.experience-section h1,
+.education-section h1,
+.project-section h1 {
     margin: 0.4rem 0 1.5rem;
     font-size: 2rem;
 }
 
-.experience-grid {
+.experience-grid,
+.education-grid,
+.project-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1rem;
 }
 
-.experience-card {
+.experience-card,
+.education-card,
+.project-card {
     padding: 1.25rem;
     background-color: var(--paper-dark);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     display: flex;
     flex-direction: column;
+}
+
+.experience-card h2,
+.education-card h2,
+.project-card h2 {
+    margin: 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.experience-description,
+.education-description,
+.empty-state {
+    color: var(--text-muted);
+}
+
+.experience-status,
+.education-status,
+.project-link {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Experience css below */
+.section-kicker {
+    color: var(--accent-dark);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .experience-category {
@@ -443,58 +472,14 @@ h1, .brand {
     text-transform: uppercase;
 }
 
-.experience-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
-}
-
-.experience-description,
-.empty-state {
-    color: var(--text-muted);
-}
-
-.experience-status {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
 
 /* Education css below */
-.education-section {
-    padding: 4rem 0;
-    border-top: 1px solid var(--line);
-}
-
-.education-section h1 {
-    margin: 0.4rem 0 1.5rem;
-    font-size: 2rem;
-}
-
-.education-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-}
-
-.education-card {
-    padding: 1.25rem;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-}
-
-.education-degree {
+.education-degree,
+.project-tech {
     color: var(--accent-light);
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-}
-
-.education-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
 }
 
 .education-major {
@@ -504,20 +489,10 @@ h1, .brand {
     margin-bottom: 0.5rem;
 }
 
-.education-description {
-    color: var(--text-muted);
-}
-
 .education-date {
     color: var(--text-muted);
     font-size: 0.85rem;
     margin-top: 0.75rem;
-}
-
-.education-status {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 /* Education and Project form css below */
@@ -581,7 +556,8 @@ h1, .brand {
 
 .form-group input:focus,
 .form-group textarea:focus,
-.form-group select:focus {
+.form-group select:focus,
+.search-input:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
@@ -685,31 +661,6 @@ h1, .brand {
 }
 
 /* Project css below */
-.project-section {
-    padding: 4rem 0;
-    border-top: 1px solid var(--line);
-}
-
-.project-section h1 {
-    margin: 0.4rem 0 1.5rem;
-    font-size: 2rem;
-}
-
-.project-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-}
-
-.project-card {
-    padding: 1.25rem;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-}
-
 .project-image {
     display: block;
     width: 100%;
@@ -717,39 +668,16 @@ h1, .brand {
     border-radius: var(--radius);
     margin-bottom: 0.75rem;
 }
-/* so it doesnt override the hidden atributes */
-[hidden] {
-    display: none !important;
-}
-
-.project-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
-}
-
-.project-tech {
-    color: var(--accent-light);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
 .project-description {
     color: var(--text-muted);
     margin-top: 0.5rem;
-}
-
-.project-link {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 .project-link a {
     color: var(--accent);
 }
 
-/* Shared delete modal styles for education and project */
+/* Danger button (delete) */
 .button-danger {
     background: var(--paper-dark);
     border-color: var(--danger);
@@ -889,98 +817,6 @@ h1, .brand {
     100% { transform: scale(1); }
 }
 
-.delete-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    margin: 0;
-    padding: 1rem;
-    border: 0;
-    background: transparent;
-    color: var(--ink);
-    z-index: 20;
-    align-items: center;
-    justify-content: center;
-}
-
-.delete-modal:popover-open {
-    display: flex;
-}
-
-.delete-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    padding: 0;
-    background: rgba(0, 0, 0, 0.7);
-    cursor: default;
-}
-
-.delete-modal__content {
-    position: relative;
-    z-index: 1;
-    width: min(100%, 480px);
-    padding: 1.5rem;
-    background: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
-}
-
-.delete-modal__content h2 {
-    margin: 0 0 0.75rem;
-    font-family: "Space Grotesk", -apple-system, sans-serif;
-    font-size: 1.5rem;
-}
-
-.delete-modal__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    border: 0;
-    padding: 0;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 1.8rem;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.delete-modal__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-}
-
-@media (max-width: 600px) {
-    .delete-modal {
-        align-items: flex-end;
-        padding: 0;
-    }
-
-    .delete-modal__content {
-        width: 100%;
-        padding: 1.25rem;
-        border-radius: var(--radius) var(--radius) 0 0;
-    }
-
-    .delete-modal__actions {
-        flex-direction: column-reverse;
-    }
-
-    .delete-modal__actions .button {
-        width: 100%;
-        text-align: center;
-    }
-}
-
 /* Search form */
 .search-form {
     display: flex;
@@ -1006,12 +842,6 @@ h1, .brand {
 
 .search-input::placeholder {
     color: var(--text-muted);
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
 }
 
 @media (max-width: 600px) {
@@ -1126,8 +956,8 @@ h1, .brand {
     }
 }
 
-.project-form-modal,
-.education-form-modal {
+/* Modal (popover): shared by the delete confirmations and the add/edit form */
+.modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -1140,18 +970,16 @@ h1, .brand {
     border: 0;
     background: transparent;
     color: var(--ink);
-    z-index: 10;
+    z-index: 20;
     align-items: center;
     justify-content: center;
 }
 
-.project-form-modal:popover-open,
-.education-form-modal:popover-open {
+.modal:popover-open {
     display: flex;
 }
 
-.project-form-modal__backdrop,
-.education-form-modal__backdrop {
+.modal__backdrop {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -1162,45 +990,24 @@ h1, .brand {
     cursor: default;
 }
 
-.project-form-modal__content,
-.education-form-modal__content {
+.modal__content {
     position: relative;
     z-index: 1;
-    width: min(100%, 640px);
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
+    width: min(100%, 480px);
     padding: 1.5rem;
     background: var(--paper-dark);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 224, 67, 0.08);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
 }
 
-/* The form already sits inside the modal box, so drop its own card styling */
-.project-form-modal__content .project-form,
-.education-form-modal__content .education-form {
-    max-width: none;
-    margin-top: 0;
-    padding: 0;
-    background: transparent;
-    border: 0;
-}
-
-.project-form-modal__content .project-form .button,
-.education-form-modal__content .education-form .button {
-    margin: 0;
-}
-
-.project-form-modal__content > h2,
-.education-form-modal__content > h2 {
-    margin: 0 2.5rem 1.25rem 0;
+.modal__content > h2 {
+    margin: 0 0 0.75rem;
     font-family: "Space Grotesk", -apple-system, sans-serif;
     font-size: 1.5rem;
-    color: var(--accent);
 }
 
-.project-form-modal__close,
-.education-form-modal__close {
+.modal__close {
     position: absolute;
     top: 1rem;
     right: 1rem;
@@ -1214,58 +1021,73 @@ h1, .brand {
     transition: color 0.1s ease;
 }
 
-.project-form-modal__close:hover,
-.education-form-modal__close:hover {
+.modal__close:hover {
     color: var(--accent);
 }
 
-.project-form-modal__actions,
-.education-form-modal__actions {
+.modal__actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
     margin-top: 1.5rem;
 }
 
+/* Add/edit form modal: wider so the live preview fits beside the form, and scrollable */
+.modal--form .modal__content {
+    width: min(100%, 980px);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 224, 67, 0.08);
+}
+
+.modal--form .modal__content > h2 {
+    margin: 0 2.5rem 1.25rem 0;
+    color: var(--accent);
+}
+
+.modal--form .form-layout {
+    margin-top: 0;
+}
+
+/* The form already sits inside the modal box, so drop its own card styling */
+.modal--form .form-layout form {
+    max-width: none;
+    padding: 0;
+    background: transparent;
+    border: 0;
+}
+
+.modal--form .form-layout form .button {
+    margin: 0;
+}
+
+.modal--form .form-preview {
+    top: 0;
+}
+
 @media (max-width: 600px) {
-    .project-form-modal,
-    .education-form-modal {
+    .modal {
         align-items: flex-end;
         padding: 0;
     }
 
-    .project-form-modal__content,
-    .education-form-modal__content {
+    .modal__content {
         width: 100%;
-        max-height: 90vh;
         padding: 1.25rem;
         border-radius: var(--radius) var(--radius) 0 0;
     }
 
-    .project-form-modal__actions,
-    .education-form-modal__actions {
+    .modal--form .modal__content {
+        width: 100%;
+        max-height: 90vh;
+    }
+
+    .modal__actions {
         flex-direction: column-reverse;
     }
 
-    .project-form-modal__actions .button,
-    .education-form-modal__actions .button {
+    .modal__actions .button {
         width: 100%;
         text-align: center;
     }
-}
-
-/* Form modals are wider so the live preview fits beside the form */
-.project-form-modal__content,
-.education-form-modal__content {
-    width: min(100%, 980px);
-}
-
-.project-form-modal .form-layout,
-.education-form-modal .form-layout {
-    margin-top: 0;
-}
-
-.project-form-modal .form-preview,
-.education-form-modal .form-preview {
-    top: 0;
 }

@@ -4,20 +4,20 @@ Usage: {% include "components/form_modal.html" with name="project" title="Add a 
 Creates the ids add-<name>-modal, add-<name>-modal-title and <name>-form.
 {% endcomment %}
 <div id="add-{{ name }}-modal"
-     class="{{ name }}-form-modal"
+     class="modal modal--form"
      popover="auto"
      role="dialog"
      aria-modal="true"
      aria-labelledby="add-{{ name }}-modal-title">
     <button type="button"
-            class="{{ name }}-form-modal__backdrop"
+            class="modal__backdrop"
             popovertarget="add-{{ name }}-modal"
             popovertargetaction="hide"
             aria-label="Close {{ name }} form"></button>
 
-    <div class="{{ name }}-form-modal__content">
+    <div class="modal__content">
         <button type="button"
-                class="{{ name }}-form-modal__close"
+                class="modal__close"
                 popovertarget="add-{{ name }}-modal"
                 popovertargetaction="hide"
                 aria-label="Close {{ name }} form">×</button>
@@ -39,7 +39,7 @@ Creates the ids add-<name>-modal, add-<name>-modal-title and <name>-form.
                         {% endfor %}
                     </div>
                 {% endfor %}
-                <div class="{{ name }}-form-modal__actions">
+                <div class="modal__actions">
                     <button type="button"
                             class="button button-secondary"
                             popovertarget="add-{{ name }}-modal"

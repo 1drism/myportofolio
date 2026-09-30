@@ -4,19 +4,19 @@ Usage: {% include "components/delete_modal.html" with name="project" title="Dele
 Creates the ids delete-<name>-modal, delete-<name>-form and delete-<name>-name.
 {% endcomment %}
 <div id="delete-{{ name }}-modal"
-     class="delete-modal"
+     class="modal"
      popover="auto"
      role="dialog"
      aria-modal="true"
      aria-labelledby="delete-{{ name }}-modal-title">
     <button type="button"
-            class="delete-modal__backdrop"
+            class="modal__backdrop"
             popovertarget="delete-{{ name }}-modal"
             popovertargetaction="hide"
             aria-label="Close confirmation"></button>
-    <div class="delete-modal__content">
+    <div class="modal__content">
         <button type="button"
-                class="delete-modal__close"
+                class="modal__close"
                 popovertarget="delete-{{ name }}-modal"
                 popovertargetaction="hide"
                 aria-label="Close confirmation">×</button>
@@ -25,7 +25,7 @@ Creates the ids delete-<name>-modal, delete-<name>-form and delete-<name>-name.
             Are you sure you want to delete
             <strong id="delete-{{ name }}-name"></strong>?
         </p>
-        <div class="delete-modal__actions">
+        <div class="modal__actions">
             <button type="button"
                     class="button button-secondary"
                     popovertarget="delete-{{ name }}-modal"
