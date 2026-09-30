@@ -26,17 +26,7 @@
                         </button>
                         <a href="{% url 'main:show_education' %}" class="button button-secondary">Cancel</a>
                     </form>
-                    <aside class="form-preview" aria-label="Live preview">
-                        <p class="section-kicker">Live preview</p>
-                        <article class="education-card" data-preview-card>
-                            <span class="education-degree" data-preview="degree" data-placeholder="Degree"></span>
-                            <h2 data-preview="institution" data-placeholder="Institution"></h2>
-                            <p class="education-major" data-preview="faculty_or_major" data-placeholder="Faculty / Major"></p>
-                            <p class="education-description" data-preview="description"></p>
-                            <p class="education-date" data-preview="started_at" data-format="date"></p>
-                            <p class="education-status" data-preview-status="ended_at"></p>
-                        </article>
-                    </aside>
+                    {% include "components/previews/education_preview.html" %}
                 </div>
             </div>
         </section>

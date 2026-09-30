@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block meta %}
     <title>{{ name }} - Portfolio</title>
 {% endblock meta %}
@@ -49,32 +50,376 @@
         </section>
         <div class="divider">
         </div>
-        <section class ="skills" id ="skills">
-            <div class ="container">
+        <section class="skills" id="skills">
+            <div class="container">
                 <h2>Skills</h2>
-                <ul class = "skills-grid">
-                    <li class = "skills-card">
-                        <img src="/static/img/python-logo.png" alt="Python logo">
-                        <span>PYTHON</span>
-                    </li>
-                    <li class = "skills-card">
-                        <img src="/static/img/java-logo.png" alt="Java logo">
-                        <span>JAVA</span>
-                    </li>
-                    <li class = "skills-card">
-                        <img src="/static/img/html-logo.png" alt="HTML logo">
-                        <span>HTML</span>
-                    </li>
-                    <li class = "skills-card">
-                        <img src="/static/img/css-logo.png" alt="CSS logo">
-                        <span>CSS</span>
-                    </li>
-                    <li class = "skills-card">
-                        <img src="/static/img/valorant-logo.png" alt="Adobe Valorant logo">
-                        <span>VALORANT</span>
-                    </li>
-                </ul>
+
+                <div class="skills-filter" role="group" aria-label="Filter skills by category">
+                    <button type="button" class="skills-filter__option is-active" data-filter="all" aria-pressed="true">All</button>
+                    {% for category in skill_categories %}
+                        <button type="button" class="skills-filter__option" data-filter="{{ category.value }}" aria-pressed="false">{{ category.label }}</button>
+                    {% endfor %}
+                </div>
+
+                {% if user.is_superuser or is_editor %}
+                    <div class="skills-owner-actions">
+                        {% if user.is_superuser %}
+                            <button type="button" class="button skill-add-button" popovertarget="add-skill-modal">
+                                <span aria-hidden="true">+</span>
+                                Add Skill
+                            </button>
+                        {% endif %}
+                        <button type="button" class="button button-secondary skills-manage-button" aria-pressed="false">Manage</button>
+                    </div>
+                {% endif %}
+
+                <!-- JavaScript fills each group; the skeleton tiles show while loading -->
+                <div class="skills-board" id="skills-board" data-filter="all" aria-busy="true">
+                    {% for category in skill_categories %}
+                        <section class="skill-group" data-category="{{ category.value }}" aria-labelledby="skill-group-{{ category.value }}">
+                            <h3 id="skill-group-{{ category.value }}">{{ category.label }}</h3>
+                            <ul class="skills-grid" data-list="{{ category.value }}">
+                                <li class="skills-card skills-card--skeleton" aria-hidden="true"></li>
+                                <li class="skills-card skills-card--skeleton" aria-hidden="true"></li>
+                                <li class="skills-card skills-card--skeleton" aria-hidden="true"></li>
+                            </ul>
+                        </section>
+                    {% endfor %}
+                    <p class="skills-message hide" id="skills-empty"></p>
+                    <div class="skills-message hide" id="skills-error" role="alert">
+                        <p>Failed to load skills.</p>
+                        <button type="button" class="button button-secondary" id="skills-retry">Try again</button>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
+
+    {% if user.is_superuser or is_editor %}
+        {% url 'main:create_skill_ajax' as create_url %}
+        {% include "components/form_modal.html" with name="skill" title="Add a New Skill" submit_label="Add Skill" action=create_url preview="components/previews/skill_preview.html" size="compact" %}
+    {% endif %}
+    {% if user.is_superuser %}
+        {% include "components/delete_modal.html" with name="skill" title="Delete Skill?" %}
+    {% endif %}
+
+    {{ skill_categories|json_script:"skill-categories" }}
+    <script>
+    const SKILLS_ENDPOINT = "{% url 'main:get_skills_json' %}";
+    const CREATE_SKILL_ENDPOINT = "{% url 'main:create_skill_ajax' %}";
+    const EDIT_SKILL_ENDPOINT = "{% url 'main:edit_skill_ajax' '00000000-0000-0000-0000-000000000000' %}";
+    const DELETE_SKILL_ENDPOINT = "{% url 'main:delete_skill_ajax' '00000000-0000-0000-0000-000000000000' %}";
+    const PLACEHOLDER_ID = "00000000-0000-0000-0000-000000000000";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
+    const SKILL_CATEGORIES = JSON.parse(document.getElementById('skill-categories').textContent);
+    const DEFAULT_SKILL_ICON = "{% static 'img/valorant-logo.png' %}";   // used when a skill has no image of its own
+
+    const skillsBoard = document.getElementById('skills-board');
+    const skillsEmpty = document.getElementById('skills-empty');
+    const skillsError = document.getElementById('skills-error');
+    const skillForm = document.getElementById('skill-form');
+    const skillModal = document.getElementById('add-skill-modal');
+    const deleteSkillModal = document.getElementById('delete-skill-modal');
+    const deleteSkillForm = document.getElementById('delete-skill-form');
+    const manageButton = document.querySelector('.skills-manage-button');
+
+    let skills = [];
+    let activeFilter = 'all';
+    let editingSkillId = null;
+    let deletingSkillId = null;
+
+    // Only https image links (e.g. Google Drive thumbnails) are used as logos
+    function isSafeIconUrl(url) {
+        return url.startsWith('https://');
+    }
+
+    // Read a cookie value, used to get the CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Build one skill tile.
+    function buildSkillCard(skill) {
+        const { name, icon_url } = skill.fields;
+        const card = document.createElement('li');
+        card.className = 'skills-card';
+
+        const icon = document.createElement('span');
+        icon.className = 'skills-card__icon';
+        const img = document.createElement('img');
+        const hasOwnIcon = icon_url && isSafeIconUrl(icon_url);
+        img.src = hasOwnIcon ? icon_url : DEFAULT_SKILL_ICON;
+        img.alt = hasOwnIcon ? `${name} logo` : '';
+        icon.append(img);
+
+        const label = document.createElement('span');
+        label.className = 'skills-card__name';
+        label.textContent = name;
+
+        card.append(icon, label);
+
+        if (CAN_EDIT) {
+            const actions = document.createElement('div');
+            actions.className = 'card-actions skills-card__actions';
+            actions.append(buildCardAction('edit', 'Edit', 'button button-secondary', skill));
+            if (IS_SUPERUSER) actions.append(buildCardAction('delete', 'Delete', 'button button-danger', skill));
+            card.append(actions);
+        }
+        return card;
+    }
+
+    function buildCardAction(action, text, className, skill) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = className;
+        button.dataset.action = action;
+        button.dataset.id = skill.pk;
+        button.textContent = text;
+        button.setAttribute('aria-label', `${text} ${skill.fields.name}`);
+        return button;
+    }
+
+    // Owner only: an empty category becomes an "add" tile with that category already chosen
+    function buildAddTile(category) {
+        const item = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'skills-card skills-card--add';
+        button.dataset.category = category.value;
+        button.innerHTML = '<span class="skills-card__icon" aria-hidden="true">+</span>';
+        const label = document.createElement('span');
+        label.className = 'skills-card__name';
+        label.textContent = `Add ${category.label.replace(/s$/, '').toLowerCase()}`;
+        button.append(label);
+        item.append(button);
+        return item;
+    }
+
+    // Put every skill into its category; empty categories are hidden from visitors
+    function renderSkills() {
+        skillsBoard.dataset.filter = activeFilter;
+        let visibleGroups = 0;
+
+        SKILL_CATEGORIES.forEach(category => {
+            const items = skills.filter(skill => skill.fields.category === category.value);
+            const group = skillsBoard.querySelector(`.skill-group[data-category="${category.value}"]`);
+            const list = group.querySelector('.skills-grid');
+            const selected = activeFilter === 'all' || activeFilter === category.value;
+
+            list.replaceChildren();
+            items.forEach(skill => list.append(buildSkillCard(skill)));
+            if (items.length === 0 && IS_SUPERUSER) list.append(buildAddTile(category));
+
+            const show = selected && (items.length > 0 || IS_SUPERUSER);
+            group.classList.toggle('hide', !show);
+            if (show) visibleGroups++;
+        });
+
+        const filterLabel = SKILL_CATEGORIES.find(category => category.value === activeFilter)?.label;
+        skillsEmpty.textContent = filterLabel ? `No ${filterLabel.toLowerCase()} listed yet.` : 'No skills listed yet.';
+        skillsEmpty.classList.toggle('hide', visibleGroups > 0);
+    }
+
+    // Fetch the skills
+    async function fetchSkills() {
+        skillsError.classList.add('hide');
+        skillsBoard.setAttribute('aria-busy', 'true');
+
+        try {
+            const response = await fetch(SKILLS_ENDPOINT, { headers: { 'Accept': 'application/json' } });
+            if (!response.ok) throw new Error('Failed to fetch skills');
+
+            skills = await response.json();
+            renderSkills();
+        } catch (error) {
+            console.error('Error loading skills:', error);
+            skillsBoard.querySelectorAll('.skill-group').forEach(group => group.classList.add('hide'));
+            skillsEmpty.classList.add('hide');
+            skillsError.classList.remove('hide');
+        } finally {
+            skillsBoard.setAttribute('aria-busy', 'false');
+        }
+    }
+
+    // Category filter
+    document.querySelectorAll('.skills-filter__option').forEach(option => {
+        option.addEventListener('click', () => {
+            activeFilter = option.dataset.filter;
+            document.querySelectorAll('.skills-filter__option').forEach(other => {
+                const isActive = other === option;
+                other.classList.toggle('is-active', isActive);
+                other.setAttribute('aria-pressed', isActive);
+            });
+            renderSkills();
+        });
+    });
+
+    // Manage mode shows Edit / Delete under every tile
+    if (manageButton) {
+        manageButton.addEventListener('click', () => {
+            const managing = !skillsBoard.classList.contains('is-managing');
+            skillsBoard.classList.toggle('is-managing', managing);
+            manageButton.setAttribute('aria-pressed', managing);
+            manageButton.textContent = managing ? 'Done' : 'Manage';
+        });
+    }
+
+    // Edit / Delete / "add" tiles one listener for the whole thing
+    skillsBoard.addEventListener('click', event => {
+        const addTile = event.target.closest('.skills-card--add');
+        if (addTile) {
+            openAddSkillModal(addTile.dataset.category);
+            return;
+        }
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const skill = skills.find(item => item.pk === button.dataset.id);
+        if (!skill) return;
+        if (button.dataset.action === 'edit') openEditSkillModal(skill);
+        if (button.dataset.action === 'delete') openDeleteSkillModal(skill);
+    });
+
+    document.getElementById('skills-retry').addEventListener('click', fetchSkills);
+
+    // Switch the shared modal between "add" and "edit" mode
+    function setSkillModalMode(skillId) {
+        editingSkillId = skillId;
+        document.getElementById('add-skill-modal-title').textContent = skillId ? 'Edit Skill' : 'Add a New Skill';
+        skillForm.querySelector('button[type="submit"]').textContent = skillId ? 'Save Changes' : 'Add Skill';
+    }
+
+    function openAddSkillModal(category = '') {
+        skillForm.reset();
+        setSkillModalMode(null);
+        skillForm.elements.category.value = category;
+        skillForm.dispatchEvent(new Event('input'));   // refresh the live preview
+        skillModal.showPopover();
+    }
+
+    function openEditSkillModal(skill) {
+        setSkillModalMode(skill.pk);
+        skillForm.elements.name.value = skill.fields.name;
+        skillForm.elements.category.value = skill.fields.category;
+        skillForm.elements.icon_url.value = skill.fields.icon_url;
+        skillForm.dispatchEvent(new Event('input'));   // refresh the live preview
+        skillModal.showPopover();
+    }
+
+    const addSkillButton = document.querySelector('.skill-add-button');
+    if (addSkillButton) {
+        addSkillButton.addEventListener('click', () => {
+            skillForm.reset();
+            setSkillModalMode(null);
+        });
+    }
+
+    function formatFieldErrors(errors) {
+        return Object.entries(errors).flatMap(([fieldName, fieldErrors]) => {
+            const label = skillForm.querySelector(`label[for="id_${fieldName}"]`);
+            const prefix = label ? `${label.textContent}: ` : '';
+            return fieldErrors.map(error => prefix + error.message);
+        });
+    }
+
+    async function saveSkill(event) {
+        event.preventDefault();
+
+        const isEditing = editingSkillId !== null;
+        const endpoint = isEditing ? EDIT_SKILL_ENDPOINT.replace(PLACEHOLDER_ID, editingSkillId) : CREATE_SKILL_ENDPOINT;
+        const failTitle = isEditing ? 'Failed to update skill' : 'Failed to add skill';
+
+        const submitButton = skillForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(skillForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                skillForm.reset();
+                setSkillModalMode(null);
+                skillModal.hidePopover();
+                showToast('Success', isEditing ? 'Skill updated successfully!' : 'New skill added successfully!', 'success');
+                fetchSkills();
+            } else {
+                const errorMessages = result.errors
+                    ? formatFieldErrors(result.errors)
+                    : [result.message || `Something went wrong (status ${response.status}).`];
+                showToast(failTitle, errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error saving skill:', error);
+            showToast(failTitle, 'Could not reach the server. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (skillForm) {
+        skillForm.addEventListener('submit', saveSkill);
+    }
+
+    function openDeleteSkillModal(skill) {
+        deletingSkillId = skill.pk;
+        document.getElementById('delete-skill-name').textContent = skill.fields.name;
+        deleteSkillModal.showPopover();
+    }
+
+    async function deleteSkill(event) {
+        event.preventDefault();
+
+        const submitButton = deleteSkillForm.querySelector('button[type="submit"]');
+        const skillName = document.getElementById('delete-skill-name').textContent;
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(DELETE_SKILL_ENDPOINT.replace(PLACEHOLDER_ID, deletingSkillId), {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                showToast('Failed to delete skill', result.message || `Something went wrong (status ${response.status}).`, 'error');
+                return;
+            }
+
+            deleteSkillModal.hidePopover();
+            showToast('Skill deleted', `"${skillName}" has been removed.`, 'success');
+            fetchSkills();
+        } catch (error) {
+            console.error('Error deleting skill:', error);
+            showToast('Failed to delete skill', 'Could not reach the server. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (deleteSkillForm) {
+        deleteSkillForm.addEventListener('submit', deleteSkill);
+    }
+
+    // Start the application
+    fetchSkills();
+    </script>
 {% endblock content %}
+
+{% block scripts %}
+    <script src="{% static 'js/form-preview.js' %}" defer></script>
+{% endblock scripts %}

@@ -1,38 +1,36 @@
-<button type="button"
-        class="button button-danger"
-        popovertarget="delete-experience-{{ experience.id }}"
-        aria-label="Delete {{ experience.title }}"
-        title="Delete experience">
-    Delete
-</button>
-<div id="delete-experience-{{ experience.id }}"
+{% comment %}
+Shared delete confirmation modal. JavaScript fills in the item name and delete URL.
+Usage: {% include "components/delete_modal.html" with name="project" title="Delete Project?" %}
+Creates the ids delete-<name>-modal, delete-<name>-form and delete-<name>-name.
+{% endcomment %}
+<div id="delete-{{ name }}-modal"
      class="modal"
      popover="auto"
      role="dialog"
      aria-modal="true"
-     aria-labelledby="delete-experience-title-{{ experience.id }}">
+     aria-labelledby="delete-{{ name }}-modal-title">
     <button type="button"
             class="modal__backdrop"
-            popovertarget="delete-experience-{{ experience.id }}"
+            popovertarget="delete-{{ name }}-modal"
             popovertargetaction="hide"
             aria-label="Close confirmation"></button>
     <div class="modal__content">
         <button type="button"
                 class="modal__close"
-                popovertarget="delete-experience-{{ experience.id }}"
+                popovertarget="delete-{{ name }}-modal"
                 popovertargetaction="hide"
                 aria-label="Close confirmation">×</button>
-        <h2 id="delete-experience-title-{{ experience.id }}">Delete Experience?</h2>
+        <h2 id="delete-{{ name }}-modal-title">{{ title }}</h2>
         <p>
             Are you sure you want to delete
-            <strong>{{ experience.title }}</strong>?
+            <strong id="delete-{{ name }}-name"></strong>?
         </p>
         <div class="modal__actions">
             <button type="button"
                     class="button button-secondary"
-                    popovertarget="delete-experience-{{ experience.id }}"
+                    popovertarget="delete-{{ name }}-modal"
                     popovertargetaction="hide">Cancel</button>
-            <form method="post" action="{% url 'main:delete_experience' experience.id %}">
+            <form id="delete-{{ name }}-form" method="post" action="">
                 {% csrf_token %}
                 <button type="submit" class="button button-danger">Yes, Delete</button>
             </form>

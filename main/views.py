@@ -1,5 +1,5 @@
-from main.models import Experience,Education,Project
-from main.forms import EducationForm,ProjectForm,ExperienceForm
+from main.models import Experience,Education,Project,Skill
+from main.forms import EducationForm,ProjectForm,ExperienceForm,SkillForm
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -7,8 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 
 from django.contrib import messages
-from django.core import serializers
-from django.http import HttpResponse,JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -30,6 +29,11 @@ def show_main(request):
             "Hi, I'm Idris! I'm a CS student at Universitas Indonesia (Fasilkom UI) who is deeply interested in the world of cybersecurity. I love learning about how systems and software work under the hood, and I'm eager to learn more about how to keep those systems secure. Outside of tech, I'm a fan of Reality Club and will always be Burhan lover #1 (definitely not a hater)"
         ),
         "last_login": last_login,
+        "form": SkillForm(),
+        "skill_categories": [
+            {"value": value, "label": label} for value, label in Skill.CATEGORY_CHOICES
+        ],
+        "is_editor": is_editor(request.user),
     }
     return render(request, "index.html", context)
 
@@ -123,13 +127,35 @@ def get_projects_json(request):
 
 def get_education_json(request):
     institution_query = request.GET.get("institution", "").strip()
-    education = Education.objects.all()
+    education_list = Education.objects.prefetch_related('starred_by').all()
 
     if institution_query:
-        education = education.filter(institution__icontains=institution_query)
+        education_list = education_list.filter(institution__icontains=institution_query)
 
-    education_json = serializers.serialize("json", education, use_natural_foreign_keys=True)
-    return HttpResponse(education_json, content_type="application/json")
+    # Manually build the JSON data so we can add the Star logic
+    data = []
+    for education in education_list:
+        starred_users = education.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(education.id),
+            "fields": {
+                "institution": education.institution,
+                "faculty_or_major": education.faculty_or_major,
+                "degree": education.degree,
+                "description": education.description,
+                "started_at": education.started_at.isoformat(),
+                "ended_at": education.ended_at.isoformat() if education.ended_at else None,
+                "is_ongoing": education.is_ongoing,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 def show_projects(request):
     title_query = request.GET.get("title", "").strip()
@@ -143,19 +169,12 @@ def show_projects(request):
     return render(request, "project.html", context)
 
 def show_education(request):
-    json_response = get_education_json(request)
-
-    education_list = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    education_list = [item.object for item in education_list]
     institution_query = request.GET.get("institution", "").strip()
 
     context = {
         "name": "Idris",
-        "education_list": education_list,
         "institution_query": institution_query,
+        "form": EducationForm(),
         "is_editor": is_editor(request.user),
     }
     return render(request, "education.html", context)
@@ -188,6 +207,11 @@ def delete_education(request, education_id):
 
     if request.method == "POST":
         education.delete()
+
+        # AJAX request: the page shows its own toast, so just confirm with JSON
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"message": "Education deleted successfully."})
+
         messages.success(request, "Education deleted!")
         return redirect("main:show_education")
 
@@ -335,6 +359,15 @@ def toggle_education_star(request, education_id):
         else:
             education.starred_by.add(request.user)
 
+    # AJAX request: send back the new star state instead of redirecting
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        starred_users = education.starred_by.all()
+        return JsonResponse({
+            "is_starred": request.user in starred_users,
+            "star_count": starred_users.count(),
+            "starred_by_names": ", ".join([u.username for u in starred_users]),
+        })
+
     return redirect("main:show_education")
 
 
@@ -355,3 +388,127 @@ def create_project_ajax(request):
         )
 
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def edit_project_ajax(request, project_id):
+    # Superuser and Editor can edit (Assignment 4 roles); JSON 403 instead of a login redirect
+    if not (request.user.is_superuser or is_editor(request.user)):
+        return JsonResponse(
+            {"message": "Only the portfolio owner or an editor can edit projects."},
+            status=403,
+        )
+
+    project = Project.objects.filter(pk=project_id).first()
+    if project is None:
+        return JsonResponse({"message": "This project no longer exists."}, status=404)
+
+    form = ProjectForm(request.POST, instance=project)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"message": "Project updated successfully.", "pk": str(project.id)})
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def create_education_ajax(request):
+    # No @login_required: it would redirect fetch to the login page (200 HTML) instead of a JSON 403
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Only the portfolio owner can add education."},
+            status=403,
+        )
+
+    form = EducationForm(request.POST)
+    if form.is_valid():
+        education = form.save()
+        return JsonResponse(
+            {"message": "Education added successfully.", "pk": str(education.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def edit_education_ajax(request, education_id):
+    # Superuser and Editor can edit (Assignment 4 roles); JSON 403 instead of a login redirect
+    if not (request.user.is_superuser or is_editor(request.user)):
+        return JsonResponse(
+            {"message": "Only the portfolio owner or an editor can edit education."},
+            status=403,
+        )
+
+    education = Education.objects.filter(pk=education_id).first()
+    if education is None:
+        return JsonResponse({"message": "This education entry no longer exists."}, status=404)
+
+    form = EducationForm(request.POST, instance=education)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"message": "Education updated successfully.", "pk": str(education.id)})
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+# Skills (main page)
+def get_skills_json(request):
+    data = [
+        {
+            "pk": str(skill.id),
+            "fields": {
+                "name": skill.name,
+                "category": skill.category,
+                "category_label": skill.get_category_display(),
+                "icon_url": skill.icon_url,
+            },
+        }
+        for skill in Skill.objects.all()
+    ]
+    return JsonResponse(data, safe=False)
+
+
+@require_POST
+def create_skill_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can add skills."}, status=403)
+
+    form = SkillForm(request.POST)
+    if form.is_valid():
+        skill = form.save()
+        return JsonResponse({"message": "Skill added successfully.", "pk": str(skill.id)}, status=201)
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def edit_skill_ajax(request, skill_id):
+    if not (request.user.is_superuser or is_editor(request.user)):
+        return JsonResponse(
+            {"message": "Only the portfolio owner or an editor can edit skills."},
+            status=403,
+        )
+
+    skill = Skill.objects.filter(pk=skill_id).first()
+    if skill is None:
+        return JsonResponse({"message": "This skill no longer exists."}, status=404)
+
+    form = SkillForm(request.POST, instance=skill)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"message": "Skill updated successfully.", "pk": str(skill.id)})
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def delete_skill_ajax(request, skill_id):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can delete skills."}, status=403)
+
+    deleted, _ = Skill.objects.filter(pk=skill_id).delete()
+    if not deleted:
+        return JsonResponse({"message": "This skill no longer exists."}, status=404)
+
+    return JsonResponse({"message": "Skill deleted successfully."})

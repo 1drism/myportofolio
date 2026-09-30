@@ -68,3 +68,24 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+class Skill(models.Model):
+    CATEGORY_CHOICES = [
+        ("software", "Software Skills"),
+        ("technical", "Technical Skills"),
+        ("soft", "Soft Skills"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=50)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    
+    # Optional logo a Google Drive thumbnail link empty shows the default image
+    icon_url = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.get_category_display()})"

@@ -1,0 +1,58 @@
+{% comment %}
+Shared add/edit modal with a live preview. JavaScript switches the title, button text and target endpoint.
+Usage: {% include "components/form_modal.html" with name="project" title="Add a New Project" submit_label="Add Project" action=create_url preview="components/previews/project_preview.html" %}
+Optional: size="compact" for short forms (narrower modal).
+Creates the ids add-<name>-modal, add-<name>-modal-title and <name>-form.
+{% endcomment %}
+<div id="add-{{ name }}-modal"
+     class="modal modal--form{% if size %} modal--{{ size }}{% endif %}"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="add-{{ name }}-modal-title">
+    <button type="button"
+            class="modal__backdrop"
+            popovertarget="add-{{ name }}-modal"
+            popovertargetaction="hide"
+            aria-label="Close {{ name }} form"></button>
+
+    <div class="modal__content">
+        <button type="button"
+                class="modal__close"
+                popovertarget="add-{{ name }}-modal"
+                popovertargetaction="hide"
+                aria-label="Close {{ name }} form">×</button>
+
+        <h2 id="add-{{ name }}-modal-title">{{ title }}</h2>
+        <div class="form-layout">
+            <form id="{{ name }}-form"
+                  method="post"
+                  action="{{ action }}"
+                  class="{{ name }}-form"
+                  data-preview-form>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-help">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="modal__actions">
+                    <button type="button"
+                            class="button button-secondary"
+                            popovertarget="add-{{ name }}-modal"
+                            popovertargetaction="hide">Cancel</button>
+                    <button type="submit" class="button">{{ submit_label }}</button>
+                </div>
+            </form>
+
+            {% include preview %}
+        </div>
+    </div>
+</div>

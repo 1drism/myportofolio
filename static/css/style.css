@@ -26,7 +26,9 @@
     --radius: 4px;
 }
 
-.hide {
+/* .hide is toggled by JavaScript; [hidden] must also win over classes that set display */
+.hide,
+[hidden] {
     display: none !important;
 }
 
@@ -197,7 +199,8 @@ h1, .brand {
     animation-delay: 0.3s;
 }
 
-.hero {
+.hero,
+.skills {
     padding: 4.5rem 0 5rem;
 }
 
@@ -347,49 +350,11 @@ h1, .brand {
     }
 }
 
-.skills {
-    padding: 4.5rem 0 5rem;
-}
-
-.skills-grid{
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 200px);
-    justify-content: center;
-    gap: 16px;
-}
-
-.skills-card {
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--accent);
-    border-radius: 2px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.skills-card:hover {
-    transform: translateY(-4px);
-        box-shadow: 0 6px 12px var(--accent);
-}
-
-.skills-card img {
-    width: 96px;
-    height: 96px;
-    object-fit: contain;
-}
-
-.skills-card span{
-    font-weight: bold;
-}
-
+/* Skills (main page): the original centered tile grid, now filled from the database */
 .skills h2 {
     text-align: center;
     font-size: 2rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .skills h2::after {
@@ -402,38 +367,345 @@ h1, .brand {
     margin: 0.75rem auto 0;
 }
 
-/* Experience css below */
-.experience-section {
+/* Category filter uses the same look as the GitHub / LinkedIn / Email links */
+.skills-filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.skills-filter__option {
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background-color: transparent;
+    border-radius: var(--radius);
+    border: 2px solid var(--accent);
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.skills-filter__option:hover {
+    background-color: var(--accent);
+    color: var(--paper-dark);
+    box-shadow: 0 0 15px var(--accent-light);
+}
+
+.skills-filter__option.is-active {
+    background-color: var(--accent);
+    color: var(--paper-dark);
+}
+
+.skills-owner-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.skills-owner-actions .button {
+    gap: 0.4rem;
+}
+
+.skills-owner-actions .button span {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* The categories sit side by side as 280px columns so every skill is visible at once.
+   Flex (not an auto-fit grid) so three columns fit the container and fewer columns stay centered */
+.skills-board {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem 2rem;
+    margin-top: 2.5rem;
+}
+
+.skill-group {
+    flex: 0 1 280px;
+    min-width: 240px;
+}
+
+.skill-group h3 {
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent-light);
+}
+
+.skills-grid {
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+}
+
+/* One category chosen in the filter: that column spreads across the full width, three tiles per row */
+.skills-board:not([data-filter="all"]) .skill-group {
+    flex-basis: 100%;
+}
+
+.skills-board:not([data-filter="all"]) .skills-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* Compact version of the original gold tile: logo on the left, name on the right */
+.skills-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    background-color: var(--paper-dark);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.skills-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--accent);
+}
+
+.skills-card__icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+}
+
+.skills-card__icon img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.skills-card__name {
+    flex: 1;
+    min-width: 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+/* Manage mode: the same Edit / Delete bar as the project cards, on its own line under the name.
+   Two classes so these win over .card-actions, which comes later in this file */
+.skills-card .skills-card__actions {
+    display: none;
+    flex-basis: 100%;
+    margin-top: 0;
+    padding-top: 0.6rem;
+}
+
+.skills-board.is-managing .skills-card .skills-card__actions {
+    display: flex;
+}
+
+.skills-card__actions .button {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Owner only: an empty category shows a dashed tile that opens the add form */
+.skills-card--add {
+    width: 100%;
+    border-style: dashed;
+    border-color: var(--accent-dark);
+    background-color: transparent;
+    color: var(--accent-light);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.skills-card--add .skills-card__icon {
+    font-size: 1.75rem;
+    font-weight: 300;
+}
+
+.skills-card--add:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Loading skeletons, the same height as a real tile */
+.skills-card--skeleton {
+    height: 58px;
+    border-color: transparent;
+    background-color: rgba(255, 255, 255, 0.04);
+    animation: skeletonPulse 1s ease-in-out infinite alternate;
+}
+
+.skills-card--skeleton:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.skills-message {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.skills-filter__option:focus-visible,
+.skills-card--add:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* Live preview inside the add/edit modal */
+.skill-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.skill-preview .skills-card {
+    width: 240px;
+}
+
+.skill-preview__category {
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-weight: 700;
+    color: var(--accent-light);
+}
+
+@keyframes skeletonPulse {
+    from { opacity: 0.45; }
+    to   { opacity: 1; }
+}
+
+/* Phone: each category uses the full width with two smaller tiles per row */
+@media (max-width: 600px) {
+    .skills-board {
+        gap: 1.75rem;
+    }
+
+    .skill-group {
+        flex-basis: 100%;
+    }
+
+    .skills-grid,
+    .skills-board:not([data-filter="all"]) .skills-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .skills-card {
+        gap: 0.6rem;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .skills-card__icon,
+    .skills-card__icon img {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skills-card,
+    .skills-card:hover {
+        transition: none;
+        transform: none;
+    }
+
+    .skills-card--skeleton {
+        animation: none;
+    }
+}
+
+/* Compact form modal (short forms like Skill) */
+.modal--compact .modal__content {
+    width: min(100%, 720px);
+}
+
+.modal--compact .form-layout {
+    grid-template-columns: minmax(0, 1fr) 240px;
+}
+
+@media (max-width: 800px) {
+    .modal--compact .form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Shared section, grid and card styles for experience, education and project */
+.experience-section,
+.education-section,
+.project-section {
     padding: 4rem 0;
     border-top: 1px solid var(--line);
 }
 
-.section-kicker {
-    color: var(--accent-dark);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.experience-section h1 {
+.experience-section h1,
+.education-section h1,
+.project-section h1 {
     margin: 0.4rem 0 1.5rem;
     font-size: 2rem;
 }
 
-.experience-grid {
+.experience-grid,
+.education-grid,
+.project-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1rem;
 }
 
-.experience-card {
+.experience-card,
+.education-card,
+.project-card {
     padding: 1.25rem;
     background-color: var(--paper-dark);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     display: flex;
     flex-direction: column;
+}
+
+.experience-card h2,
+.education-card h2,
+.project-card h2 {
+    margin: 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.experience-description,
+.education-description,
+.empty-state {
+    color: var(--text-muted);
+}
+
+.experience-status,
+.education-status,
+.project-link {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Experience css below */
+.section-kicker {
+    color: var(--accent-dark);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .experience-category {
@@ -443,58 +715,14 @@ h1, .brand {
     text-transform: uppercase;
 }
 
-.experience-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
-}
-
-.experience-description,
-.empty-state {
-    color: var(--text-muted);
-}
-
-.experience-status {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
 
 /* Education css below */
-.education-section {
-    padding: 4rem 0;
-    border-top: 1px solid var(--line);
-}
-
-.education-section h1 {
-    margin: 0.4rem 0 1.5rem;
-    font-size: 2rem;
-}
-
-.education-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-}
-
-.education-card {
-    padding: 1.25rem;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-}
-
-.education-degree {
+.education-degree,
+.project-tech {
     color: var(--accent-light);
     font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
-}
-
-.education-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
 }
 
 .education-major {
@@ -504,20 +732,10 @@ h1, .brand {
     margin-bottom: 0.5rem;
 }
 
-.education-description {
-    color: var(--text-muted);
-}
-
 .education-date {
     color: var(--text-muted);
     font-size: 0.85rem;
     margin-top: 0.75rem;
-}
-
-.education-status {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 /* Education and Project form css below */
@@ -581,7 +799,8 @@ h1, .brand {
 
 .form-group input:focus,
 .form-group textarea:focus,
-.form-group select:focus {
+.form-group select:focus,
+.search-input:focus {
     outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
@@ -601,16 +820,6 @@ h1, .brand {
     margin-top: 0.35rem;
     color: var(--danger-light);
     font-size: 0.85rem;
-}
-
-.form-message {
-    margin-bottom: 1rem;
-    padding: 0.75rem 1rem;
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius);
-    background: rgba(255, 224, 67, 0.08);
-    color: var(--accent-light);
-    font-size: 0.9rem;
 }
 
 .education-form .button,
@@ -695,31 +904,6 @@ h1, .brand {
 }
 
 /* Project css below */
-.project-section {
-    padding: 4rem 0;
-    border-top: 1px solid var(--line);
-}
-
-.project-section h1 {
-    margin: 0.4rem 0 1.5rem;
-    font-size: 2rem;
-}
-
-.project-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-}
-
-.project-card {
-    padding: 1.25rem;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-}
-
 .project-image {
     display: block;
     width: 100%;
@@ -727,39 +911,16 @@ h1, .brand {
     border-radius: var(--radius);
     margin-bottom: 0.75rem;
 }
-/* so it doesnt override the hidden atributes */
-[hidden] {
-    display: none !important;
-}
-
-.project-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
-}
-
-.project-tech {
-    color: var(--accent-light);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
 .project-description {
     color: var(--text-muted);
     margin-top: 0.5rem;
-}
-
-.project-link {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
 }
 
 .project-link a {
     color: var(--accent);
 }
 
-/* Shared delete modal styles for education and project */
+/* Danger button (delete) */
 .button-danger {
     background: var(--paper-dark);
     border-color: var(--danger);
@@ -899,98 +1060,6 @@ h1, .brand {
     100% { transform: scale(1); }
 }
 
-.delete-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-    margin: 0;
-    padding: 1rem;
-    border: 0;
-    background: transparent;
-    color: var(--ink);
-    z-index: 20;
-    align-items: center;
-    justify-content: center;
-}
-
-.delete-modal:popover-open {
-    display: flex;
-}
-
-.delete-modal__backdrop {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    padding: 0;
-    background: rgba(0, 0, 0, 0.7);
-    cursor: default;
-}
-
-.delete-modal__content {
-    position: relative;
-    z-index: 1;
-    width: min(100%, 480px);
-    padding: 1.5rem;
-    background: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
-}
-
-.delete-modal__content h2 {
-    margin: 0 0 0.75rem;
-    font-family: "Space Grotesk", -apple-system, sans-serif;
-    font-size: 1.5rem;
-}
-
-.delete-modal__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    border: 0;
-    padding: 0;
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 1.8rem;
-    line-height: 1;
-    cursor: pointer;
-}
-
-.delete-modal__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-}
-
-@media (max-width: 600px) {
-    .delete-modal {
-        align-items: flex-end;
-        padding: 0;
-    }
-
-    .delete-modal__content {
-        width: 100%;
-        padding: 1.25rem;
-        border-radius: var(--radius) var(--radius) 0 0;
-    }
-
-    .delete-modal__actions {
-        flex-direction: column-reverse;
-    }
-
-    .delete-modal__actions .button {
-        width: 100%;
-        text-align: center;
-    }
-}
-
 /* Search form */
 .search-form {
     display: flex;
@@ -1016,12 +1085,6 @@ h1, .brand {
 
 .search-input::placeholder {
     color: var(--text-muted);
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
 }
 
 @media (max-width: 600px) {
@@ -1136,7 +1199,8 @@ h1, .brand {
     }
 }
 
-.project-form-modal {
+/* Modal (popover): shared by the delete confirmations and the add/edit form */
+.modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -1149,16 +1213,16 @@ h1, .brand {
     border: 0;
     background: transparent;
     color: var(--ink);
-    z-index: 10;
+    z-index: 20;
     align-items: center;
     justify-content: center;
 }
 
-.project-form-modal:popover-open {
+.modal:popover-open {
     display: flex;
 }
 
-.project-form-modal__backdrop {
+.modal__backdrop {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -1169,40 +1233,24 @@ h1, .brand {
     cursor: default;
 }
 
-.project-form-modal__content {
+.modal__content {
     position: relative;
     z-index: 1;
-    width: min(100%, 640px);
-    max-height: calc(100vh - 2rem);
-    overflow-y: auto;
+    width: min(100%, 480px);
     padding: 1.5rem;
     background: var(--paper-dark);
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 224, 67, 0.08);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
 }
 
-/* The form already sits inside the modal box, so drop its own card styling */
-.project-form-modal__content .project-form {
-    max-width: none;
-    margin-top: 0;
-    padding: 0;
-    background: transparent;
-    border: 0;
-}
-
-.project-form-modal__content .project-form .button {
-    margin: 0;
-}
-
-.project-form-modal__content h2 {
-    margin: 0 2.5rem 1.25rem 0;
+.modal__content > h2 {
+    margin: 0 0 0.75rem;
     font-family: "Space Grotesk", -apple-system, sans-serif;
     font-size: 1.5rem;
-    color: var(--accent);
 }
 
-.project-form-modal__close {
+.modal__close {
     position: absolute;
     top: 1rem;
     right: 1rem;
@@ -1216,35 +1264,72 @@ h1, .brand {
     transition: color 0.1s ease;
 }
 
-.project-form-modal__close:hover {
+.modal__close:hover {
     color: var(--accent);
 }
 
-.project-form-modal__actions {
+.modal__actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
     margin-top: 1.5rem;
 }
 
+/* Add/edit form modal: wider so the live preview fits beside the form, and scrollable */
+.modal--form .modal__content {
+    width: min(100%, 980px);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 224, 67, 0.08);
+}
+
+.modal--form .modal__content > h2 {
+    margin: 0 2.5rem 1.25rem 0;
+    color: var(--accent);
+}
+
+.modal--form .form-layout {
+    margin-top: 0;
+}
+
+/* The form already sits inside the modal box, so drop its own card styling */
+.modal--form .form-layout form {
+    max-width: none;
+    padding: 0;
+    background: transparent;
+    border: 0;
+}
+
+.modal--form .form-layout form .button {
+    margin: 0;
+}
+
+.modal--form .form-preview {
+    top: 0;
+}
+
 @media (max-width: 600px) {
-    .project-form-modal {
+    .modal {
         align-items: flex-end;
         padding: 0;
     }
 
-    .project-form-modal__content {
+    .modal__content {
         width: 100%;
-        max-height: 90vh;
         padding: 1.25rem;
         border-radius: var(--radius) var(--radius) 0 0;
     }
 
-    .project-form-modal__actions {
+    .modal--form .modal__content {
+        width: 100%;
+        max-height: 90vh;
+    }
+
+    .modal__actions {
         flex-direction: column-reverse;
     }
 
-    .project-form-modal__actions .button {
+    .modal__actions .button {
         width: 100%;
         text-align: center;
     }

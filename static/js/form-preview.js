@@ -22,9 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Only allow real web links, never "javascript:" URLs
+    // Only allow real web links or the site's own files, never "javascript:" URLs
     function isSafeUrl(url) {
-        return /^https?:\/\//i.test(url);
+        return /^https?:\/\//i.test(url) || /^\/(?!\/)/.test(url);
     }
 
     function updatePreview() {
@@ -43,9 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.querySelectorAll("[data-preview-src]").forEach((el) => {
             const url = fieldValue(el.dataset.previewSrc);
-            const show = isSafeUrl(url);
-            el.hidden = !show;
-            if (show) el.src = url;
+            const src = isSafeUrl(url) ? url : el.dataset.previewDefault;
+            el.hidden = !src;
+            if (src) el.src = src;
         });
 
         card.querySelectorAll("[data-preview-link]").forEach((el) => {
@@ -58,5 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     form.addEventListener("input", updatePreview);
     form.addEventListener("change", updatePreview);
+    // "reset" fires before the fields are cleared, so wait a tick before re-reading them
+    form.addEventListener("reset", () => setTimeout(updatePreview));
     updatePreview();
 });
