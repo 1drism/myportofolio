@@ -58,5 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     form.addEventListener("input", updatePreview);
     form.addEventListener("change", updatePreview);
+    // "reset" fires before the fields are cleared, so wait a tick before re-reading them
+    form.addEventListener("reset", () => setTimeout(updatePreview));
     updatePreview();
 });

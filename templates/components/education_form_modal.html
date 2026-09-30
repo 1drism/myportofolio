@@ -1,0 +1,59 @@
+<div id="add-education-modal"
+     class="education-form-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="add-education-modal-title">
+    <button type="button"
+            class="education-form-modal__backdrop"
+            popovertarget="add-education-modal"
+            popovertargetaction="hide"
+            aria-label="Close add education form"></button>
+
+    <div class="education-form-modal__content">
+        <button type="button"
+                class="education-form-modal__close"
+                popovertarget="add-education-modal"
+                popovertargetaction="hide"
+                aria-label="Close add education form">×</button>
+
+        <h2 id="add-education-modal-title">Add New Education</h2>
+        <div class="form-layout">
+            <form id="education-form"
+                  method="post"
+                  action="{% url 'main:create_education' %}"
+                  class="education-form"
+                  data-preview-form>
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <div class="education-form-modal__actions">
+                    <button type="button"
+                            class="button button-secondary"
+                            popovertarget="add-education-modal"
+                            popovertargetaction="hide">Cancel</button>
+                    <button type="submit" class="button">Add Education</button>
+                </div>
+            </form>
+
+            <aside class="form-preview" aria-label="Live preview">
+                <p class="section-kicker">Live preview</p>
+                <article class="education-card" data-preview-card>
+                    <span class="education-degree" data-preview="degree" data-placeholder="Degree"></span>
+                    <h2 data-preview="institution" data-placeholder="Institution"></h2>
+                    <p class="education-major" data-preview="faculty_or_major" data-placeholder="Faculty / Major"></p>
+                    <p class="education-description" data-preview="description"></p>
+                    <p class="education-date" data-preview="started_at" data-format="date"></p>
+                    <p class="education-status" data-preview-status="ended_at"></p>
+                </article>
+            </aside>
+        </div>
+    </div>
+</div>

@@ -60,7 +60,28 @@ class EducationForm(ModelForm):
                 }
             ),
         }
-        
+
+    def clean_institution(self):
+        institution = strip_tags(self.cleaned_data["institution"]).strip()
+        if not institution:
+            raise ValidationError("Institution can't contain only HTML tags.")
+        return institution
+
+    def clean_faculty_or_major(self):
+        faculty_or_major = strip_tags(self.cleaned_data["faculty_or_major"]).strip()
+        if not faculty_or_major:
+            raise ValidationError("Faculty / Major can't contain only HTML tags.")
+        return faculty_or_major
+
+    def clean_degree(self):
+        degree = strip_tags(self.cleaned_data["degree"]).strip()
+        if not degree:
+            raise ValidationError("Degree can't contain only HTML tags.")
+        return degree
+
+    def clean_description(self):
+        return strip_tags(self.cleaned_data["description"]).strip()
+
         
 class ProjectForm(ModelForm):
     class Meta:

@@ -1136,7 +1136,8 @@ h1, .brand {
     }
 }
 
-.project-form-modal {
+.project-form-modal,
+.education-form-modal {
     display: none;
     position: fixed;
     inset: 0;
@@ -1154,11 +1155,13 @@ h1, .brand {
     justify-content: center;
 }
 
-.project-form-modal:popover-open {
+.project-form-modal:popover-open,
+.education-form-modal:popover-open {
     display: flex;
 }
 
-.project-form-modal__backdrop {
+.project-form-modal__backdrop,
+.education-form-modal__backdrop {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -1169,7 +1172,8 @@ h1, .brand {
     cursor: default;
 }
 
-.project-form-modal__content {
+.project-form-modal__content,
+.education-form-modal__content {
     position: relative;
     z-index: 1;
     width: min(100%, 640px);
@@ -1183,7 +1187,8 @@ h1, .brand {
 }
 
 /* The form already sits inside the modal box, so drop its own card styling */
-.project-form-modal__content .project-form {
+.project-form-modal__content .project-form,
+.education-form-modal__content .education-form {
     max-width: none;
     margin-top: 0;
     padding: 0;
@@ -1191,18 +1196,21 @@ h1, .brand {
     border: 0;
 }
 
-.project-form-modal__content .project-form .button {
+.project-form-modal__content .project-form .button,
+.education-form-modal__content .education-form .button {
     margin: 0;
 }
 
-.project-form-modal__content h2 {
+.project-form-modal__content h2,
+.education-form-modal__content > h2 {
     margin: 0 2.5rem 1.25rem 0;
     font-family: "Space Grotesk", -apple-system, sans-serif;
     font-size: 1.5rem;
     color: var(--accent);
 }
 
-.project-form-modal__close {
+.project-form-modal__close,
+.education-form-modal__close {
     position: absolute;
     top: 1rem;
     right: 1rem;
@@ -1216,11 +1224,13 @@ h1, .brand {
     transition: color 0.1s ease;
 }
 
-.project-form-modal__close:hover {
+.project-form-modal__close:hover,
+.education-form-modal__close:hover {
     color: var(--accent);
 }
 
-.project-form-modal__actions {
+.project-form-modal__actions,
+.education-form-modal__actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
@@ -1228,24 +1238,41 @@ h1, .brand {
 }
 
 @media (max-width: 600px) {
-    .project-form-modal {
+    .project-form-modal,
+    .education-form-modal {
         align-items: flex-end;
         padding: 0;
     }
 
-    .project-form-modal__content {
+    .project-form-modal__content,
+    .education-form-modal__content {
         width: 100%;
         max-height: 90vh;
         padding: 1.25rem;
         border-radius: var(--radius) var(--radius) 0 0;
     }
 
-    .project-form-modal__actions {
+    .project-form-modal__actions,
+    .education-form-modal__actions {
         flex-direction: column-reverse;
     }
 
-    .project-form-modal__actions .button {
+    .project-form-modal__actions .button,
+    .education-form-modal__actions .button {
         width: 100%;
         text-align: center;
     }
+}
+
+/* Education modal is wider so the live preview fits beside the form */
+.education-form-modal__content {
+    width: min(100%, 980px);
+}
+
+.education-form-modal .form-layout {
+    margin-top: 0;
+}
+
+.education-form-modal .form-preview {
+    top: 0;
 }

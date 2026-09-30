@@ -169,6 +169,7 @@ def show_education(request):
     context = {
         "name": "Idris",
         "institution_query": institution_query,
+        "form": EducationForm(),
         "is_editor": is_editor(request.user),
     }
     return render(request, "education.html", context)
@@ -364,6 +365,26 @@ def create_project_ajax(request):
         project = form.save()
         return JsonResponse(
             {"message": "Project added successfully.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def create_education_ajax(request):
+    # No @login_required: it would redirect fetch to the login page (200 HTML) instead of a JSON 403
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Only the portfolio owner can add education."},
+            status=403,
+        )
+
+    form = EducationForm(request.POST)
+    if form.is_valid():
+        education = form.save()
+        return JsonResponse(
+            {"message": "Education added successfully.", "pk": str(education.id)},
             status=201,
         )
 
