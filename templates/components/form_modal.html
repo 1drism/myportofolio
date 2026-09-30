@@ -1,10 +1,11 @@
 {% comment %}
 Shared add/edit modal with a live preview. JavaScript switches the title, button text and target endpoint.
 Usage: {% include "components/form_modal.html" with name="project" title="Add a New Project" submit_label="Add Project" action=create_url preview="components/previews/project_preview.html" %}
+Optional: size="compact" for short forms (narrower modal).
 Creates the ids add-<name>-modal, add-<name>-modal-title and <name>-form.
 {% endcomment %}
 <div id="add-{{ name }}-modal"
-     class="modal modal--form"
+     class="modal modal--form{% if size %} modal--{{ size }}{% endif %}"
      popover="auto"
      role="dialog"
      aria-modal="true"
@@ -34,6 +35,9 @@ Creates the ids add-<name>-modal, add-<name>-modal-title and <name>-form.
                     <div class="form-group">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-help">{{ field.help_text }}</div>
+                        {% endif %}
                         {% for error in field.errors %}
                             <p class="form-error">{{ error }}</p>
                         {% endfor %}

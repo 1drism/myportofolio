@@ -1,0 +1,13 @@
+{% load static %}
+<aside class="form-preview" aria-label="Live preview">
+    <p class="section-kicker">Live preview</p>
+    <div class="skill-preview" data-preview-card>
+        <p class="skill-preview__category" data-preview="category" data-placeholder="Category"></p>
+        <div class="skills-card">
+            <span class="skills-card__icon">
+                <img alt="" data-preview-src="icon_url" data-preview-default="{% static 'img/valorant-logo.png' %}">
+            </span>
+            <span class="skills-card__name" data-preview="name" data-placeholder="Skill name"></span>
+        </div>
+    </div>
+</aside>

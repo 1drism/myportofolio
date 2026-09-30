@@ -1,5 +1,5 @@
-from main.models import Experience,Education,Project
-from main.forms import EducationForm,ProjectForm,ExperienceForm
+from main.models import Experience,Education,Project,Skill
+from main.forms import EducationForm,ProjectForm,ExperienceForm,SkillForm
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -29,6 +29,11 @@ def show_main(request):
             "Hi, I'm Idris! I'm a CS student at Universitas Indonesia (Fasilkom UI) who is deeply interested in the world of cybersecurity. I love learning about how systems and software work under the hood, and I'm eager to learn more about how to keep those systems secure. Outside of tech, I'm a fan of Reality Club and will always be Burhan lover #1 (definitely not a hater)"
         ),
         "last_login": last_login,
+        "form": SkillForm(),
+        "skill_categories": [
+            {"value": value, "label": label} for value, label in Skill.CATEGORY_CHOICES
+        ],
+        "is_editor": is_editor(request.user),
     }
     return render(request, "index.html", context)
 
@@ -445,3 +450,65 @@ def edit_education_ajax(request, education_id):
         return JsonResponse({"message": "Education updated successfully.", "pk": str(education.id)})
 
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+# Skills (main page)
+def get_skills_json(request):
+    data = [
+        {
+            "pk": str(skill.id),
+            "fields": {
+                "name": skill.name,
+                "category": skill.category,
+                "category_label": skill.get_category_display(),
+                "icon_url": skill.icon_url,
+            },
+        }
+        for skill in Skill.objects.all()
+    ]
+    return JsonResponse(data, safe=False)
+
+
+@require_POST
+def create_skill_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can add skills."}, status=403)
+
+    form = SkillForm(request.POST)
+    if form.is_valid():
+        skill = form.save()
+        return JsonResponse({"message": "Skill added successfully.", "pk": str(skill.id)}, status=201)
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def edit_skill_ajax(request, skill_id):
+    if not (request.user.is_superuser or is_editor(request.user)):
+        return JsonResponse(
+            {"message": "Only the portfolio owner or an editor can edit skills."},
+            status=403,
+        )
+
+    skill = Skill.objects.filter(pk=skill_id).first()
+    if skill is None:
+        return JsonResponse({"message": "This skill no longer exists."}, status=404)
+
+    form = SkillForm(request.POST, instance=skill)
+    if form.is_valid():
+        form.save()
+        return JsonResponse({"message": "Skill updated successfully.", "pk": str(skill.id)})
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def delete_skill_ajax(request, skill_id):
+    if not request.user.is_superuser:
+        return JsonResponse({"message": "Only the portfolio owner can delete skills."}, status=403)
+
+    deleted, _ = Skill.objects.filter(pk=skill_id).delete()
+    if not deleted:
+        return JsonResponse({"message": "This skill no longer exists."}, status=404)
+
+    return JsonResponse({"message": "Skill deleted successfully."})

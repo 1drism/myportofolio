@@ -1,5 +1,7 @@
-from django.forms import ModelForm, TextInput, Textarea, DateInput, URLInput
-from main.models import Education,Project,Experience
+import re
+
+from django.forms import ModelForm, TextInput, Textarea, DateInput, URLInput, Select
+from main.models import Education,Project,Experience,Skill
 from django.core.exceptions import ValidationError
 from django.utils.html import strip_tags
 
@@ -180,3 +182,71 @@ class ExperienceForm(ModelForm):
                 }
             ),
         }
+
+
+class SkillForm(ModelForm):
+    class Meta:
+        model = Skill
+        fields = ["name", "category", "icon_url"]
+
+        labels = {
+            "name": "Skill",
+            "category": "Category",
+            "icon_url": "Logo (optional)",
+        }
+
+        help_texts = {
+            "icon_url": "Google Drive thumbnail link (a normal Drive share link also works). Leave empty to use the default image.",
+        }
+
+        widgets = {
+            "name": TextInput(
+                attrs={
+                    "placeholder": "Django",
+                    "maxlength": 50,
+                }
+            ),
+            "category": Select(),
+            "icon_url": TextInput(
+                attrs={
+                    "placeholder": "https://drive.google.com/thumbnail?id=FILE_ID&sz=w1000",
+                    "maxlength": 300,
+                }
+            ),
+        }
+
+    def clean_name(self):
+        name = strip_tags(self.cleaned_data["name"]).strip()
+        if not name:
+            raise ValidationError("Skill name can't contain only HTML tags.")
+        return name
+
+    def clean_icon_url(self):
+        icon_url = self.cleaned_data["icon_url"].strip()
+        if not icon_url:
+            return icon_url
+
+        # A normal Drive share link (".../file/d/FILE_ID/view?usp=sharing") becomes the thumbnail URL
+        share_link = re.match(r"https://drive\.google\.com/file/d/([\w-]+)", icon_url)
+        if share_link:
+            return f"https://drive.google.com/thumbnail?id={share_link.group(1)}&sz=w1000"
+
+        # Only https image links, never javascript: or data: URLs
+        if not icon_url.startswith("https://"):
+            raise ValidationError("Use a Google Drive thumbnail link that starts with https://.")
+        return icon_url
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get("name")
+        category = cleaned_data.get("category")
+
+        # The same skill twice in one category is almost always a mistake
+        if name and category:
+            duplicates = Skill.objects.filter(name__iexact=name, category=category)
+            if self.instance.pk:
+                duplicates = duplicates.exclude(pk=self.instance.pk)
+            if duplicates.exists():
+                label = dict(Skill.CATEGORY_CHOICES)[category]
+                self.add_error("name", f"{name} is already listed under {label}.")
+        return cleaned_data

@@ -3,7 +3,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from main.models import Experience,Education,Project
+from main.models import Experience,Education,Project,Skill
 
 class MainTest(TestCase):
     def setUp(self):
@@ -332,3 +332,124 @@ class ProjectAjaxTest(AjaxTestBase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Project.objects.exists())
+
+
+class SkillTest(AjaxTestBase):
+    def setUp(self):
+        super().setUp()
+        self.skill = Skill.objects.create(name="Python", category="technical")
+        self.edit_url = reverse("main:edit_skill_ajax", args=[self.skill.id])
+        self.delete_url = reverse("main:delete_skill_ajax", args=[self.skill.id])
+
+    def test_main_page_is_skeleton(self):
+        response = self.client.get(reverse("main:show_main"))
+
+        self.assertContains(response, 'id="skills-board"')
+        self.assertContains(response, reverse("main:get_skills_json"))
+        self.assertContains(response, "Software Skills")
+        self.assertContains(response, "Technical Skills")
+        self.assertContains(response, "Soft Skills")
+
+    def test_skills_in_json(self):
+        fields = self.client.get(reverse("main:get_skills_json")).json()[0]["fields"]
+
+        self.assertEqual(fields["name"], "Python")
+        self.assertEqual(fields["category"], "technical")
+        self.assertEqual(fields["category_label"], "Technical Skills")
+        self.assertEqual(fields["icon_url"], "")
+
+    def test_icon_url_validation(self):
+        self.login(self.owner)
+        url = reverse("main:create_skill_ajax")
+        thumbnail = "https://drive.google.com/thumbnail?id=1qbdofeOckPIbbj77svGTLNa2Ps8ogMET&sz=w1000"
+        drive_thumbnail = self.client.post(url, {"name": "Java", "category": "technical", "icon_url": thumbnail})
+        share_link = self.client.post(url, {"name": "Figma", "category": "software",
+            "icon_url": "https://drive.google.com/file/d/1qbdofeOckPIbbj77svGTLNa2Ps8ogMET/view?usp=sharing"})
+        static_path = self.client.post(url, {"name": "Bad", "category": "soft", "icon_url": "/static/img/java-logo.png"})
+        javascript = self.client.post(url, {"name": "Bad", "category": "soft", "icon_url": "javascript:alert(1)"})
+
+        self.assertEqual(drive_thumbnail.status_code, 201)
+        self.assertEqual(Skill.objects.get(name="Java").icon_url, thumbnail)
+        self.assertEqual(share_link.status_code, 201)
+        self.assertEqual(Skill.objects.get(name="Figma").icon_url, thumbnail)   # share link converted
+        self.assertEqual(static_path.status_code, 400)
+        self.assertEqual(javascript.status_code, 400)
+        self.assertIn("icon_url", javascript.json()["errors"])
+
+    def test_add_button_only_for_owner(self):
+        guest_page = self.client.get(reverse("main:show_main"))
+        self.login(self.owner)
+        owner_page = self.client.get(reverse("main:show_main"))
+
+        self.assertNotContains(guest_page, 'id="add-skill-modal"')
+        self.assertContains(owner_page, 'id="add-skill-modal"')
+        self.assertContains(owner_page, 'id="delete-skill-modal"')
+
+    def test_create_permissions(self):
+        data = {"name": "Teamwork", "category": "soft"}
+        for user in [None, self.visitor, self.editor]:
+            self.client.logout()
+            if user:
+                self.login(user)
+            self.assertEqual(self.client.post(reverse("main:create_skill_ajax"), data).status_code, 403)
+
+        self.login(self.owner)
+        response = self.client.post(reverse("main:create_skill_ajax"), data)
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Skill.objects.filter(name="Teamwork", category="soft").exists())
+
+    def test_create_validation(self):
+        self.login(self.owner)
+        invalid = self.client.post(reverse("main:create_skill_ajax"), {"name": "<b></b>", "category": "nope"})
+        duplicate = self.client.post(reverse("main:create_skill_ajax"), {"name": "python", "category": "technical"})
+        cleaned = self.client.post(reverse("main:create_skill_ajax"), {"name": "<i>Figma</i>", "category": "software"})
+
+        self.assertEqual(invalid.status_code, 400)
+        self.assertIn("name", invalid.json()["errors"])
+        self.assertIn("category", invalid.json()["errors"])
+        self.assertEqual(duplicate.status_code, 400)
+        self.assertIn("already listed", duplicate.json()["errors"]["name"][0]["message"])
+        self.assertEqual(cleaned.status_code, 201)
+        self.assertTrue(Skill.objects.filter(name="Figma").exists())
+
+    def test_same_name_in_another_category_is_allowed(self):
+        self.login(self.owner)
+        response = self.client.post(reverse("main:create_skill_ajax"), {"name": "Python", "category": "software"})
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_edit_permissions(self):
+        self.login(self.visitor)
+        self.assertEqual(self.client.post(self.edit_url, {"name": "Py", "category": "technical"}).status_code, 403)
+
+        self.login(self.editor)
+        response = self.client.post(self.edit_url, {"name": "Python 3", "category": "software"})
+        self.skill.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual((self.skill.name, self.skill.category), ("Python 3", "software"))
+
+    def test_edit_keeping_the_same_name_is_not_a_duplicate(self):
+        self.login(self.owner)
+        response = self.client.post(self.edit_url, {"name": "Python", "category": "technical"})
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_permissions(self):
+        self.login(self.editor)
+        self.assertEqual(self.client.post(self.delete_url).status_code, 403)
+
+        self.login(self.owner)
+        self.assertEqual(self.client.post(self.delete_url).status_code, 200)
+        self.assertFalse(Skill.objects.exists())
+        self.assertEqual(self.client.post(self.delete_url).status_code, 404)
+
+    def test_skill_endpoints_require_post_and_csrf(self):
+        self.login(self.owner)
+        self.assertEqual(self.client.get(reverse("main:create_skill_ajax")).status_code, 405)
+
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.owner)
+        self.assertEqual(csrf_client.post(self.delete_url).status_code, 403)
+        self.assertTrue(Skill.objects.exists())

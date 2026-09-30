@@ -350,45 +350,11 @@ h1, .brand {
     }
 }
 
-.skills-grid{
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, 200px);
-    justify-content: center;
-    gap: 16px;
-}
-
-.skills-card {
-    padding: 24px 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--accent);
-    border-radius: 2px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.skills-card:hover {
-    transform: translateY(-4px);
-        box-shadow: 0 6px 12px var(--accent);
-}
-
-.skills-card img {
-    width: 96px;
-    height: 96px;
-    object-fit: contain;
-}
-
-.skills-card span{
-    font-weight: bold;
-}
-
+/* Skills (main page): the original centered tile grid, now filled from the database */
 .skills h2 {
     text-align: center;
     font-size: 2rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .skills h2::after {
@@ -399,6 +365,283 @@ h1, .brand {
     background-color: var(--accent-light);
     border-radius: 2px;
     margin: 0.75rem auto 0;
+}
+
+/* Category filter uses the same look as the GitHub / LinkedIn / Email links */
+.skills-filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.skills-filter__option {
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background-color: transparent;
+    border-radius: var(--radius);
+    border: 2px solid var(--accent);
+    padding: 0.5rem 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.skills-filter__option:hover {
+    background-color: var(--accent);
+    color: var(--paper-dark);
+    box-shadow: 0 0 15px var(--accent-light);
+}
+
+.skills-filter__option.is-active {
+    background-color: var(--accent);
+    color: var(--paper-dark);
+}
+
+.skills-owner-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.skills-owner-actions .button {
+    gap: 0.4rem;
+}
+
+.skills-owner-actions .button span {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* The categories sit side by side as 280px columns so every skill is visible at once.
+   Flex (not an auto-fit grid) so three columns fit the container and fewer columns stay centered */
+.skills-board {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1.5rem 2rem;
+    margin-top: 2.5rem;
+}
+
+.skill-group {
+    flex: 0 1 280px;
+    min-width: 240px;
+}
+
+.skill-group h3 {
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line);
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-size: 1.1rem;
+    color: var(--accent-light);
+}
+
+.skills-grid {
+    list-style: none;
+    display: grid;
+    gap: 0.6rem;
+}
+
+/* One category chosen in the filter: that column spreads across the full width, three tiles per row */
+.skills-board:not([data-filter="all"]) .skill-group {
+    flex-basis: 100%;
+}
+
+.skills-board:not([data-filter="all"]) .skills-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+/* Compact version of the original gold tile: logo on the left, name on the right */
+.skills-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    background-color: var(--paper-dark);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.skills-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--accent);
+}
+
+.skills-card__icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+}
+
+.skills-card__icon img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.skills-card__name {
+    flex: 1;
+    min-width: 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+/* Manage mode: the same Edit / Delete bar as the project cards, on its own line under the name.
+   Two classes so these win over .card-actions, which comes later in this file */
+.skills-card .skills-card__actions {
+    display: none;
+    flex-basis: 100%;
+    margin-top: 0;
+    padding-top: 0.6rem;
+}
+
+.skills-board.is-managing .skills-card .skills-card__actions {
+    display: flex;
+}
+
+.skills-card__actions .button {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+/* Owner only: an empty category shows a dashed tile that opens the add form */
+.skills-card--add {
+    width: 100%;
+    border-style: dashed;
+    border-color: var(--accent-dark);
+    background-color: transparent;
+    color: var(--accent-light);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.skills-card--add .skills-card__icon {
+    font-size: 1.75rem;
+    font-weight: 300;
+}
+
+.skills-card--add:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Loading skeletons, the same height as a real tile */
+.skills-card--skeleton {
+    height: 58px;
+    border-color: transparent;
+    background-color: rgba(255, 255, 255, 0.04);
+    animation: skeletonPulse 1s ease-in-out infinite alternate;
+}
+
+.skills-card--skeleton:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.skills-message {
+    flex-basis: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.skills-filter__option:focus-visible,
+.skills-card--add:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+/* Live preview inside the add/edit modal */
+.skill-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.skill-preview .skills-card {
+    width: 240px;
+}
+
+.skill-preview__category {
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-weight: 700;
+    color: var(--accent-light);
+}
+
+@keyframes skeletonPulse {
+    from { opacity: 0.45; }
+    to   { opacity: 1; }
+}
+
+/* Phone: each category uses the full width with two smaller tiles per row */
+@media (max-width: 600px) {
+    .skills-board {
+        gap: 1.75rem;
+    }
+
+    .skill-group {
+        flex-basis: 100%;
+    }
+
+    .skills-grid,
+    .skills-board:not([data-filter="all"]) .skills-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .skills-card {
+        gap: 0.6rem;
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .skills-card__icon,
+    .skills-card__icon img {
+        flex-basis: 32px;
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skills-card,
+    .skills-card:hover {
+        transition: none;
+        transform: none;
+    }
+
+    .skills-card--skeleton {
+        animation: none;
+    }
+}
+
+/* Compact form modal (short forms like Skill) */
+.modal--compact .modal__content {
+    width: min(100%, 720px);
+}
+
+.modal--compact .form-layout {
+    grid-template-columns: minmax(0, 1fr) 240px;
+}
+
+@media (max-width: 800px) {
+    .modal--compact .form-layout {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Shared section, grid and card styles for experience, education and project */
