@@ -26,6 +26,10 @@
     --radius: 4px;
 }
 
+.hide {
+    display: none !important;
+}
+
 body {
     font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     color: var(--ink);
@@ -786,6 +790,115 @@ h1, .brand {
     min-width: 0;
 }
 
+/* Star button */
+.star-form {
+    display: flex;
+    flex: 1;
+}
+
+.button-star {
+    --star-ease: 0.3s ease;
+    gap: 0.5rem;
+    width: 100%;
+    background: transparent;
+    border-color: var(--accent-dark);
+    color: var(--ink);
+    transition:
+        background-color var(--star-ease),
+        border-color var(--star-ease),
+        color var(--star-ease),
+        box-shadow var(--star-ease);
+}
+
+/* Same ★ glyph in both states: outlined when off, filled when on, so its width never changes */
+.button-star .star-icon {
+    display: inline-block;
+    font-size: 1.1rem;
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--accent);
+    transition: color var(--star-ease), transform 0.2s ease;
+}
+
+/* Both labels share one grid cell, so the button is always as wide as "Starred" */
+.button-star .star-label {
+    display: inline-grid;
+    text-align: center;
+}
+
+.button-star .star-label > span {
+    grid-area: 1 / 1;
+    transition: opacity var(--star-ease);
+}
+
+.button-star .star-label-on,
+.button-star.is-starred .star-label-off {
+    opacity: 0;
+}
+
+.button-star.is-starred .star-label-on {
+    opacity: 1;
+}
+
+.button-star .star-count {
+    min-width: 1.6rem;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(255, 224, 67, 0.12);
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    transition: background-color var(--star-ease);
+}
+
+.button-star:hover {
+    background-color: rgba(255, 224, 67, 0.06);
+    border-color: var(--accent);
+    color: var(--ink);
+    box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
+}
+
+.button-star:hover .star-icon {
+    transform: scale(1.12);
+}
+
+/* Starred: a soft gold tint instead of a solid fill */
+.button-star.is-starred {
+    background-color: rgba(255, 224, 67, 0.14);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.button-star.is-starred .star-icon {
+    color: var(--accent);
+}
+
+.button-star.is-starred .star-count {
+    background: rgba(255, 224, 67, 0.22);
+}
+
+.button-star.is-starred:hover {
+    background-color: rgba(255, 224, 67, 0.2);
+    color: var(--accent);
+}
+
+/* While the request runs, block extra clicks without visually dimming the button */
+.button-star:disabled {
+    cursor: progress;
+}
+
+.button-star.star-pop .star-icon {
+    animation: starPop 0.35s ease;
+}
+
+@keyframes starPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1); }
+}
+
 .delete-modal {
     display: none;
     position: fixed;
@@ -950,3 +1063,189 @@ h1, .brand {
     }
 }
 
+/* toast */
+.toast-component {
+    position: fixed;
+    inset: auto 2rem 2rem auto;
+    min-width: 280px;
+    max-width: min(420px, calc(100vw - 2rem));
+    margin: 0;
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    background-color: var(--paper-dark);
+    border: 1px solid var(--line);
+    color: var(--ink);
+}
+
+.toast-component:popover-open {
+    display: flex;
+}
+
+.toast-hidden {
+    opacity: 0;
+    transform: translateY(150%);
+    pointer-events: none;
+}
+
+.toast-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.15rem;
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+}
+
+.toast-message {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Change the left border based on the notification type */
+.toast-success {
+    border-left: 4px solid #22c55e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), -4px 0 15px rgba(34, 197, 94, 0.25);
+}
+.toast-success .toast-title { color: #4ade80; }
+
+.toast-error {
+    border-left: 4px solid var(--danger);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), -4px 0 15px rgba(224, 105, 94, 0.25);
+}
+.toast-error .toast-title { color: var(--danger-light); }
+
+.toast-normal {
+    border-left: 4px solid var(--accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), -4px 0 15px rgba(255, 224, 67, 0.25);
+}
+.toast-normal .toast-title { color: var(--accent); }
+
+@media (max-width: 600px) {
+    .toast-component {
+        inset: auto 1rem 1rem 1rem;
+        min-width: 0;
+        max-width: none;
+    }
+}
+
+.project-form-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 1rem;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    z-index: 10;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-form-modal:popover-open {
+    display: flex;
+}
+
+.project-form-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.7);
+    cursor: default;
+}
+
+.project-form-modal__content {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 640px);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: var(--paper-dark);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 224, 67, 0.08);
+}
+
+/* The form already sits inside the modal box, so drop its own card styling */
+.project-form-modal__content .project-form {
+    max-width: none;
+    margin-top: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+}
+
+.project-form-modal__content .project-form .button {
+    margin: 0;
+}
+
+.project-form-modal__content h2 {
+    margin: 0 2.5rem 1.25rem 0;
+    font-family: "Space Grotesk", -apple-system, sans-serif;
+    font-size: 1.5rem;
+    color: var(--accent);
+}
+
+.project-form-modal__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.1s ease;
+}
+
+.project-form-modal__close:hover {
+    color: var(--accent);
+}
+
+.project-form-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .project-form-modal {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .project-form-modal__content {
+        width: 100%;
+        max-height: 90vh;
+        padding: 1.25rem;
+        border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .project-form-modal__actions {
+        flex-direction: column-reverse;
+    }
+
+    .project-form-modal__actions .button {
+        width: 100%;
+        text-align: center;
+    }
+}

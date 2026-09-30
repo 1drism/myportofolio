@@ -9,60 +9,385 @@
                 <p class="section-kicker">What I've built</p>
                 <div class="page-header">
                     <h1>Projects</h1>
-                        {% if user.is_superuser %}
-                            <a href="{% url 'main:create_project' %}" class="button">
-                                <span aria-hidden="true">+</span> Add Project
-                            </a>
-                        {% endif %}
+                    {% if user.is_superuser %}
+                        <button type="button"
+                                class="button project-add-button"
+                                popovertarget="add-project-modal">
+                            <span aria-hidden="true">+</span>
+                            Add Project
+                        </button>
+                    {% endif %}
                 </div>
-                <form method="get"
-                    action="{% url 'main:show_projects' %}"
-                    class="search-form">
+
+                <!-- Search form: no method/action anymore, JavaScript handles it -->
+                <form id="project-search-form" class="search-form">
                     <input type="search"
-                        name="title"
-                        value="{{ title_query }}"
-                        placeholder="Search by project name"
-                        class="search-input">
+                           id="search-input"
+                           name="title"
+                           value="{{ title_query }}"
+                           placeholder="Search by project name"
+                           class="search-input"
+                           aria-label="Search by project name">
                     <button type="submit" class="button">Search</button>
                 </form>
 
-                <div class="project-grid">
-                    {% for project in project_list %}
-                        <article class="project-card">
-                            {% if project.project_image_url %}
-                                <img src="{{ project.project_image_url }}"
-                                     alt="{{ project.title }}"
-                                     class="project-image">
-                            {% endif %}
-                            <h2>{{ project.title }}</h2>
-                            <span class="project-tech">
-                                {{ project.tech_stack }}
-                            </span>
-                            <p class="project-description">
-                                {{ project.description }}
-                            </p>
-                            {% if project.project_url %}
-                                <p class="project-link">
-                                    <a href="{{ project.project_url }}">View Project</a>
-                                </p>
-                            {% endif %}
-                            <div class="card-actions">
-                                {% include "components/project_star.html" with project=project %}
-                                {% if user.is_superuser or is_editor %}
-                                    <a href="{% url 'main:edit_project' project.id %}" class="button button-secondary">Edit</a>
-                                {% endif %}
-                                {% if user.is_superuser %}
-                                    {% include "components/project_delete_modal.html" with project=project %}
-                                {% endif %}
-                                </div>
-                        </article>
-                    {% empty %}
-                        <p class="empty-state">
-                            No projects have been added yet.
-                        </p>
-                    {% endfor %}
+                <!-- Loading State -->
+                <div id="loading" class="empty-state hide">
+                    <p>Loading projects...</p>
                 </div>
+
+                <!-- Error State -->
+                <div id="error" class="empty-state hide">
+                    <p>Failed to load project data. Please try again.</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty" class="empty-state hide">
+                    <p>No projects have been added or found yet.</p>
+                </div>
+
+                <!-- Project Grid: JavaScript fills this in -->
+                <div id="grid" class="project-grid hide"></div>
             </div>
         </section>
     </main>
+
+    {% if user.is_superuser %}
+        {% include "components/project_form_modal.html" %}
+        {% include "components/project_delete_modal.html" %}
+    {% endif %}
+
+    <script>
+    // Configuration
+    const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_projects_json' %}";
+    const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
+    const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
+    const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
+    const PLACEHOLDER_ID = "00000000-0000-0000-0000-000000000000";
+    let projectsAbortController;
+
+    // DOM elements
+    const loadingState = document.getElementById('loading');
+    const errorState = document.getElementById('error');
+    const emptyState = document.getElementById('empty');
+    const gridContainer = document.getElementById('grid');
+    const searchForm = document.getElementById('project-search-form');
+    const searchInput = document.getElementById('search-input');
+    const projectForm = document.getElementById('project-form');
+
+    const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
+    const SEARCH_DEBOUNCE_DELAY = 300;
+    let searchDebounceTimer;
+
+    // Show/hide page sections
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+        loadingState.classList.toggle('hide', !showLoading);
+        errorState.classList.toggle('hide', !showError);
+        emptyState.classList.toggle('hide', !showEmpty);
+        gridContainer.classList.toggle('hide', !showGrid);
+    }
+
+    // Convert special HTML characters into entities so they display as text
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    // Build a project card element
+    function buildProjectCardElement(item) {
+        const project = item.fields;
+        const projectId = item.pk;
+
+        const articleElement = document.createElement('article');
+        articleElement.className = 'project-card';
+
+        const imageHtml = project.project_image_url
+            ? `<img src="${escapeHtml(project.project_image_url)}" alt="${escapeHtml(project.title)}" class="project-image">`
+            : '';
+
+        const urlHtml = project.project_url
+            ? `<p class="project-link"><a href="${escapeHtml(project.project_url)}">View Project</a></p>`
+            : '';
+
+        // Django fills in the URL with a dummy UUID, JavaScript swaps in the real ID
+        const starUrl = "{% url 'main:toggle_project_star' '00000000-0000-0000-0000-000000000000' %}"
+            .replace(PLACEHOLDER_ID, projectId);
+        const editUrl = "{% url 'main:edit_project' '00000000-0000-0000-0000-000000000000' %}"
+            .replace(PLACEHOLDER_ID, projectId);
+        const deleteUrl = "{% url 'main:delete_project' '00000000-0000-0000-0000-000000000000' %}"
+            .replace(PLACEHOLDER_ID, projectId);
+
+        const editHtml = CAN_EDIT
+            ? `<a href="${editUrl}" class="button button-secondary">Edit</a>`
+            : '';
+
+        const deleteHtml = IS_SUPERUSER
+            ? `<button type="button" class="button button-danger delete-button"
+                       data-delete-url="${deleteUrl}">Delete</button>`
+            : '';
+
+        articleElement.innerHTML = `
+            ${imageHtml}
+            <h2>${escapeHtml(project.title)}</h2>
+            <span class="project-tech">${escapeHtml(project.tech_stack)}</span>
+            <p class="project-description">${escapeHtml(project.description)}</p>
+            ${urlHtml}
+            <div class="card-actions">
+                <form method="post" action="${starUrl}" class="star-form">
+                    {% csrf_token %}
+                    <button type="submit" class="button button-star">
+                        <span class="star-icon" aria-hidden="true">★</span>
+                        <span class="star-label">
+                            <span class="star-label-off">Star</span>
+                            <span class="star-label-on" aria-hidden="true">Starred</span>
+                        </span>
+                        <span class="star-count"></span>
+                    </button>
+                </form>
+                ${editHtml}
+                ${deleteHtml}
+            </div>
+        `;
+
+        const starForm = articleElement.querySelector('.star-form');
+        renderStarButton(starForm.querySelector('.button-star'), project);
+        starForm.addEventListener('submit', handleStarSubmit);
+
+        const deleteButton = articleElement.querySelector('.delete-button');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', () =>
+                openDeleteModal(deleteButton.dataset.deleteUrl, project.title));
+        }
+        return articleElement;
+    }
+
+    // Update the star button to match the current star state
+    function renderStarButton(button, { is_starred, star_count, starred_by_names }) {
+        button.classList.toggle('is-starred', is_starred);
+        button.setAttribute('aria-pressed', is_starred);  // CSS swaps the icon fill and label from this state
+        button.querySelector('.star-count').textContent = star_count;
+        button.title = star_count > 0 ? `Starred by ${starred_by_names}` : 'Be the first to star';
+    }
+
+    // Toggle a star via AJAX so the page doesnt reload
+    async function handleStarSubmit(e) {
+        if (!IS_AUTHENTICATED) return;   // Let the normal submit send guests to the login page
+        e.preventDefault();
+
+        const form = e.currentTarget;
+        const button = form.querySelector('.button-star');
+        const projectTitle = form.closest('.project-card').querySelector('h2').textContent;
+        if (button.disabled) return;
+        button.disabled = true;
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            // Session expired: @login_required redirected fetch to the login page
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+            if (!response.ok) {
+                showToast('Failed to update star', `Something went wrong (status ${response.status}).`, 'error');
+                return;
+            }
+
+            const starData = await response.json();
+            renderStarButton(button, starData);
+            if (starData.is_starred) {
+                button.classList.remove('star-pop');
+                void button.offsetWidth;  // restart the animation
+                button.classList.add('star-pop');
+                showToast('Starred', `You starred "${projectTitle}".`, 'success');
+            } else {
+                showToast('Unstarred', `You removed your star from "${projectTitle}".`, 'normal');
+            }
+        } catch (error) {
+            console.error('Error toggling star:', error);
+            showToast('Failed to update star', 'Could not reach the server. Please try again.', 'error');
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    // Fetch project data
+    async function fetchProjects(searchQuery = "") {
+        if (projectsAbortController) projectsAbortController.abort();
+        projectsAbortController = new AbortController();
+
+        try {
+            displayPageSection({ showLoading: true });
+
+            const url = searchQuery
+                ? `${BASE_PROJECTS_ENDPOINT}?title=${encodeURIComponent(searchQuery)}`
+                : BASE_PROJECTS_ENDPOINT;
+
+            const response = await fetch(url, {
+                headers: { 'Accept': 'application/json' },
+                signal: projectsAbortController.signal,
+            });
+
+            if (!response.ok) throw new Error('Failed to fetch data');
+
+            const projectData = await response.json();
+
+            if (projectData.length === 0) {
+                displayPageSection({ showEmpty: true });
+            } else {
+                gridContainer.innerHTML = '';
+                projectData.forEach(item => {
+                    gridContainer.appendChild(buildProjectCardElement(item));
+                });
+                displayPageSection({ showGrid: true });
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') return;
+            console.error('Error loading projects:', error);
+            displayPageSection({ showError: true });
+        }
+    }
+
+    function closeProjectModal() {
+        document.getElementById("add-project-modal").hidePopover();
+    }
+
+    // Fill the shared delete modal with this project's details, then open it
+    const deleteModal = document.getElementById('delete-project-modal');
+    const deleteForm = document.getElementById('delete-project-form');
+
+    function openDeleteModal(deleteUrl, projectTitle) {
+        deleteForm.action = deleteUrl;
+        document.getElementById('delete-project-name').textContent = projectTitle;
+        deleteModal.showPopover();
+    }
+
+    // Delete a project via AJAX so the page doesn't reload
+    async function deleteProject(event) {
+        event.preventDefault();
+
+        const submitButton = deleteForm.querySelector('button[type="submit"]');
+        const projectTitle = document.getElementById('delete-project-name').textContent;
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(deleteForm.action, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: new FormData(deleteForm),
+            });
+
+            // Session expired: @login_required redirected fetch to the login page
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+            if (!response.ok) {
+                const message = response.status === 403
+                    ? 'Only the portfolio owner can delete projects.'
+                    : `Something went wrong (status ${response.status}).`;
+                showToast('Failed to delete project', message, 'error');
+                return;
+            }
+
+            deleteModal.hidePopover();
+            showToast('Project deleted', `"${projectTitle}" has been removed.`, 'success');
+            fetchProjects(searchInput.value.trim());
+        } catch (error) {
+            console.error('Error deleting project:', error);
+            showToast('Failed to delete project', 'Could not reach the server. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', deleteProject);
+    }
+
+    // Read a cookie value, used to get the CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Send the form data to the server
+    async function addProject(event) {
+        event.preventDefault();
+
+        const submitButton = projectForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+
+        try {
+            const response = await fetch(CREATE_PROJECT_ENDPOINT, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                body: new FormData(projectForm),
+            });
+            const result = await response.json().catch(() => ({}));
+
+            if (response.ok) {
+                projectForm.reset();
+                closeProjectModal();
+                showToast('Success', 'New project added successfully!', 'success');
+                fetchProjects(searchInput.value.trim());
+            } else {
+                const errorMessages = result.errors
+                    ? Object.values(result.errors).flat().map(error => error.message)
+                    : [result.message || `Something went wrong (status ${response.status}).`];
+                showToast('Failed to add project', errorMessages.join(' '), 'error');
+            }
+        } catch (error) {
+            console.error('Error adding project:', error);
+            showToast('Failed to add project', 'Could not reach the server. Please try again.', 'error');
+        } finally {
+            submitButton.disabled = false;
+        }
+    }
+
+    if (projectForm) {
+        projectForm.addEventListener('submit', addProject);
+    }
+
+    function searchProjects() {
+        fetchProjects(searchInput.value.trim());
+    }
+
+    // Search as the user types, but only after they pause
+    searchInput.addEventListener("input", function () {
+        clearTimeout(searchDebounceTimer);
+
+        searchDebounceTimer = setTimeout(function () {
+            searchProjects();
+        }, SEARCH_DEBOUNCE_DELAY);
+    });
+
+    // Search button / Enter still search immediately
+    searchForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        clearTimeout(searchDebounceTimer);
+        searchProjects();
+    });
+
+    // Start the application
+    fetchProjects(searchInput.value.trim());
+    </script>
 {% endblock content %}
