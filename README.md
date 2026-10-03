@@ -91,3 +91,28 @@ Once I added `starred_by`, the serializer started including it in /api/education
 
 ### AI usage disclosure
 I used Claude as a guide throughout Tutorial 4 and this assignment. It explained the concepts step by step and gave me hints for the Editor role and the Education star feature, which I then wrote and adapted myself in `views.py`, `models.py`, `urls.py`, and the templates. It also reviewed my code and caught bugs, such as my `is_editor` helper expecting a `request` while I was calling it with `request.user`. For the extra features, the `form-preview.js` live preview script claude teaches me step by step on how to write it without giving direct answer. I asked it to explain JavaScript line by line so I understood the script before using it, and I integrated it into my templates and fixed the empty preview myself once I found the missing `data-preview-form` attributes. The AI was not always right, so I verified its suggestions against my own code and the course pages.
+
+## Assignment 5
+
+### 1. Debouncing
+So debouncing is basically waiting until the user stops doing something before running a function. In my Education search, every time the user types a character the old timer gets cancelled with clearTimeout and a new 300ms timer starts (`SEARCH_DEBOUNCE_DELAY = 300`), so the fetch to /api/education/ only runs after the user stops typing for 300ms.
+
+Without it every character sends its own request, typing "Universitas" would send 11 requests even though only the last one matters. I also use an `AbortController` to cancel the previous request so only the latest search can update the page. The Search button and Enter still search right away because they clear the timer and call the search directly.
+
+### 2. Why we use await with fetch()
+fetch() doesn't give the data right away, it returns a Promise which is like a placeholder for the response that comes later. await pauses the async function until the Promise is done, so the next line gets the real Response object. Same with `response.json()`, it also returns a Promise so it needs await too. It only pauses that one function not the whole page, so the page can still be used while it waits.
+
+If we don't use await the code keeps going before the server answers. response would still be a Promise so response.ok is undefined, which means my `if (!response.ok)` check would throw an error even when the request actually worked, and `response.json()` would fail because a Promise doesn't have that method. So the cards never get built and the page just shows the error state.
+
+### 3. XSS and why AJAX is more vulnerable
+XSS (Cross-Site Scripting) is when someone manages to put their own JavaScript into a website and it runs in other users' browsers. For example if a project title is saved as `<img src=x onerror="...">`, the script runs every time someone opens the page. Because it runs as the victim, it can read the `csrftoken` cookie and send POST requests for them, like starring or even deleting data if the victim is the owner, so the CSRF protection from Tutorial 4 doesn't help anymore.
+
+Django templates are safer because they auto escape every `{{ variable }}`, so `<` and `>` become `&lt;` and `&gt;` and the browser just shows it as text. With AJAX the HTML is built by JavaScript instead, and when the JSON data goes into a template literal and then `innerHTML`, nothing escapes it automatically, so the browser treats it as real HTML and runs it. That's why moving to AJAX removed the protection Django gave us.
+
+In my project i handled it like this:
+- Every value from the JSON goes through `escapeHtml()` before going into `innerHTML` (Projects and Education), and the Skills section uses `textContent` which never reads text as HTML.
+- The `clean_<field>` methods in my ModelForms use `strip_tags` so HTML tags are removed before saving. This is only an extra layer, escaping when displaying is still the main protection.
+- Links are checked on the server, `URLField` rejects `javascript:` links and the skill logo only accepts `https://` links.
+
+### AI Usage Disclosure
+This week i used Claude web a lot more than in the previous weeks. For Tutorial 5 it checked my work against the tutorial and found bugs i missed, like the Edit button not showing for editors because `is_editor` wasn't passed to the project page. For the assignment mostly is my code and i also reviewed it again myself if its from claude. It also wrote fixed the tests that broke after switching to AJAX, and helped me refactor the modals and CSS into shared components.

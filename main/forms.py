@@ -226,7 +226,6 @@ class SkillForm(ModelForm):
         if not icon_url:
             return icon_url
 
-        # A normal Drive share link (".../file/d/FILE_ID/view?usp=sharing") becomes the thumbnail URL
         share_link = re.match(r"https://drive\.google\.com/file/d/([\w-]+)", icon_url)
         if share_link:
             return f"https://drive.google.com/thumbnail?id={share_link.group(1)}&sz=w1000"

@@ -7,7 +7,6 @@
   </div>
   <script src="{% static 'js/toast.js' %}"></script>
 
-  {% comment %} Show Django messages (e.g. "Project updated!") as a toast after a redirect {% endcomment %}
   {% for message in messages %}
       {% if forloop.last %}
           <script>
