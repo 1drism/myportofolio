@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from main.models import Project
+from main.models import Education, Project
 
 
 class ProjectAPITest(APITestCase):
@@ -135,3 +135,100 @@ class ProjectAPITest(APITestCase):
             self.list_url, self.payload, format="json", HTTP_X_CSRFTOKEN=token,
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class EducationAPITest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_superuser(
+            username="owner", password="test-password", email="owner@example.com",
+        )
+        self.editor = User.objects.create_user(username="editor", password="test-password")
+        self.editor.groups.add(Group.objects.create(name="Editor"))
+        self.regular = User.objects.create_user(username="regular", password="test-password")
+        self.education = Education.objects.create(
+            institution="Universitas Indonesia", faculty_or_major="Ilmu Komputer",
+            degree="S1", started_at="2025-08-01", description="Computer Science",
+        )
+        self.list_url = reverse("api:education-list")
+        self.detail_url = reverse("api:education-detail", args=[self.education.id])
+        self.star_url = reverse("api:education-star", args=[self.education.id])
+        self.payload = {
+            "institution": "SMA Negeri 8", "faculty_or_major": "IPA", "degree": "SMA",
+            "started_at": "2022-07-01", "ended_at": "2025-06-01", "description": "",
+        }
+
+    def assert_education_unchanged(self):
+        self.assertEqual(Education.objects.count(), 1)
+        self.education.refresh_from_db()
+        self.assertEqual(self.education.institution, "Universitas Indonesia")
+        self.assertEqual(self.education.description, "Computer Science")
+        self.assertIsNone(self.education.ended_at)
+
+    def test_visitor_can_read_list_detail_and_search(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]["id"], str(self.education.id))
+        self.assertTrue(response.data[0]["is_ongoing"])
+        self.assertNotIn("fields", response.data[0])
+        self.assertEqual(self.client.get(self.detail_url).status_code, status.HTTP_200_OK)
+        response = self.client.get(self.list_url, {"institution": "UNIVERSITAS"})
+        self.assertEqual(len(response.data), 1)
+        response = self.client.get(self.list_url, {"institution": "not-found"})
+        self.assertEqual(response.data, [])
+        self.assertEqual(self.client.options(self.list_url).status_code, status.HTTP_200_OK)
+        self.assert_education_unchanged()
+
+    def test_missing_education_returns_404(self):
+        missing_url = reverse("api:education-detail", args=[uuid.uuid4()])
+        self.assertEqual(self.client.get(missing_url).status_code, status.HTTP_404_NOT_FOUND)
+        self.client.force_authenticate(user=self.owner)
+        self.assertEqual(self.client.patch(missing_url, {"degree": "S2"}, format="json").status_code, 404)
+        self.assertEqual(self.client.delete(missing_url).status_code, 404)
+        self.assert_education_unchanged()
+
+    def test_visitor_and_regular_user_cannot_write(self):
+        for user in (None, self.regular):
+            self.client.force_authenticate(user=user)
+            self.assertEqual(self.client.post(self.list_url, self.payload, format="json").status_code, 403)
+            self.assertEqual(self.client.put(self.detail_url, self.payload, format="json").status_code, 403)
+            self.assertEqual(self.client.patch(self.detail_url, {"description": "Changed"}, format="json").status_code, 403)
+            self.assertEqual(self.client.delete(self.detail_url).status_code, 403)
+            self.assert_education_unchanged()
+
+    def test_editor_can_patch_and_put(self):
+        self.client.force_authenticate(user=self.editor)
+        response = self.client.patch(self.detail_url, {"description": "Edited by editor"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.education.refresh_from_db()
+        self.assertEqual(self.education.description, "Edited by editor")
+        self.assertEqual(self.education.institution, "Universitas Indonesia")
+
+        response = self.client.put(self.detail_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.education.refresh_from_db()
+        self.assertEqual(self.education.institution, "SMA Negeri 8")
+        self.assertFalse(self.education.is_ongoing)
+
+    def test_editor_cannot_create_or_delete(self):
+        self.client.force_authenticate(user=self.editor)
+        response = self.client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("detail", response.data)
+        self.assertEqual(self.client.delete(self.detail_url).status_code, status.HTTP_403_FORBIDDEN)
+        self.assert_education_unchanged()
+
+    def test_owner_can_create_update_and_delete(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Education.objects.filter(pk=response.data["id"]).exists())
+
+        response = self.client.patch(self.detail_url, {"degree": "S2"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.education.refresh_from_db()
+        self.assertEqual(self.education.degree, "S2")
+
+        response = self.client.delete(self.detail_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b"")
+        self.assertFalse(Education.objects.filter(pk=self.education.id).exists())
