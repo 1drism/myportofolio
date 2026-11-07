@@ -326,3 +326,29 @@ class EducationAPITest(APITestCase):
             self.assertNotIn("password", body)
             self.assertNotIn("pbkdf2", body)
         self.assertEqual(responses[1].data["starred_by_names"], "owner, regular")
+
+    def test_session_write_without_csrf_is_rejected(self):
+        client = APIClient(enforce_csrf_checks=True)
+        self.assertTrue(client.login(username="owner", password="test-password"))
+        response = client.post(self.list_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertIn("CSRF", response.data["detail"])
+        self.assertEqual(Education.objects.count(), 1)
+
+        client.get(reverse("main:show_education"))
+        token = client.cookies["csrftoken"].value
+        response = client.post(self.list_url, self.payload, format="json", HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Education.objects.count(), 2)
+
+    def test_education_page_gives_regular_users_a_csrf_token_for_starring(self):
+        client = APIClient(enforce_csrf_checks=True)
+        self.assertTrue(client.login(username="regular", password="test-password"))
+        self.assertEqual(client.post(self.star_url).status_code, status.HTTP_403_FORBIDDEN)
+        self.assertFalse(self.education.starred_by.exists())
+
+        client.get(reverse("main:show_education"))
+        token = client.cookies["csrftoken"].value
+        response = client.post(self.star_url, HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(self.education.starred_by.filter(pk=self.regular.pk).exists())
