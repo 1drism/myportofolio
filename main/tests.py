@@ -315,10 +315,13 @@ class ProjectAjaxTest(AjaxTestBase):
     def test_edit_permissions(self):
         url = reverse("main:edit_project_ajax", args=[self.project.id])
 
-        self.login(self.visitor)
-        self.assertEqual(self.client.post(url, self.valid_data).status_code, 403)
+        for user in (self.visitor, self.editor):
+            self.login(user)
+            self.assertEqual(self.client.post(url, self.valid_data).status_code, 403)
+            self.project.refresh_from_db()
+            self.assertEqual(self.project.title, "Portfolio Website")
 
-        self.login(self.editor)
+        self.login(self.owner)
         self.assertEqual(self.client.post(url, self.valid_data).status_code, 200)
         self.project.refresh_from_db()
         self.assertEqual(self.project.title, "New Project")

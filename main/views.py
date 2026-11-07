@@ -252,7 +252,7 @@ def edit_education(request, education_id):
 
 @login_required(login_url="/login/")
 def edit_project(request, project_id):
-    if not (request.user.is_superuser or is_editor(request.user)):
+    if not request.user.is_superuser:
         raise PermissionDenied
     
     project = get_object_or_404(Project, pk=project_id)
@@ -392,10 +392,10 @@ def create_project_ajax(request):
 
 @require_POST
 def edit_project_ajax(request, project_id):
-    # Superuser and Editor can edit (Assignment 4 roles); JSON 403 instead of a login redirect
-    if not (request.user.is_superuser or is_editor(request.user)):
+    # Owner only, same as the Projects API; JSON 403 instead of a login redirect
+    if not request.user.is_superuser:
         return JsonResponse(
-            {"message": "Only the portfolio owner or an editor can edit projects."},
+            {"message": "Only the portfolio owner can edit projects."},
             status=403,
         )
 
