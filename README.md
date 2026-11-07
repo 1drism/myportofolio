@@ -116,3 +116,51 @@ In my project i handled it like this:
 
 ### AI Usage Disclosure
 This week i used Claude web a lot more than in the previous weeks. For Tutorial 5 it checked my work against the tutorial and found bugs i missed, like the Edit button not showing for editors because `is_editor` wasn't passed to the project page. For the assignment mostly is my code and i also reviewed it again myself if its from claude. It also wrote fixed the tests that broke after switching to AJAX, and helped me refactor the modals and CSS into shared components.
+
+## Assignment 6
+
+For this assignment i moved my Education section to Django REST Framework, same pattern as the Projects API from Tutorial 7. The Education page now loads, searches, adds, edits, stars and deletes everything through /api/v1/education/ without reloading.
+
+| Method | Endpoint | What it does | Who can use it |
+|---|---|---|---|
+| GET | /api/v1/education/ | list, search with ?institution= | everyone |
+| POST | /api/v1/education/ | add education | owner |
+| GET | /api/v1/education/<uuid>/ | one education | everyone |
+| PUT / PATCH | /api/v1/education/<uuid>/ | edit | owner and editor |
+| DELETE | /api/v1/education/<uuid>/ | delete | owner |
+| POST | /api/v1/education/<uuid>/star/ | star / unstar | logged in users |
+
+### 1. REST, and PUT vs PATCH
+REST (Representational State Transfer) is a set of rules for how an API is organized, not a library or a data format. The URL points to the data as a resource (/api/v1/education/ is the whole collection, /api/v1/education/<id>/ is one entry), the HTTP method says the action (GET reads, POST creates, PUT/PATCH update, DELETE removes), and the status code says what happened (201 created, 204 deleted, 400 bad input, 403 not allowed, 404 not found). It should also be stateless, mine bends this a bit because SessionAuthentication keeps a session on the server.
+
+JSON alone isn't enough because my Assignment 5 endpoints already returned JSON, but they were all POST with the action in the URL (/education/add-ajax/, /education/<id>/edit-ajax/, /education/<id>/delete/), so you have to memorize every custom URL. Now it's one resource URL and the method decides the action. The JSON is the same, the organization is what makes it RESTful.
+
+PUT replaces the whole entry so every required field has to be sent, a PUT with only {"institution": "UI"} gives 400. PATCH only sends what changes and partial=True keeps the rest. My edit modal always sends every field so it uses PUT. PATCH fits a small change, like marking an entry as finished after graduating with just {"ended_at": "2026-07-01"}.
+
+### 2. What a serializer does
+A serializer translates both ways. Going out it turns an Education object into Python data that DRF renders as JSON (or the Browsable API page), and coming in it validates and cleans request.data, then .save() creates or updates the object.
+
+Before, get_education_json built every key by hand in a loop, and validation was separately in EducationForm. With EducationSerializer:
+- one fields list is used for list, detail, create and star, before my star view returned a different shape than the list
+- output and validation are in the same place, so they can't drift apart
+- id, star_count and is_starred are read only, sending "star_count": 99 is just ignored
+- dates and null are handled automatically
+- errors are always {"field": ["message"]} with a 400 from is_valid(raise_exception=True)
+- ModelSerializer reads the model, so a new section only needs a few lines
+
+### 3. Authentication vs authorization
+Authentication is "who are you?". SessionAuthentication reads the session from my login page and sets request.user, or AnonymousUser if there's none. Authorization is "what are you allowed to do?". My permission class IsPortfolioOwnerOrEditorOrReadOnly checks request.user and request.method, and if it says no the view never runs and you get 403.
+
+The check has to be on the server because the browser belongs to the user. Hiding the Delete button from an Editor only changes what they see, they can still send a DELETE from the DevTools Console, the Browsable API, curl or Postman. Hiding buttons is good for UX but it's not security, that's why my tests send requests straight to the API and check the database didn't change.
+
+### 4. CSRF with SessionAuthentication
+The browser attaches my session cookie to every request to my site, even ones started by another website. So if i'm logged in as the owner and open a bad page, it could send a request to /api/v1/education/ and my browser would add the cookie. The CSRF token fixes this: my page reads it from the csrftoken cookie and sends it in X-CSRFToken, and other sites can't read my cookies because of the same-origin policy. DRF views skip Django's normal CSRF middleware, so SessionAuthentication adds the check back for logged in users on POST, PUT, PATCH and DELETE.
+
+force_authenticate puts the user straight on the request and skips SessionAuthentication, which is where the CSRF check is, and APIClient doesn't enforce CSRF by default anyway. So a write without a token would still pass even if CSRF was broken. My real test uses APIClient(enforce_csrf_checks=True) with .login(), so the request goes through a real session, and a POST without the token gets 403 and creates nothing.
+
+### AI Usage Disclosure
+For this assignment I used Claude as a tutor, not to write the code for me. I wrote the code and the README answers myself. Claude helped me with:
+
+- Understanding the concepts: how a serializer works in both directions (model -> JSON and input -> validated data), the difference between authentication and authorization, why SessionAuthentication still needs a CSRF token, why `force_authenticate` can't prove CSRF works, and REST / PUT vs PATCH using my own Education endpoints as examples.
+- Planning the work: it split the assignment into small steps (serializer -> permission -> API views -> page migration -> tests) so I could commit gradually, and gave me skeletons with TODOs and hints that I filled in myself.
+- Pointing out pitfalls before I ran into them: an empty end date (`""`) is rejected by DRF's DateField, so the page has to send `null`; `test_education_page_is_skeleton` still checked the old `get_education_json` URL; and regular users need a `{% csrf_token %}` on the page once the star form is removed.
