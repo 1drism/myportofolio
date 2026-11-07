@@ -65,7 +65,7 @@
     <script>
     // Configuration
     const BASE_EDUCATION_ENDPOINT = "{% url 'api:education-list' %}";
-    const EDIT_EDUCATION_ENDPOINT = "{% url 'main:edit_education_ajax' '00000000-0000-0000-0000-000000000000' %}";
+    const DETAIL_EDUCATION_ENDPOINT = "{% url 'api:education-detail' '00000000-0000-0000-0000-000000000000' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
@@ -359,15 +359,6 @@
         return cookieValue;
     }
 
-    // Turn {"institution": [{"message": "..."}]} into "Institution: ..." using the form's own labels
-    function formatFieldErrors(errors) {
-        return Object.entries(errors).flatMap(([fieldName, fieldErrors]) => {
-            const label = educationForm.querySelector(`label[for="id_${fieldName}"]`);
-            const prefix = label ? `${label.textContent}: ` : '';
-            return fieldErrors.map(error => prefix + error.message);
-        });
-    }
-
     // Turn DRF errors into one message, using the form's own labels
     function apiErrorMessage(data, status) {
         const messages = Object.entries(data).flatMap(([fieldName, value]) => {
@@ -407,21 +398,6 @@
         return payload;
     }
 
-    async function updateEducationOld() {
-        const response = await fetch(EDIT_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, editingEducationId), {
-            method: 'POST',
-            headers: { 'X-CSRFToken': getCookie('csrftoken') },
-            body: new FormData(educationForm),
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            const errorMessages = result.errors
-                ? formatFieldErrors(result.errors)
-                : [result.message || `Something went wrong (status ${response.status}).`];
-            throw new Error(errorMessages.join(' '));
-        }
-    }
-
     // Send the form data to the server (add or edit, depending on the modal mode)
     async function saveEducation(event) {
         event.preventDefault();
@@ -434,7 +410,8 @@
 
         try {
             if (isEditing) {
-                await updateEducationOld();
+                const detailUrl = DETAIL_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, editingEducationId);
+                await writeEducation(detailUrl, 'PUT', buildEducationPayload());
             } else {
                 await writeEducation(BASE_EDUCATION_ENDPOINT, 'POST', buildEducationPayload());
             }
