@@ -7,9 +7,11 @@ from rest_framework.decorators import (
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from main.models import Project
-from main.permissions import IsPortfolioOwnerOrReadOnly
-from main.serializers import ProjectSerializer
+from main.models import Education, Project
+from main.permissions import (
+    IsPortfolioOwnerOrEditorOrReadOnly, IsPortfolioOwnerOrReadOnly,
+)
+from main.serializers import EducationSerializer, ProjectSerializer
 
 
 @api_view(["GET", "HEAD", "POST"])
@@ -65,3 +67,22 @@ def project_star(request, project_id):
         project.starred_by.add(request.user)
     serializer = ProjectSerializer(project, context={"request": request})
     return Response(serializer.data)
+
+@api_view(["GET", "HEAD", "POST"])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
+def education_list(request):
+    if request.method in ("GET", "HEAD"):
+        education = Education.objects.prefetch_related("starred_by").order_by("-started_at", "id")
+        institution = request.query_params.get("institution", "").strip()
+        if institution:
+            education = education.filter(institution__icontains=institution)
+        serializer = EducationSerializer(
+            education, many=True, context={"request": request},
+        )
+        return Response(serializer.data)
+
+    serializer = EducationSerializer(data=request.data, context={"request": request})
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
