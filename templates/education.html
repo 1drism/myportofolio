@@ -75,6 +75,7 @@
     const EDUCATION_FIELDS = ['institution', 'faculty_or_major', 'degree', 'started_at', 'ended_at', 'description'];
     let educationAbortController;
     let editingEducationId = null;   // null = the modal is adding, otherwise the ID being edited
+    let deletingEducationId = null;
 
     // DOM elements
     const loadingState = document.getElementById('loading');
@@ -120,9 +121,6 @@
         const articleElement = document.createElement('article');
         articleElement.className = 'education-card';
 
-        // Django fills in the URL with a dummy UUID, JavaScript swaps in the real ID
-        const deleteUrl = "{% url 'main:delete_education' '00000000-0000-0000-0000-000000000000' %}"
-            .replace(PLACEHOLDER_ID, educationId);
 
         const starInnerHtml = `
             <span class="star-icon" aria-hidden="true">★</span>
@@ -141,8 +139,7 @@
             : '';
 
         const deleteHtml = IS_SUPERUSER
-            ? `<button type="button" class="button button-danger delete-button"
-                       data-delete-url="${deleteUrl}">Delete</button>`
+            ? `<button type="button" class="button button-danger delete-button">Delete</button>`
             : '';
 
         articleElement.innerHTML = `
@@ -173,7 +170,7 @@
         const deleteButton = articleElement.querySelector('.delete-button');
         if (deleteButton) {
             deleteButton.addEventListener('click', () =>
-                openDeleteModal(deleteButton.dataset.deleteUrl, education.institution));
+                openDeleteModal(educationId, education.institution));
         }
         return articleElement;
     }
@@ -244,8 +241,8 @@
     const deleteModal = document.getElementById('delete-education-modal');
     const deleteForm = document.getElementById('delete-education-form');
 
-    function openDeleteModal(deleteUrl, institution) {
-        deleteForm.action = deleteUrl;
+    function openDeleteModal(educationId, institution) {
+        deletingEducationId = educationId;
         document.getElementById('delete-education-name').textContent = institution;
         deleteModal.showPopover();
     }
@@ -259,31 +256,15 @@
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(deleteForm.action, {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                body: new FormData(deleteForm),
-            });
-
-            // Session expired: @login_required redirected fetch to the login page
-            if (response.redirected) {
-                window.location.href = response.url;
-                return;
-            }
-            if (!response.ok) {
-                const message = response.status === 403
-                    ? 'Only the portfolio owner can delete education.'
-                    : `Something went wrong (status ${response.status}).`;
-                showToast('Failed to delete education', message, 'error');
-                return;
-            }
+            const detailUrl = DETAIL_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, deletingEducationId);
+            await writeEducation(detailUrl, 'DELETE');
 
             deleteModal.hidePopover();
             showToast('Education deleted', `"${institution}" has been removed.`, 'success');
-            fetchEducation(searchInput.value.trim());
+            await fetchEducation(searchInput.value.trim());
         } catch (error) {
             console.error('Error deleting education:', error);
-            showToast('Failed to delete education', 'Could not reach the server. Please try again.', 'error');
+            showToast('Failed to delete education', error.message, 'error');
         } finally {
             submitButton.disabled = false;
         }
