@@ -61,9 +61,10 @@
         {% include "components/delete_modal.html" with name="education" title="Delete Education?" %}
     {% endif %}
 
+    {% csrf_token %}
     <script>
     // Configuration
-    const BASE_EDUCATION_ENDPOINT = "{% url 'main:get_education_json' %}";
+    const BASE_EDUCATION_ENDPOINT = "{% url 'api:education-list' %}";
     const CREATE_EDUCATION_ENDPOINT = "{% url 'main:create_education_ajax' %}";
     const EDIT_EDUCATION_ENDPOINT = "{% url 'main:edit_education_ajax' '00000000-0000-0000-0000-000000000000' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
@@ -111,9 +112,8 @@
     }
 
     // Build an education card element
-    function buildEducationCardElement(item) {
-        const education = item.fields;
-        const educationId = item.pk;
+    function buildEducationCardElement(education) {
+        const educationId = education.id;
 
         const articleElement = document.createElement('article');
         articleElement.className = 'education-card';
@@ -236,28 +236,19 @@
         try {
             displayPageSection({ showLoading: true });
 
-            const url = searchQuery
-                ? `${BASE_EDUCATION_ENDPOINT}?institution=${encodeURIComponent(searchQuery)}`
-                : BASE_EDUCATION_ENDPOINT;
+            const url = new URL(BASE_EDUCATION_ENDPOINT, window.location.origin);
+            if (searchQuery) url.searchParams.set('institution', searchQuery);
 
             const response = await fetch(url, {
                 headers: { 'Accept': 'application/json' },
                 signal: educationAbortController.signal,
             });
 
-            if (!response.ok) throw new Error('Failed to fetch data');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
             const educationData = await response.json();
-
-            if (educationData.length === 0) {
-                displayPageSection({ showEmpty: true });
-            } else {
-                gridContainer.innerHTML = '';
-                educationData.forEach(item => {
-                    gridContainer.appendChild(buildEducationCardElement(item));
-                });
-                displayPageSection({ showGrid: true });
-            }
+            gridContainer.replaceChildren(...educationData.map(buildEducationCardElement));
+            displayPageSection({ showGrid: educationData.length > 0, showEmpty: educationData.length === 0 });
         } catch (error) {
             if (error.name === 'AbortError') return;
             console.error('Error loading education:', error);

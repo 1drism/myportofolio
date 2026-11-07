@@ -86,7 +86,7 @@ class EducationTest(TestCase):
         self.assertContains(response, 'id="grid"')
         self.assertContains(response, 'id="loading"')
         self.assertContains(response, 'id="error"')
-        self.assertContains(response, reverse("main:get_education_json"))
+        self.assertContains(response, reverse("api:education-list"))
         self.assertNotContains(response, "Skeleton Check Institute")
 
     def test_education_data_in_json(self):
