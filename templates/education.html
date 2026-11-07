@@ -65,12 +65,12 @@
     <script>
     // Configuration
     const BASE_EDUCATION_ENDPOINT = "{% url 'api:education-list' %}";
-    const CREATE_EDUCATION_ENDPOINT = "{% url 'main:create_education_ajax' %}";
     const EDIT_EDUCATION_ENDPOINT = "{% url 'main:edit_education_ajax' '00000000-0000-0000-0000-000000000000' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
     const PLACEHOLDER_ID = "00000000-0000-0000-0000-000000000000";
+    const EDUCATION_FIELDS = ['institution', 'faculty_or_major', 'degree', 'started_at', 'ended_at', 'description'];
     let educationAbortController;
     let editingEducationId = null;   // null = the modal is adding, otherwise the ID being edited
 
@@ -331,7 +331,7 @@
     // Edit button: fill the form with this entry's current data, then open the modal
     function openEditEducationModal(educationId, education) {
         setEducationModalMode(educationId);
-        ['institution', 'faculty_or_major', 'degree', 'started_at', 'ended_at', 'description'].forEach(name => {
+        EDUCATION_FIELDS.forEach(name => {
             educationForm.elements[name].value = education[name] ?? '';   // dates are "YYYY-MM-DD", as <input type="date"> expects
         });
         educationForm.dispatchEvent(new Event('input'));   // refresh the live preview
@@ -390,6 +390,8 @@
                 'X-CSRFToken': getCookie('csrftoken'),
             },
             body: payload === undefined ? undefined : JSON.stringify(payload),
+        }).catch(() => {
+            throw new Error('Could not reach the server. Please try again.');
         });
         if (response.status === 204) return null;
         const data = await response.json().catch(() => ({}));
@@ -397,42 +399,54 @@
         return data;
     }
 
+    // Only the model fields, never csrfmiddlewaretoken; an empty end date is sent as null
+    function buildEducationPayload() {
+        const fields = new FormData(educationForm);
+        const payload = Object.fromEntries(EDUCATION_FIELDS.map(name => [name, fields.get(name)]));
+        if (!payload.ended_at) payload.ended_at = null;
+        return payload;
+    }
+
+    async function updateEducationOld() {
+        const response = await fetch(EDIT_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, editingEducationId), {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: new FormData(educationForm),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            const errorMessages = result.errors
+                ? formatFieldErrors(result.errors)
+                : [result.message || `Something went wrong (status ${response.status}).`];
+            throw new Error(errorMessages.join(' '));
+        }
+    }
+
     // Send the form data to the server (add or edit, depending on the modal mode)
     async function saveEducation(event) {
         event.preventDefault();
 
         const isEditing = editingEducationId !== null;
-        const endpoint = isEditing
-            ? EDIT_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, editingEducationId)
-            : CREATE_EDUCATION_ENDPOINT;
         const failTitle = isEditing ? 'Failed to update education' : 'Failed to add education';
 
         const submitButton = educationForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                body: new FormData(educationForm),
-            });
-            const result = await response.json().catch(() => ({}));
-
-            if (response.ok) {
-                educationForm.reset();
-                setEducationModalMode(null);
-                closeEducationModal();
-                showToast('Success', isEditing ? 'Education updated successfully!' : 'New education added successfully!', 'success');
-                fetchEducation(searchInput.value.trim());
+            if (isEditing) {
+                await updateEducationOld();
             } else {
-                const errorMessages = result.errors
-                    ? formatFieldErrors(result.errors)
-                    : [result.message || `Something went wrong (status ${response.status}).`];
-                showToast(failTitle, errorMessages.join(' '), 'error');
+                await writeEducation(BASE_EDUCATION_ENDPOINT, 'POST', buildEducationPayload());
             }
+
+            educationForm.reset();
+            setEducationModalMode(null);
+            closeEducationModal();
+            showToast('Success', isEditing ? 'Education updated successfully!' : 'New education added successfully!', 'success');
+            await fetchEducation(searchInput.value.trim());
         } catch (error) {
             console.error('Error saving education:', error);
-            showToast(failTitle, 'Could not reach the server. Please try again.', 'error');
+            showToast(failTitle, error.message, 'error');
         } finally {
             submitButton.disabled = false;
         }
