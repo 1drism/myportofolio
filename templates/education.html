@@ -368,6 +368,35 @@
         });
     }
 
+    // Turn DRF errors into one message, using the form's own labels
+    function apiErrorMessage(data, status) {
+        const messages = Object.entries(data).flatMap(([fieldName, value]) => {
+            const label = educationForm?.querySelector(`label[for="id_${fieldName}"]`);
+            const prefix = label ? `${label.textContent}: ` : '';
+            return [value].flat()
+                .filter(message => typeof message === 'string')
+                .map(message => prefix + message);
+        });
+        return messages.join(' ') || `Request failed (HTTP ${status}).`;
+    }
+
+    // Send a JSON write request to the API with the CSRF token
+    async function writeEducation(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        });
+        if (response.status === 204) return null;
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
+        return data;
+    }
+
     // Send the form data to the server (add or edit, depending on the modal mode)
     async function saveEducation(event) {
         event.preventDefault();
