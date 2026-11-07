@@ -66,6 +66,8 @@
     // Configuration
     const BASE_EDUCATION_ENDPOINT = "{% url 'api:education-list' %}";
     const DETAIL_EDUCATION_ENDPOINT = "{% url 'api:education-detail' '00000000-0000-0000-0000-000000000000' %}";
+    const STAR_EDUCATION_ENDPOINT = "{% url 'api:education-star' '00000000-0000-0000-0000-000000000000' %}";
+    const LOGIN_URL = "{% url 'main:login' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
@@ -119,10 +121,20 @@
         articleElement.className = 'education-card';
 
         // Django fills in the URL with a dummy UUID, JavaScript swaps in the real ID
-        const starUrl = "{% url 'main:toggle_education_star' '00000000-0000-0000-0000-000000000000' %}"
-            .replace(PLACEHOLDER_ID, educationId);
         const deleteUrl = "{% url 'main:delete_education' '00000000-0000-0000-0000-000000000000' %}"
             .replace(PLACEHOLDER_ID, educationId);
+
+        const starInnerHtml = `
+            <span class="star-icon" aria-hidden="true">★</span>
+            <span class="star-label">
+                <span class="star-label-off">Star</span>
+                <span class="star-label-on" aria-hidden="true">Starred</span>
+            </span>
+            <span class="star-count"></span>`;
+
+        const starHtml = IS_AUTHENTICATED
+            ? `<button type="button" class="button button-star">${starInnerHtml}</button>`
+            : `<a href="${LOGIN_URL}" class="button button-star" aria-label="Log in to star">${starInnerHtml}</a>`;
 
         const editHtml = CAN_EDIT
             ? `<button type="button" class="button button-secondary edit-button">Edit</button>`
@@ -141,25 +153,17 @@
             <p class="education-date">${escapeHtml(formatDate(education.started_at))}</p>
             <p class="education-status">${education.is_ongoing ? 'Ongoing' : 'Completed'}</p>
             <div class="card-actions">
-                <form method="post" action="${starUrl}" class="star-form">
-                    {% csrf_token %}
-                    <button type="submit" class="button button-star">
-                        <span class="star-icon" aria-hidden="true">★</span>
-                        <span class="star-label">
-                            <span class="star-label-off">Star</span>
-                            <span class="star-label-on" aria-hidden="true">Starred</span>
-                        </span>
-                        <span class="star-count"></span>
-                    </button>
-                </form>
+                ${starHtml}
                 ${editHtml}
                 ${deleteHtml}
             </div>
         `;
 
-        const starForm = articleElement.querySelector('.star-form');
-        renderStarButton(starForm.querySelector('.button-star'), education);
-        starForm.addEventListener('submit', handleStarSubmit);
+        const starButton = articleElement.querySelector('.button-star');
+        renderStarButton(starButton, education);
+        if (IS_AUTHENTICATED) {
+            starButton.addEventListener('click', () => toggleStar(starButton, educationId));
+        }
 
         const editButton = articleElement.querySelector('.edit-button');
         if (editButton) {
@@ -183,34 +187,14 @@
     }
 
     // Toggle a star via AJAX so the page doesn't reload
-    async function handleStarSubmit(e) {
-        if (!IS_AUTHENTICATED) return;   // Let the normal submit send guests to the login page
-        e.preventDefault();
-
-        const form = e.currentTarget;
-        const button = form.querySelector('.button-star');
-        const institution = form.closest('.education-card').querySelector('h2').textContent;
+    async function toggleStar(button, educationId) {
+        const institution = button.closest('.education-card').querySelector('h2').textContent;
         if (button.disabled) return;
         button.disabled = true;
 
         try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            });
-
-            // Session expired: @login_required redirected fetch to the login page
-            if (response.redirected) {
-                window.location.href = response.url;
-                return;
-            }
-            if (!response.ok) {
-                showToast('Failed to update star', `Something went wrong (status ${response.status}).`, 'error');
-                return;
-            }
-
-            const starData = await response.json();
+            const starUrl = STAR_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, educationId);
+            const starData = await writeEducation(starUrl, 'POST');
             renderStarButton(button, starData);
             if (starData.is_starred) {
                 button.classList.remove('star-pop');
@@ -222,7 +206,7 @@
             }
         } catch (error) {
             console.error('Error toggling star:', error);
-            showToast('Failed to update star', 'Could not reach the server. Please try again.', 'error');
+            showToast('Failed to update star', error.message, 'error');
         } finally {
             button.disabled = false;
         }
