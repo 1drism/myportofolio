@@ -232,3 +232,97 @@ class EducationAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(response.content, b"")
         self.assertFalse(Education.objects.filter(pk=self.education.id).exists())
+
+    def test_tag_only_or_whitespace_input_is_rejected(self):
+        self.client.force_authenticate(user=self.owner)
+        for changes, field in [
+            ({"institution": "   "}, "institution"),
+            ({"institution": "<b></b>"}, "institution"),
+            ({"faculty_or_major": "<i> </i>"}, "faculty_or_major"),
+            ({"degree": '<img src="x" onerror="alert(1)">'}, "degree"),
+        ]:
+            response = self.client.post(self.list_url, {**self.payload, **changes}, format="json")
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn(field, response.data)
+        self.assert_education_unchanged()
+
+    def test_html_tags_are_stripped(self):
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.post(self.list_url, {
+            **self.payload,
+            "institution": "<b>SMA</b> Negeri 8",
+            "description": "  <script>alert(1)</script>Science class  ",
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        created = Education.objects.get(pk=response.data["id"])
+        self.assertEqual(created.institution, "SMA Negeri 8")
+        self.assertEqual(created.description, "alert(1)Science class")
+
+    def test_invalid_dates_are_rejected(self):
+        self.client.force_authenticate(user=self.owner)
+        for changes, field in [
+            ({"started_at": "not-a-date"}, "started_at"),
+            ({"ended_at": ""}, "ended_at"),
+            ({"ended_at": "2020-01-01"}, "ended_at"),
+        ]:
+            response = self.client.post(self.list_url, {**self.payload, **changes}, format="json")
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn(field, response.data)
+
+        self.client.force_authenticate(user=self.editor)
+        response = self.client.patch(self.detail_url, {"ended_at": "2024-01-01"}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("ended_at", response.data)
+        self.assert_education_unchanged()
+
+    def test_guest_cannot_star(self):
+        response = self.client.post(self.star_url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.education.starred_by.count(), 0)
+
+    def test_star_toggles_for_the_logged_in_user(self):
+        self.client.force_authenticate(user=self.regular)
+        response = self.client.post(self.star_url, {"user": self.owner.id}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["is_starred"])
+        self.assertEqual(response.data["star_count"], 1)
+        self.assertEqual(list(self.education.starred_by.all()), [self.regular])
+
+        response = self.client.post(self.star_url)
+        self.assertFalse(response.data["is_starred"])
+        self.assertEqual(response.data["star_count"], 0)
+        self.assertFalse(self.education.starred_by.exists())
+
+        self.assertEqual(self.client.get(self.star_url).status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_computed_fields_are_read_only(self):
+        forged_id = uuid.uuid4()
+        self.client.force_authenticate(user=self.owner)
+        response = self.client.post(self.list_url, {
+            **self.payload, "ended_at": None, "id": str(forged_id),
+            "star_count": 99, "is_starred": True, "is_ongoing": False,
+            "starred_by_names": "forged", "starred_by": [self.regular.id],
+        }, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertNotEqual(response.data["id"], str(forged_id))
+        self.assertEqual(response.data["star_count"], 0)
+        self.assertFalse(response.data["is_starred"])
+        self.assertTrue(response.data["is_ongoing"])
+        self.assertEqual(response.data["starred_by_names"], "")
+        self.assertFalse(Education.objects.get(pk=response.data["id"]).starred_by.exists())
+
+    def test_responses_do_not_expose_account_data(self):
+        self.education.starred_by.add(self.owner, self.regular)
+        self.client.force_authenticate(user=self.regular)
+        responses = [
+            self.client.get(self.list_url),
+            self.client.get(self.detail_url),
+            self.client.post(self.star_url),
+        ]
+        for response in responses:
+            body = response.content.decode()
+            self.assertNotIn("email", body)
+            self.assertNotIn("owner@example.com", body)
+            self.assertNotIn("password", body)
+            self.assertNotIn("pbkdf2", body)
+        self.assertEqual(responses[1].data["starred_by_names"], "owner, regular")
