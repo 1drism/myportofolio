@@ -22,6 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function yearOf(value) {
+        return value ? new Date(value + "T00:00").getFullYear() : "";
+    }
+
     // Only allow real web links or the site's own files, never "javascript:" URLs
     function isSafeUrl(url) {
         return /^https?:\/\//i.test(url) || /^\/(?!\/)/.test(url);
@@ -39,6 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
         card.querySelectorAll("[data-preview-status]").forEach((el) => {
             const ended = fieldValue(el.dataset.previewStatus);
             el.textContent = ended ? "Completed" : "Ongoing";
+            el.classList.toggle("is-ongoing", !ended);
+        });
+
+        card.querySelectorAll("[data-preview-period]").forEach((el) => {
+            const [startName, endName] = el.dataset.previewPeriod.split(" ");
+            const start = yearOf(fieldValue(startName));
+            const end = yearOf(fieldValue(endName));
+            if (end) el.textContent = `Graduated ${end}`;
+            else el.textContent = start ? `${start} – Present` : "Start date";
         });
 
         card.querySelectorAll("[data-preview-src]").forEach((el) => {

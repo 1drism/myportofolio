@@ -1,12 +1,15 @@
 <aside class="form-preview" aria-label="Live preview">
     <p class="section-kicker">Live preview</p>
-    <article class="project-card" data-preview-card>
-        <img class="project-image" alt="" data-preview-src="project_image_url" hidden>
-        <h2 data-preview="title" data-placeholder="Project title"></h2>
-        <span class="project-tech" data-preview="tech_stack" data-placeholder="Tech stack"></span>
-        <p class="project-description" data-preview="description"></p>
-        <p class="project-link" data-preview-link="project_url" hidden>
-            <a href="#">View Project</a>
+    <article class="preview-card" data-preview-card>
+        <img class="preview-card__image" alt="" data-preview-src="project_image_url" hidden>
+        <p class="label-overline preview-card__tech" data-preview="tech_stack" data-placeholder="Tech stack"></p>
+        <h3 class="text-h3 preview-card__title" data-preview="title" data-placeholder="Project title"></h3>
+        <p class="text-body preview-card__description" data-preview="description"></p>
+        <p class="preview-card__link" data-preview-link="project_url" hidden>
+            <a href="#" class="label-button" target="_blank" rel="noopener noreferrer">
+                View project<span class="visually-hidden"> (opens in a new tab)</span>
+                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+            </a>
         </p>
     </article>
 </aside>

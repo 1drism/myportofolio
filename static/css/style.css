@@ -193,7 +193,8 @@ h1 {
     transition: color 0.15s ease;
 }
 
-.site-nav__link {
+.site-nav__link,
+.site-actions__link {
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -929,18 +930,16 @@ h1 {
 .skill-preview {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
+    align-items: flex-start;
+    gap: var(--space-8);
 }
 
 .skill-preview .skills-card {
-    width: 256px;
+    width: 240px;
 }
 
 .skill-preview__category {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    color: var(--accent-light);
+    color: var(--color-accent-light);
 }
 
 @keyframes skeletonPulse {
@@ -973,19 +972,169 @@ h1 {
     }
 }
 
-/* Compact form modal (short forms like Skill) */
-.modal--compact .modal__content {
+.modal--form.modal--compact .modal__content {
     width: min(100%, 720px);
 }
 
-.modal--compact .form-layout {
-    grid-template-columns: minmax(0, 1fr) 240px;
+.modal--form.modal--compact .form-layout {
+    grid-template-columns: minmax(0, 384px) 240px;
 }
 
 @media (max-width: 800px) {
-    .modal--compact .form-layout {
+    .modal--form.modal--compact .form-layout {
         grid-template-columns: 1fr;
     }
+}
+
+.section-kicker {
+    color: var(--color-accent);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.form-fields {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--space-24) var(--space-16);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+.education-form .form-group--started_at,
+.education-form .form-group--ended_at {
+    grid-column: span 3;
+}
+
+.experience-form .form-group--category,
+.experience-form .form-group--ended_at {
+    grid-column: span 2;
+}
+
+.form-group label {
+    color: var(--color-accent-light);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    min-height: 48px;
+    padding: 11px 15px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 24px;
+    color-scheme: dark;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.form-group textarea {
+    min-height: 96px;
+    resize: vertical;
+}
+
+.form-group select {
+    appearance: none;
+    padding-right: 47px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5L10 12.5L15 7.5' stroke='%23B8B5B2' stroke-width='1.66667' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position: right 15px center;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    cursor: pointer;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+.search-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow:
+        0 0 0 1px var(--color-accent),
+        0 0 12px rgba(235, 212, 87, 0.32);
+}
+
+.form-group [aria-invalid="true"] {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 1px var(--color-danger);
+}
+
+.form-group [aria-invalid="true"]:focus {
+    border-color: var(--color-danger);
+    box-shadow:
+        0 0 0 1px var(--color-danger),
+        0 0 12px rgba(224, 105, 94, 0.32);
+}
+
+.form-help {
+    color: var(--color-text-muted);
+    font-size: 14px;
+    line-height: 24px;
+}
+
+.form-help ul {
+    padding-left: 1.2rem;
+}
+
+.form-errors:empty {
+    display: none;
+}
+
+.form-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-8);
+    color: var(--color-danger-light);
+    font-size: 14px;
+    line-height: 24px;
+}
+
+.form-error__icon {
+    flex: none;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
+    margin-top: 4px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.33333;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-16);
+    margin-top: var(--space-32);
+}
+
+.form-actions--start {
+    justify-content: flex-start;
 }
 
 .experience-section,
@@ -1002,186 +1151,30 @@ h1 {
     font-size: 2rem;
 }
 
-.form-preview .experience-card,
-.form-preview .education-card {
-    padding: 1.25rem;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    display: flex;
-    flex-direction: column;
-}
-
-.form-preview .experience-card h2,
-.form-preview .education-card h2,
-.form-preview .project-card h2 {
-    margin: 0.5rem 0;
-    font-size: 1.25rem;
-}
-
-.experience-description,
-.education-description {
-    color: var(--text-muted);
-}
-
-.experience-status,
-.education-status,
-.project-link {
-    margin-top: 1rem;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-/* Experience css below */
-.section-kicker {
-    color: var(--accent-dark);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-}
-
-.experience-category {
-    color: var(--accent-dark);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-
-/* Education css below */
-.education-degree,
-.project-tech {
-    color: var(--accent-light);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.education-major {
-    color: var(--accent-light);
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.education-date {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin-top: 0.75rem;
-}
-
-/* Education and Project form css below */
-.education-form,
-.project-form,
-.experience-form {
-    width: 100%;
-    max-width: 640px;
-    margin-top: 1.5rem;
-    padding: 1.75rem;
-    background: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-}
-
-.form-group {
-    margin-bottom: 1.25rem;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.4rem;
-    color: var(--accent-light);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-    width: 100%;
-    padding: 0.7rem 0.9rem;
-    border: 2px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--paper);
-    color: var(--ink);
-    font: inherit;
-    font-size: 0.95rem;
-    color-scheme: dark;
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 6rem;
-}
-
-.form-group select {
-    cursor: pointer;
-}
-
-.form-group input::placeholder,
-.form-group textarea::placeholder {
-    color: var(--text-muted);
-    opacity: 0.7;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus,
-.search-input:focus {
-    outline: none;
-    border-color: var(--accent);
-    box-shadow: 0 0 12px rgba(255, 224, 67, 0.25);
-}
-
-.form-help {
-    margin-top: 0.4rem;
-    color: var(--text-muted);
-    font-size: 0.8rem;
-}
-
-.form-help ul {
-    padding-left: 1.2rem;
-}
-
-.form-error {
-    margin-top: 0.35rem;
-    color: var(--danger-light);
-    font-size: 0.85rem;
-}
-
-.education-form .button,
-.project-form .button,
-.experience-form .button {
-    margin-top: 0.5rem;
-    margin-right: 0.5rem;
-}
 /* Form with live preview */
 .form-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    gap: 2rem;
+    grid-template-columns: minmax(0, 1fr) 304px;
+    gap: var(--space-32);
     align-items: start;
-    margin-top: 1.5rem;
+}
+
+.form-layout--page {
+    grid-template-columns: minmax(0, 640px) 352px;
+    justify-content: space-between;
+    margin-top: var(--space-64);
 }
 
 .form-layout form {
-    max-width: 100%;
-    margin-top: 0;
+    min-width: 0;
 }
 
 .form-preview {
     position: sticky;
     top: 7rem;
-}
-
-.form-preview .section-kicker {
-    margin-bottom: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
 }
 
 @media (max-width: 800px) {
@@ -1194,22 +1187,99 @@ h1 {
     }
 }
 
+.preview-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 23px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background-color: var(--color-paper-dark);
+}
+
+.preview-card__period {
+    color: var(--color-ink);
+}
+
+.preview-card__period + .timeline-row__status {
+    margin-top: var(--space-8);
+}
+
+.preview-card__tag,
+.preview-card__title {
+    margin-top: var(--space-16);
+}
+
+.preview-card__title {
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+}
+
+.preview-card__tech + .preview-card__title {
+    margin-top: var(--space-8);
+}
+
+.preview-card__org {
+    color: var(--color-accent-light);
+}
+
+.preview-card__description {
+    margin-top: var(--space-8);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.preview-card__description:empty {
+    display: none;
+}
+
+.preview-card__image {
+    display: block;
+    width: 100%;
+    height: 160px;
+    margin-bottom: var(--space-24);
+    border-radius: var(--radius-md);
+    object-fit: cover;
+}
+
+.preview-card__tech {
+    color: var(--color-accent-light);
+}
+
+.preview-card__link {
+    margin-top: var(--space-24);
+}
+
+.preview-card__link a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    color: var(--color-ink);
+    text-decoration: none;
+}
+
+.preview-card__link .icon-sm {
+    color: var(--color-accent);
+}
+
 .button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: fit-content;
-    border: 2px solid var(--accent);
-    border-radius: var(--radius);
-    padding: 0.55rem 1.1rem;
-    background: var(--accent);
-    color: var(--paper-dark);
+    gap: var(--space-8);
+    height: 48px;
+    padding: 0 22px;
+    border: 2px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: var(--color-accent);
+    color: var(--color-paper-dark);
     cursor: pointer;
-    font: inherit;
-    font-size: 0.85rem;
-    font-weight: 700;
-    line-height: 1.2;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 16px;
     text-decoration: none;
+    white-space: nowrap;
     transition:
         background-color 0.1s ease,
         color 0.1s ease,
@@ -1218,54 +1288,113 @@ h1 {
 
 .button:hover {
     background-color: transparent;
-    color: var(--accent);
-    box-shadow: 0 0 15px var(--accent-light);
+    color: var(--color-accent);
+    box-shadow: 0 0 15px var(--color-accent-light);
 }
-
 
 .button-secondary {
     background: transparent;
-    border-color: var(--accent-dark);
-    color: var(--ink);
+    border-color: var(--color-line);
+    color: var(--color-ink);
 }
 
 .button-secondary:hover {
     background-color: transparent;
-    border-color: var(--accent);
-    color: var(--accent);
-    box-shadow: 0 0 15px var(--accent-light);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    box-shadow: 0 0 15px var(--color-accent-light);
 }
 
-/* Project css below */
-.project-image {
-    display: block;
+.button:focus-visible,
+.modal__close:focus-visible,
+.auth-card__switch a:focus-visible,
+.preview-card__link a:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+}
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-128) var(--space-24);
+}
+
+.auth-card {
+    width: min(100%, 544px);
+    padding: 47px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background-color: var(--color-paper-dark);
+}
+
+.auth-card h1 {
+    color: var(--color-ink);
+}
+
+.auth-card__intro {
+    margin-top: var(--space-8);
+    color: var(--color-text-muted);
+}
+
+.auth-form {
+    margin-top: var(--space-32);
+}
+
+.auth-form > .form-error {
+    margin-bottom: var(--space-24);
+}
+
+.auth-form .form-fields + .form-error {
+    margin: var(--space-24) 0 0;
+}
+
+.auth-form__submit {
     width: 100%;
-    height: auto;
-    border-radius: var(--radius);
-    margin-bottom: 0.75rem;
-}
-.project-description {
-    color: var(--text-muted);
-    margin-top: 0.5rem;
+    margin-top: var(--space-32);
 }
 
-.project-link a {
-    color: var(--accent);
+.auth-card__switch {
+    margin-top: var(--space-24);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.auth-card__switch a {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-card__switch a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
 }
 
 /* Danger button (delete) */
 .button-danger {
-    background: var(--paper-dark);
-    border-color: var(--danger);
-    color: var(--ink);
+    background: transparent;
+    border-color: var(--color-danger);
+    color: var(--color-danger-light);
     transition: box-shadow 0.1s ease,
     border-color 0.1s ease;
 }
 
 .button-danger:hover {
     background-color: transparent;
-    color: var(--danger-light);
-    box-shadow: 0 0 15px var(--danger-light);
+    color: var(--color-danger-light);
+    box-shadow: 0 0 15px var(--color-danger-light);
+}
+
+.button-danger-solid {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: var(--color-ink);
+}
+
+.button-danger-solid:hover {
+    background-color: transparent;
+    color: var(--color-danger-light);
+    box-shadow: 0 0 15px var(--color-danger-light);
 }
 
 
@@ -1807,71 +1936,79 @@ h1 {
     position: relative;
     z-index: 1;
     width: min(100%, 480px);
-    padding: 1.5rem;
-    background: var(--paper-dark);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+    padding: 31px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    background: var(--color-paper-dark);
+    box-shadow: var(--shadow-modal);
 }
 
 .modal__content > h2 {
-    margin: 0 0 0.75rem;
-    font-family: "Space Grotesk", -apple-system, sans-serif;
-    font-size: 1.5rem;
+    margin: 0;
+    padding-right: var(--space-48);
+    color: var(--color-ink);
 }
 
 .modal__close {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 23px;
+    right: 23px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
     border: 0;
+    border-radius: var(--radius-md);
     padding: 0;
     background: transparent;
-    color: var(--text-muted);
-    font-size: 1.8rem;
-    line-height: 1;
+    color: var(--color-text-muted);
     cursor: pointer;
     transition: color 0.1s ease;
 }
 
+.modal__close-icon {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.66667;
+    stroke-linecap: round;
+}
+
 .modal__close:hover {
-    color: var(--accent);
+    color: var(--color-accent);
+}
+
+.modal__message {
+    margin-top: var(--space-16);
+    color: var(--color-text-muted);
+}
+
+.modal__message strong {
+    color: var(--color-ink);
+    font-weight: 600;
 }
 
 .modal__actions {
     display: flex;
     justify-content: flex-end;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
+    gap: var(--space-16);
+    margin-top: var(--space-32);
 }
 
 /* Add/edit form modal: wider so the live preview fits beside the form, and scrollable */
 .modal--form .modal__content {
-    width: min(100%, 980px);
+    width: min(100%, 960px);
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 224, 67, 0.08);
 }
 
 .modal--form .modal__content > h2 {
-    margin: 0 2.5rem 1.25rem 0;
-    color: var(--accent);
+    margin-bottom: var(--space-32);
 }
 
 .modal--form .form-layout {
-    margin-top: 0;
-}
-
-/* The form already sits inside the modal box, so drop its own card styling */
-.modal--form .form-layout form {
-    max-width: none;
-    padding: 0;
-    background: transparent;
-    border: 0;
-}
-
-.modal--form .form-layout form .button {
-    margin: 0;
+    grid-template-columns: minmax(0, 560px) 304px;
 }
 
 .modal--form .form-preview {

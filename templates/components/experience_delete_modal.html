@@ -21,11 +21,11 @@
                 class="modal__close"
                 popovertarget="delete-experience-{{ experience.id }}"
                 popovertargetaction="hide"
-                aria-label="Close confirmation">×</button>
-        <h2 id="delete-experience-title-{{ experience.id }}">Delete Experience?</h2>
-        <p>
+                aria-label="Close confirmation">{% include 'components/icon_close.html' %}</button>
+        <h2 class="text-h3" id="delete-experience-title-{{ experience.id }}">Delete Experience?</h2>
+        <p class="text-body modal__message">
             Are you sure you want to delete
-            <strong>{{ experience.title }}</strong>?
+            <strong>{{ experience.title }}</strong>? This can’t be undone.
         </p>
         <div class="modal__actions">
             <button type="button"
@@ -34,7 +34,7 @@
                     popovertargetaction="hide">Cancel</button>
             <form method="post" action="{% url 'main:delete_experience' experience.id %}">
                 {% csrf_token %}
-                <button type="submit" class="button button-danger">Yes, Delete</button>
+                <button type="submit" class="button button-danger-solid">Yes, Delete</button>
             </form>
         </div>
     </div>

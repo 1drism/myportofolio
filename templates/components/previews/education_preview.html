@@ -1,11 +1,11 @@
 <aside class="form-preview" aria-label="Live preview">
     <p class="section-kicker">Live preview</p>
-    <article class="education-card" data-preview-card>
-        <span class="education-degree" data-preview="degree" data-placeholder="Degree"></span>
-        <h2 data-preview="institution" data-placeholder="Institution"></h2>
-        <p class="education-major" data-preview="faculty_or_major" data-placeholder="Faculty / Major"></p>
-        <p class="education-description" data-preview="description"></p>
-        <p class="education-date" data-preview="started_at" data-format="date"></p>
-        <p class="education-status" data-preview-status="ended_at"></p>
+    <article class="preview-card" data-preview-card>
+        <p class="text-body-strong preview-card__period" data-preview-period="started_at ended_at"></p>
+        <p class="timeline-row__status label-overline" data-preview-status="ended_at"></p>
+        <span class="tag label-overline preview-card__tag" data-preview="degree" data-placeholder="Degree"></span>
+        <h3 class="text-h3 preview-card__title" data-preview="institution" data-placeholder="Institution"></h3>
+        <p class="text-body-strong preview-card__org" data-preview="faculty_or_major" data-placeholder="Faculty / Major"></p>
+        <p class="text-body preview-card__description" data-preview="description"></p>
     </article>
 </aside>

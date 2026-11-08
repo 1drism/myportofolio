@@ -406,6 +406,7 @@
 
         const submitButton = skillForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
+        clearFieldErrors(skillForm);
 
         try {
             const response = await fetch(endpoint, {
@@ -422,6 +423,7 @@
                 showToast('Success', isEditing ? 'Skill updated successfully!' : 'New skill added successfully!', 'success');
                 fetchSkills();
             } else {
+                if (result.errors) showFieldErrors(skillForm, result.errors);
                 const errorMessages = result.errors
                     ? formatFieldErrors(result.errors)
                     : [result.message || `Something went wrong (status ${response.status}).`];
@@ -486,4 +488,5 @@
 
 {% block scripts %}
     <script src="{% static 'js/form-preview.js' %}" defer></script>
+    <script src="{% static 'js/form-errors.js' %}" defer></script>
 {% endblock scripts %}

@@ -366,7 +366,11 @@
         });
         if (response.status === 204) return null;
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
+        if (!response.ok) {
+            const error = new Error(apiErrorMessage(data, response.status));
+            error.fieldErrors = data;
+            throw error;
+        }
         return data;
     }
 
@@ -387,6 +391,7 @@
 
         const submitButton = educationForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
+        clearFieldErrors(educationForm);
 
         try {
             if (isEditing) {
@@ -403,6 +408,7 @@
             await fetchEducation(searchInput.value.trim());
         } catch (error) {
             console.error('Error saving education:', error);
+            if (error.fieldErrors) showFieldErrors(educationForm, error.fieldErrors);
             showToast(failTitle, error.message, 'error');
         } finally {
             submitButton.disabled = false;
@@ -440,4 +446,5 @@
 
 {% block scripts %}
     <script src="{% static 'js/form-preview.js' %}" defer></script>
+    <script src="{% static 'js/form-errors.js' %}" defer></script>
 {% endblock scripts %}

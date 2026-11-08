@@ -26,6 +26,10 @@ class EducationForm(ModelForm):
             "description": "Description",
         }
 
+        help_texts = {
+            "ended_at": "Leave empty while it’s ongoing.",
+        }
+
         widgets = {
             "institution": TextInput(
                 attrs={
@@ -161,6 +165,10 @@ class ExperienceForm(ModelForm):
             "description": "Description",
             "category": "Category",
             "ended_at": "End Date",
+        }
+
+        help_texts = {
+            "ended_at": "Leave empty while it’s ongoing.",
         }
 
         widgets = {
