@@ -12,30 +12,103 @@
     {% block meta %} {% endblock meta %}
 </head>
 <body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">
-                <img src="/static/img/dsr-logo.png" alt="Idris" class="brand-logo">
-            </a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-                <a href="{% url 'main:show_projects' %}">Projects</a>
-                {% if user.is_authenticated %}
-                    <span class="nav-user">{{ user.username }}</span>
-                    <a href="{% url 'main:logout' %}">Logout</a>
-                {% else %}
-                    <a href="{% url 'main:login' %}">Login</a>
-                    <a href="{% url 'main:register' %}">Register</a>
-                {% endif %}
+    {% with url_name=request.resolver_match.url_name %}
+    <header class="site-header" id="top">
+        <div class="container container--wide site-header__inner">
+            {% include 'components/brand.html' %}
+            <nav class="site-nav" aria-label="Main">
+                <a href="{% url 'main:show_main' %}" class="site-nav__link label-nav"{% if url_name == 'show_main' %} aria-current="page"{% endif %}>
+                    Profile
+                    {% if url_name == 'show_main' %}{% include 'components/nav_circle.html' %}{% endif %}
+                </a>
+                <a href="{% url 'main:show_experience' %}" class="site-nav__link label-nav"{% if url_name == 'show_experience' or url_name == 'create_experience' or url_name == 'edit_experience' or url_name == 'delete_experience' %} aria-current="page"{% endif %}>
+                    Experience
+                    {% if url_name == 'show_experience' or url_name == 'create_experience' or url_name == 'edit_experience' or url_name == 'delete_experience' %}{% include 'components/nav_circle.html' %}{% endif %}
+                </a>
+                <a href="{% url 'main:show_education' %}" class="site-nav__link label-nav"{% if url_name == 'show_education' or url_name == 'create_education' or url_name == 'edit_education' %} aria-current="page"{% endif %}>
+                    Education
+                    {% if url_name == 'show_education' or url_name == 'create_education' or url_name == 'edit_education' %}{% include 'components/nav_circle.html' %}{% endif %}
+                </a>
+                <a href="{% url 'main:show_projects' %}" class="site-nav__link label-nav"{% if url_name == 'show_projects' or url_name == 'create_project' or url_name == 'edit_project' %} aria-current="page"{% endif %}>
+                    Projects
+                    {% if url_name == 'show_projects' or url_name == 'create_project' or url_name == 'edit_project' %}{% include 'components/nav_circle.html' %}{% endif %}
+                </a>
             </nav>
+            <div class="site-actions">
+                {% if user.is_authenticated %}
+                    <span class="site-user">
+                        <span class="site-user__avatar label-chip" aria-hidden="true">{{ user.username|first|upper }}</span>
+                        <span class="site-user__name label-nav">{{ user.username }}</span>
+                    </span>
+                    <a href="{% url 'main:logout' %}" class="site-actions__link label-nav">Logout</a>
+                {% else %}
+                    <a href="{% url 'main:login' %}" class="site-actions__link label-nav"{% if url_name == 'login' %} aria-current="page"{% endif %}>Login</a>
+                    <a href="{% url 'main:register' %}" class="ghost-button label-chip"{% if url_name == 'register' %} aria-current="page"{% endif %}>Register</a>
+                {% endif %}
+            </div>
         </div>
     </header>
+    {% endwith %}
     {% block content %}{% endblock content %}
     <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        <div class="container container--wide">
+            <div class="site-footer__cta">
+                <div class="site-footer__pitch">
+                    <p class="label-overline site-footer__eyebrow">Get in touch</p>
+                    <h2 class="text-h2 site-footer__headline">Have a project or a question in mind? I’d love to hear about it.</h2>
+                </div>
+                <a href="mailto:idriskamal1107@gmail.com" class="cta-button label-button">
+                    Email me
+                    <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+                </a>
+            </div>
+            <hr class="site-footer__rule">
+            <div class="site-footer__main">
+                <div class="site-footer__about">
+                    {% include 'components/brand.html' with brand_modifier='brand--footer' %}
+                    <p class="text-body site-footer__bio">Second-year Computer Science student at Universitas Indonesia, building for the web with Django.</p>
+                </div>
+                <nav class="site-footer__col" aria-labelledby="footer-navigate">
+                    <p class="label-overline site-footer__heading" id="footer-navigate">Navigate</p>
+                    <ul class="site-footer__list">
+                        <li><a href="{% url 'main:show_main' %}" class="site-footer__link text-body">Profile</a></li>
+                        <li><a href="{% url 'main:show_experience' %}" class="site-footer__link text-body">Experience</a></li>
+                        <li><a href="{% url 'main:show_education' %}" class="site-footer__link text-body">Education</a></li>
+                        <li><a href="{% url 'main:show_projects' %}" class="site-footer__link text-body">Projects</a></li>
+                    </ul>
+                </nav>
+                <div class="site-footer__col">
+                    <p class="label-overline site-footer__heading" id="footer-elsewhere">Elsewhere</p>
+                    <ul class="site-footer__list" aria-labelledby="footer-elsewhere">
+                        <li>
+                            <a href="https://github.com/1drism" class="site-footer__link text-body" target="_blank" rel="noopener noreferrer">
+                                GitHub<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://linkedin.com/in/muhamad-idris-kamal/" class="site-footer__link text-body" target="_blank" rel="noopener noreferrer">
+                                LinkedIn<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mailto:idriskamal1107@gmail.com" class="site-footer__link text-body">
+                                Email
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="site-footer__rule">
+            <div class="site-footer__bottom">
+                <p class="text-small site-footer__copyright">&copy; 2026 Muhamad Idris Kamal · Fakultas Ilmu Komputer, Universitas Indonesia</p>
+                <a href="#top" class="ghost-button label-chip">
+                    Back to top
+                    <svg class="icon-sm site-footer__top-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 12.6667V3.33333M12 7.33333L8 3.33333L4 7.33333"/></svg>
+                </a>
+            </div>
         </div>
     </footer>
     {% include 'components/toast.html' %}
