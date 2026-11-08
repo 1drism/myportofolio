@@ -2182,3 +2182,146 @@ html {
         padding: 23px;
     }
 }
+
+@media (max-width: 800px) {
+    .about__grid {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: var(--space-64);
+    }
+
+    .about__media {
+        justify-self: center;
+        width: min(320px, 100%);
+    }
+
+    .about__actions {
+        flex-wrap: wrap;
+        row-gap: var(--space-16);
+    }
+
+    .about__buttons {
+        flex-wrap: wrap;
+    }
+
+    .skills__header,
+    .skills__tools {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+
+    .skills__header {
+        flex-direction: column;
+        gap: var(--space-24);
+    }
+
+    .skills-filter {
+        flex-wrap: wrap;
+    }
+
+    .skills-board {
+        gap: var(--space-48);
+    }
+
+    .skill-group {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: var(--space-16);
+    }
+
+    .skills-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-16);
+    }
+
+    .skills-card__name {
+        overflow-wrap: normal;
+        word-break: normal;
+        hyphens: none;
+    }
+
+    .timeline-row {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: var(--space-16);
+    }
+
+    .timeline-row__actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+
+    .project-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .project-card__actions {
+        flex-wrap: wrap;
+    }
+
+    .site-footer__cta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-24);
+    }
+
+    .site-footer__main {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .site-footer__about {
+        grid-column: 1 / -1;
+    }
+
+    .form-layout,
+    .form-layout--page,
+    .modal--form .form-layout,
+    .modal--form.modal--compact .form-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .form-preview {
+        position: static;
+    }
+}
+
+@media (max-width: 600px) {
+    .hover-me {
+        display: none;
+    }
+
+    .meta-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        row-gap: var(--space-16);
+    }
+
+    .meta-list__item:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .page-heading {
+        flex-wrap: wrap;
+        gap: var(--space-16);
+    }
+
+    .form-group,
+    .education-form .form-group--started_at,
+    .education-form .form-group--ended_at,
+    .experience-form .form-group--category,
+    .experience-form .form-group--started_at,
+    .experience-form .form-group--ended_at {
+        grid-column: 1 / -1;
+    }
+
+    .site-footer__bottom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .skills-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .site-footer__main {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
