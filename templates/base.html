@@ -6,35 +6,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/tokens.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="{% static 'js/formatters.js' %}"></script>
+    <script src="{% static 'js/site-menu.js' %}" defer></script>
     {% block meta %} {% endblock meta %}
 </head>
 <body>
     <header class="site-header">
-        <div class="container">
+        <div class="container container--wide site-header__inner">
             <a href="{% url 'main:show_main' %}" class="brand">
-                <img src="/static/img/dsr-logo.png" alt="Idris" class="brand-logo">
+                <img src="{% static 'img/dsr-logo.png' %}" alt="DSR Club, go to profile" class="brand__logo">
             </a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-                <a href="{% url 'main:show_projects' %}">Projects</a>
-                {% if user.is_authenticated %}
-                    <span class="nav-user">{{ user.username }}</span>
-                    <a href="{% url 'main:logout' %}">Logout</a>
-                {% else %}
-                    <a href="{% url 'main:login' %}">Login</a>
-                    <a href="{% url 'main:register' %}">Register</a>
-                {% endif %}
-            </nav>
+            <button type="button" class="ghost-button label-chip site-menu-toggle" aria-expanded="false" aria-controls="site-menu">
+                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/menu.svg' %}#icon"/></svg>
+                Menu
+            </button>
+            <div class="site-menu" id="site-menu">
+                <nav class="site-nav" aria-label="Main">
+                    <a href="{% url 'main:show_main' %}" class="site-nav__link label-nav"{% if nav_section == '' %} aria-current="page"{% endif %}>
+                        Profile
+                        {% include 'components/nav_circle.html' %}
+                    </a>
+                    <a href="{% url 'main:show_experience' %}" class="site-nav__link label-nav"{% if nav_section == 'experience' %} aria-current="page"{% endif %}>
+                        Experience
+                        {% include 'components/nav_circle.html' %}
+                    </a>
+                    <a href="{% url 'main:show_education' %}" class="site-nav__link label-nav"{% if nav_section == 'education' %} aria-current="page"{% endif %}>
+                        Education
+                        {% include 'components/nav_circle.html' %}
+                    </a>
+                    <a href="{% url 'main:show_projects' %}" class="site-nav__link label-nav"{% if nav_section == 'projects' %} aria-current="page"{% endif %}>
+                        Projects
+                        {% include 'components/nav_circle.html' %}
+                    </a>
+                </nav>
+                <div class="site-actions">
+                    {% if user.is_authenticated %}
+                        <span class="site-user">
+                            <span class="site-user__avatar label-chip" aria-hidden="true">{{ user.username|first|upper }}</span>
+                            <span class="site-user__name label-nav">{{ user.username }}</span>
+                        </span>
+                        <a href="{% url 'main:logout' %}" class="site-actions__link label-nav">Logout</a>
+                    {% else %}
+                        <a href="{% url 'main:login' %}" class="site-actions__link label-nav"{% if nav_section == 'login' %} aria-current="page"{% endif %}>
+                            Login
+                            {% include 'components/nav_circle.html' %}
+                        </a>
+                        <a href="{% url 'main:register' %}" class="ghost-button label-chip"{% if nav_section == 'register' %} aria-current="page"{% endif %}>Register</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </header>
     {% block content %}{% endblock content %}
     <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        <div class="container container--wide">
+            <div class="site-footer__cta">
+                <div class="site-footer__pitch">
+                    <p class="label-overline site-footer__eyebrow">Get in touch</p>
+                    <h2 class="text-h2 site-footer__headline">Have a project or a question in mind? I’d love to hear about it.</h2>
+                </div>
+                <a href="mailto:idriskamal1107@gmail.com" class="cta-button label-button">
+                    Email me
+                    <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up-right.svg' %}#icon"/></svg>
+                </a>
+            </div>
+            <hr class="site-footer__rule">
+            <div class="site-footer__main">
+                <div class="site-footer__about">
+                    <a href="{% url 'main:show_main' %}" class="brand brand--footer">
+                        <img src="{% static 'img/dsr-logo.png' %}" alt="DSR Club, go to profile" class="brand__logo">
+                    </a>
+                    <p class="text-body site-footer__bio">Second-year Computer Science student at Universitas Indonesia, building for the web with Django.</p>
+                </div>
+                <nav class="site-footer__col" aria-labelledby="footer-navigate">
+                    <p class="label-overline site-footer__heading" id="footer-navigate">Navigate</p>
+                    <ul class="site-footer__list">
+                        <li><a href="{% url 'main:show_main' %}" class="site-footer__link text-body">Profile</a></li>
+                        <li><a href="{% url 'main:show_experience' %}" class="site-footer__link text-body">Experience</a></li>
+                        <li><a href="{% url 'main:show_education' %}" class="site-footer__link text-body">Education</a></li>
+                        <li><a href="{% url 'main:show_projects' %}" class="site-footer__link text-body">Projects</a></li>
+                    </ul>
+                </nav>
+                <div class="site-footer__col">
+                    <p class="label-overline site-footer__heading" id="footer-elsewhere">Elsewhere</p>
+                    <ul class="site-footer__list" aria-labelledby="footer-elsewhere">
+                        <li>
+                            <a href="https://github.com/1drism" class="site-footer__link text-body" target="_blank" rel="noopener noreferrer">
+                                GitHub<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up-right.svg' %}#icon"/></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://linkedin.com/in/muhamad-idris-kamal/" class="site-footer__link text-body" target="_blank" rel="noopener noreferrer">
+                                LinkedIn<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up-right.svg' %}#icon"/></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="mailto:idriskamal1107@gmail.com" class="site-footer__link text-body">
+                                Email
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up-right.svg' %}#icon"/></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="site-footer__rule">
+            <div class="site-footer__bottom">
+                <p class="text-small site-footer__copyright">&copy; 2026 Muhamad Idris Kamal · Fakultas Ilmu Komputer, Universitas Indonesia</p>
+                <a href="#top" class="ghost-button label-chip">
+                    Back to top
+                    <svg class="icon-sm site-footer__top-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up.svg' %}#icon"/></svg>
+                </a>
+            </div>
         </div>
     </footer>
     {% include 'components/toast.html' %}

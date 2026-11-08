@@ -14,14 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return field.value.trim();
     }
 
-    function formatDate(value) {
-        if (!value) return "";
-        const date = new Date(value + "T00:00");
-        return date.toLocaleDateString("en-US", {
-            year: "numeric", month: "short", day: "numeric",
-        });
-    }
-
     // Only allow real web links or the site's own files, never "javascript:" URLs
     function isSafeUrl(url) {
         return /^https?:\/\//i.test(url) || /^\/(?!\/)/.test(url);
@@ -30,8 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function updatePreview() {
         card.querySelectorAll("[data-preview]").forEach((el) => {
             let value = fieldValue(el.dataset.preview);
-            if (el.dataset.format === "date") {
-                value = formatDate(value);
+            if (el.dataset.format === "list") {
+                value = window.PortfolioFormat.techStack(value);
             }
             el.textContent = value || el.dataset.placeholder || "";
         });
@@ -39,12 +31,31 @@ document.addEventListener("DOMContentLoaded", () => {
         card.querySelectorAll("[data-preview-status]").forEach((el) => {
             const ended = fieldValue(el.dataset.previewStatus);
             el.textContent = ended ? "Completed" : "Ongoing";
+            el.classList.toggle("is-ongoing", !ended);
+        });
+
+        card.querySelectorAll("[data-preview-range]").forEach((el) => {
+            const [startName, endName] = el.dataset.previewRange.split(" ");
+            el.textContent = window.PortfolioFormat.monthRange(fieldValue(startName), fieldValue(endName));
+        });
+
+        card.querySelectorAll("[data-preview-period]").forEach((el) => {
+            const [startName, endName] = el.dataset.previewPeriod.split(" ");
+            el.textContent = window.PortfolioFormat.educationPeriod(fieldValue(startName), fieldValue(endName));
         });
 
         card.querySelectorAll("[data-preview-src]").forEach((el) => {
             const url = fieldValue(el.dataset.previewSrc);
-            const src = isSafeUrl(url) ? url : el.dataset.previewDefault;
+            const logo = el.dataset.previewLogo && window.skillLogoFor
+                ? window.skillLogoFor(fieldValue(el.dataset.previewLogo))
+                : null;
+            const sources = [isSafeUrl(url) ? url : null, logo, el.dataset.previewDefault].filter(Boolean);
+            const src = sources.shift();
             el.hidden = !src;
+            el.onerror = () => {
+                if (sources.length) el.src = sources.shift();
+                else el.hidden = true;
+            };
             if (src) el.src = src;
         });
 

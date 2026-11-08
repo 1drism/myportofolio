@@ -1,0 +1,13 @@
+{% load static %}
+<div class="form-group form-group--{{ field.name }}">
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.help_text %}
+        <div class="form-help" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</div>
+    {% endif %}
+    <div class="form-errors" data-errors-for="{{ field.name }}">
+        {% for error in field.errors %}
+            <p class="form-error"><img class="form-error__icon" src="{% static 'img/icons/alert.svg' %}" alt="">{{ error }}</p>
+        {% endfor %}
+    </div>
+</div>

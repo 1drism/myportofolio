@@ -6,25 +6,26 @@
 {% endblock meta %}
 {% block content %}
     <main>
-        <section class="education-section">
-            <div class="container">
-                <h1>{% if education %}Edit Education{% else %}Add New Education{% endif %}</h1>
-                <div class="form-layout">
+        <section class="list-page">
+            <div class="container container--wide">
+                <div class="list-page__header">
+                    <p class="label-overline list-page__kicker">Where I've studied</p>
+                    <h1 class="text-h1">{% if education %}Edit Education{% else %}Add New Education{% endif %}</h1>
+                </div>
+                <div class="form-layout form-layout--page">
                     <form method="post" class="education-form" data-preview-form>
                         {% csrf_token %}
-                        {% for field in form %}
-                            <div class="form-group">
-                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                                {{ field }}
-                                {% for error in field.errors %}
-                                    <p class="form-error">{{ error }}</p>
-                                {% endfor %}
-                            </div>
-                        {% endfor %}
-                        <button type="submit" class="button">
-                            {% if education %}Save Changes{% else %}Add Education{% endif %}
-                        </button>
-                        <a href="{% url 'main:show_education' %}" class="button button-secondary">Cancel</a>
+                        <div class="form-fields">
+                            {% for field in form %}
+                                {% include 'components/form_field.html' %}
+                            {% endfor %}
+                        </div>
+                        <div class="form-actions form-actions--start">
+                            <button type="submit" class="button">
+                                {% if education %}Save Changes{% else %}Add Education{% endif %}
+                            </button>
+                            <a href="{% url 'main:show_education' %}" class="button button-secondary">Cancel</a>
+                        </div>
                     </form>
                     {% include "components/previews/education_preview.html" %}
                 </div>

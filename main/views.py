@@ -18,6 +18,19 @@ def is_editor(user):
     return user.groups.filter(name='Editor').exists()
     
     
+SKILL_CATEGORY_ORDER = ["technical", "software", "soft"]
+SKILL_CATEGORY_LABELS = dict(Skill.CATEGORY_CHOICES)
+SKILL_CATEGORIES = [
+    {"value": value, "label": SKILL_CATEGORY_LABELS[value]}
+    for value in SKILL_CATEGORY_ORDER
+    if value in SKILL_CATEGORY_LABELS
+] + [
+    {"value": value, "label": label}
+    for value, label in Skill.CATEGORY_CHOICES
+    if value not in SKILL_CATEGORY_ORDER
+]
+
+
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'No active login session / Cookie not found')
     
@@ -30,9 +43,7 @@ def show_main(request):
         ),
         "last_login": last_login,
         "form": SkillForm(),
-        "skill_categories": [
-            {"value": value, "label": label} for value, label in Skill.CATEGORY_CHOICES
-        ],
+        "skill_categories": SKILL_CATEGORIES,
         "is_editor": is_editor(request.user),
     }
     return render(request, "index.html", context)
@@ -40,7 +51,7 @@ def show_main(request):
 def show_experience(request):
     context = {
         "name": "Idris",
-        "experience_list": Experience.objects.all(),
+        "experience_list": Experience.objects.order_by("-started_at"),
         "is_editor": is_editor(request.user),
     }
     return render(request, "experience.html", context)

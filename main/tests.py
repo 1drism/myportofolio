@@ -3,6 +3,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from main.forms import EducationForm, ExperienceForm
 from main.models import Experience,Education,Project,Skill
 
 class MainTest(TestCase):
@@ -56,6 +57,96 @@ class MainTest(TestCase):
         self.assertFalse(self.experience.is_ongoing)
         self.assertContains(response, "Completed")
         self.assertNotContains(response, "Ongoing")
+
+    def test_nav_highlights_current_section(self):
+        owner = User.objects.create_superuser("nav_owner", password="pass12345")
+        self.client.force_login(owner)
+        education = Education.objects.create(
+            institution="Universitas Indonesia", faculty_or_major="Computer Science",
+            degree="S1", started_at="2025-08-01",
+        )
+        project = Project.objects.create(title="Portfolio", description="Site.", tech_stack="Django")
+        pages = {
+            reverse("main:show_main"): reverse("main:show_main"),
+            reverse("main:show_experience"): reverse("main:show_experience"),
+            reverse("main:create_experience"): reverse("main:show_experience"),
+            reverse("main:edit_experience", args=[self.experience.id]): reverse("main:show_experience"),
+            reverse("main:show_education"): reverse("main:show_education"),
+            reverse("main:create_education"): reverse("main:show_education"),
+            reverse("main:edit_education", args=[education.id]): reverse("main:show_education"),
+            reverse("main:show_projects"): reverse("main:show_projects"),
+            reverse("main:create_project"): reverse("main:show_projects"),
+            reverse("main:edit_project", args=[project.id]): reverse("main:show_projects"),
+        }
+        for page, section in pages.items():
+            response = self.client.get(page)
+            html = response.content.decode()
+            self.assertIn(f'href="{section}" class="site-nav__link label-nav" aria-current="page"', html, page)
+            self.assertEqual(html.count('class="site-nav__link label-nav" aria-current="page"'), 1, page)
+
+    def test_experience_period(self):
+        def at(year, month):
+            return timezone.make_aware(timezone.datetime(year, month, 1))
+
+        self.experience.started_at = at(2025, 9)
+        self.assertEqual(self.experience.period, "Sep 2025 – Present")
+
+        self.experience.ended_at = at(2026, 2)
+        self.assertEqual(self.experience.period, "Sep 2025 – Feb 2026")
+
+        self.experience.started_at = at(2026, 7)
+        self.experience.ended_at = at(2026, 8)
+        self.assertEqual(self.experience.period, "Jul – Aug 2026")
+
+        self.experience.started_at = at(2024, 5)
+        self.experience.ended_at = at(2024, 5)
+        self.assertEqual(self.experience.period, "May 2024")
+
+    def test_experience_page_shows_organization_and_period(self):
+        self.experience.organization = "Fasilkom UI"
+        self.experience.started_at = timezone.make_aware(timezone.datetime(2025, 8, 1))
+        self.experience.save()
+        response = self.client.get(reverse("main:show_experience"))
+
+        self.assertContains(response, "Fasilkom UI")
+        self.assertContains(response, "Aug 2025 – Present")
+
+    def test_experience_list_is_newest_first(self):
+        Experience.objects.create(
+            title="Older role",
+            description="Older.",
+            started_at=timezone.make_aware(timezone.datetime(2020, 1, 1)),
+        )
+        response = self.client.get(reverse("main:show_experience"))
+
+        titles = [experience.title for experience in response.context["experience_list"]]
+        self.assertEqual(titles, ["PBP Teaching Assistant", "Older role"])
+
+    def test_education_form_rejects_end_before_start(self):
+        form = EducationForm(data={
+            "institution": "Universitas Indonesia",
+            "faculty_or_major": "Computer Science",
+            "degree": "S1",
+            "started_at": "2024-08-01",
+            "ended_at": "2020-06-01",
+            "description": "",
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("ended_at", form.errors)
+
+    def test_experience_form_rejects_end_before_start(self):
+        form = ExperienceForm(data={
+            "title": "TA",
+            "organization": "",
+            "description": "Teaching.",
+            "category": "part-time",
+            "started_at": "2026-02-01",
+            "ended_at": "2025-01-01",
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("ended_at", form.errors)
         
 class EducationTest(TestCase):
     def setUp(self):
@@ -387,6 +478,19 @@ class SkillTest(AjaxTestBase):
         self.assertNotContains(guest_page, 'id="add-skill-modal"')
         self.assertContains(owner_page, 'id="add-skill-modal"')
         self.assertContains(owner_page, 'id="delete-skill-modal"')
+
+    def test_editor_sees_manage_but_not_add_button(self):
+        add_button = 'skill-add-button" popovertarget="add-skill-modal"'
+        manage_button = 'skills-manage-button" aria-pressed="false"'
+        self.login(self.editor)
+        editor_page = self.client.get(reverse("main:show_main"))
+        self.login(self.owner)
+        owner_page = self.client.get(reverse("main:show_main"))
+
+        self.assertNotContains(editor_page, add_button)
+        self.assertContains(editor_page, manage_button)
+        self.assertContains(owner_page, add_button)
+        self.assertContains(owner_page, manage_button)
 
     def test_create_permissions(self):
         data = {"name": "Teamwork", "category": "soft"}

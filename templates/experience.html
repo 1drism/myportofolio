@@ -1,40 +1,45 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block meta %}
     <title>Experience - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
     <main>
-        <section class="experience-section" id="experience">
-            <div class="container">
-                <p class="section-kicker">My journey so far</p>
-                <div class="page-header">
-                    <h1>Experience</h1>
-                    {% if user.is_superuser %}
-                        <a href="{% url 'main:create_experience' %}" class="button">
-                            <span aria-hidden="true">+</span> Add Experience
-                        </a>
-                    {% endif %}
+        <section class="list-page" id="experience">
+            <div class="container container--wide">
+                <div class="list-page__header">
+                    <p class="label-overline list-page__kicker">My journey so far</p>
+                    <div class="page-heading">
+                        <h1 class="text-h1">Experience</h1>
+                        {% if user.is_superuser %}
+                            <a href="{% url 'main:create_experience' %}" class="cta-button label-button">
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/plus.svg' %}#icon"/></svg>
+                                Add experience
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <div class="experience-grid">
+                <div class="timeline">
                     {% for experience in experience_list %}
-                        <article class="experience-card">
-                            <span class="experience-category">
-                                {{ experience.get_category_display }}
-                            </span>
-                            <h2>{{ experience.title }}</h2>
-                            <p class="experience-description">
-                                {{ experience.description }}
-                            </p>
-
-                            {% if experience.is_ongoing %}
-                                <p class="experience-status">Ongoing</p>
-                            {% else %}
-                                <p class="experience-status">Completed</p>
-                            {% endif %}
-                            <div class="card-actions">
+                        <article class="timeline-row">
+                            <div class="timeline-row__when">
+                                <p class="text-body-strong timeline-row__period">{{ experience.period }}</p>
+                                <p class="timeline-row__status label-overline{% if experience.is_ongoing %} is-ongoing{% endif %}">
+                                    {% if experience.is_ongoing %}Ongoing{% else %}Completed{% endif %}
+                                </p>
+                            </div>
+                            <div class="timeline-row__body">
+                                <span class="tag label-overline">{{ experience.get_category_display }}</span>
+                                <h2 class="text-h3 timeline-row__title">{{ experience.title }}</h2>
+                                {% if experience.organization %}
+                                    <p class="text-body-strong timeline-row__org">{{ experience.organization }}</p>
+                                {% endif %}
+                                <p class="text-body timeline-row__description">{{ experience.description }}</p>
+                            </div>
+                            <div class="timeline-row__actions">
                                 {% if user.is_superuser or is_editor %}
-                                    <a href="{% url 'main:edit_experience' experience.id %}" class="button button-secondary">Edit</a>
+                                    <a href="{% url 'main:edit_experience' experience.id %}" class="action-button label-chip" aria-label="Edit {{ experience.title }}">Edit</a>
                                 {% endif %}
                                 {% if user.is_superuser %}
                                     {% include "components/experience_delete_modal.html" with experience=experience %}
@@ -42,7 +47,7 @@
                             </div>
                         </article>
                     {% empty %}
-                        <p class="empty-state">
+                        <p class="empty-state text-body">
                             No experience has been added yet.
                         </p>
                     {% endfor %}

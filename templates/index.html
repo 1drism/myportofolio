@@ -5,79 +5,119 @@
 {% endblock meta %}
 {% block content %}
     <main>
-        <section class="welcome">
-            <img src="/static/img/banana-cat-image.png" alt="" class="decoration-cat cat-banana">
-            <h1 class="welcome-text">Welcome to my</h1>
-            <img src="/static/img/portfolio-img.png" alt="Portfolio" class="welcome-bottom">
-            <img src="/static/img/milk-cat-image.png" alt="" class="decoration-cat cat-milk">
+        <section class="welcome" aria-label="Welcome">
+            <img class="sparkle sparkle--left" src="{% static 'img/decorations/sparkle.svg' %}" alt="">
+            <img class="sparkle sparkle--right" src="{% static 'img/decorations/sparkle.svg' %}" alt="">
+            <p class="welcome__script">Welcome to my</p>
+            <img src="/static/img/portfolio-img.png" alt="Portfolio" class="welcome__wordmark">
+            <a href="#profile" class="scroll-cue label-overline">
+                Scroll
+                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/chevron-down.svg' %}#icon"/></svg>
+            </a>
         </section>
-        <div class="divider">
-        </div>
-        <section class="hero" id="profile">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <p class="hero-kicker">Computer Science &middot; Universitas Indonesia</p>
-                    <h1>{{ name }}</h1>
-                </div>
-                <div class="hero-photo">
-                    <img class="avatar avatar-default" src="/static/img/avatar-image.jpg" alt="Photo of {{ name }}">
-                    <img class="avatar avatar-hover" src="/static/img/hover-image.png" alt=" :)">
-                    <img class="hover-me" src="/static/img/try-hover-me.png" alt="Try hovering the photo">
-                </div>
-                <div class="hero-details">
-                    <p class="bio">{{ bio }}</p>
+
+        <section class="about" id="profile">
+            <div class="container container--wide about__grid">
+                <div class="about__content">
+                    <div class="about__heading">
+                        <p class="label-overline about__kicker">Computer Science &middot; Universitas Indonesia</p>
+                        {% with name_parts=name.split %}
+                            <h1 class="text-h1 about__name">
+                                {{ name_parts|slice:":-1"|join:" " }}
+                                <span class="about__underlined">
+                                    {{ name_parts|last }}
+                                    <img class="about__underline" src="{% static 'img/decorations/underline.svg' %}" alt="">
+                                </span>
+                            </h1>
+                        {% endwith %}
+                    </div>
+                    <p class="text-body-lg about__bio">{{ bio }}</p>
                     <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>{{ npm }}</dd>
+                        <div class="meta-list__item">
+                            <dt class="label-overline">NPM</dt>
+                            <dd class="text-body-strong">{{ npm }}</dd>
                         </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>{{ study_program }}</dd>
+                        <div class="meta-list__item">
+                            <dt class="label-overline">Program</dt>
+                            <dd class="text-body-strong">{{ study_program }}</dd>
                         </div>
-                            <div class="meta-row">
-                            <dt>Last Login Session</dt>
-                            <dd>{{ last_login }}</dd>
+                        <div class="meta-list__item">
+                            <dt class="label-overline">Last login session</dt>
+                            <dd class="text-body-strong">{{ last_login }}</dd>
                         </div>
                     </dl>
-                    <div class="social-links">
-                        <a href="https://github.com/1drism" class="social-link">GitHub</a>
-                        <a href="https://linkedin.com/in/muhamad-idris-kamal/" class="social-link">LinkedIn</a>
-                        <a href="mailto:idriskamal1107@gmail.com" class="social-link">Email</a>
+                    <div class="about__actions">
+                        <div class="about__buttons">
+                            <a href="{% url 'main:show_projects' %}" class="cta-button cta-button--lg label-button">
+                                View projects
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-right.svg' %}#icon"/></svg>
+                            </a>
+                            <a href="mailto:idriskamal1107@gmail.com" class="outline-button label-button">Email me</a>
+                        </div>
+                        <div class="social-links">
+                            <a href="https://github.com/1drism" class="social-link label-button" target="_blank" rel="noopener noreferrer">
+                                GitHub<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up-right.svg' %}#icon"/></svg>
+                            </a>
+                            <a href="https://linkedin.com/in/muhamad-idris-kamal/" class="social-link label-button" target="_blank" rel="noopener noreferrer">
+                                LinkedIn<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up-right.svg' %}#icon"/></svg>
+                            </a>
+                        </div>
                     </div>
+                </div>
+
+                <div class="about__media">
+                    <figure class="polaroid hero-photo">
+                        <img class="polaroid__tape polaroid__tape--left" src="{% static 'img/decorations/tape.svg' %}" alt="">
+                        <img class="polaroid__tape polaroid__tape--right" src="{% static 'img/decorations/tape.svg' %}" alt="">
+                        <div class="polaroid__photo">
+                            <img class="avatar avatar-default" src="/static/img/avatar-image.jpg" alt="Photo of {{ name }}">
+                            <img class="avatar avatar-hover" src="/static/img/hover-image.png" alt=" :)">
+                        </div>
+                        <figcaption class="polaroid__caption">
+                            <span class="visually-hidden">Me and Mt. Fuji</span>
+                            <img class="polaroid__caption-ink" src="{% static 'img/decorations/photo-caption.svg' %}" alt="" width="181" height="52">
+                        </figcaption>
+                    </figure>
+                    <img class="hover-me" src="/static/img/try-hover-me.png" alt="Try hovering the photo">
                 </div>
             </div>
         </section>
-        <div class="divider">
-        </div>
-        <section class="skills" id="skills">
-            <div class="container">
-                <h2>Skills</h2>
 
-                <div class="skills-filter" role="group" aria-label="Filter skills by category">
-                    <button type="button" class="skills-filter__option is-active" data-filter="all" aria-pressed="true">All</button>
-                    {% for category in skill_categories %}
-                        <button type="button" class="skills-filter__option" data-filter="{{ category.value }}" aria-pressed="false">{{ category.label }}</button>
-                    {% endfor %}
-                </div>
-
-                {% if user.is_superuser or is_editor %}
-                    <div class="skills-owner-actions">
-                        {% if user.is_superuser %}
-                            <button type="button" class="button skill-add-button" popovertarget="add-skill-modal">
-                                <span aria-hidden="true">+</span>
-                                Add Skill
-                            </button>
+        <section class="skills" id="skills" aria-labelledby="skills-title">
+            <div class="container container--wide">
+                <div class="skills__header">
+                    <h2 class="text-h2" id="skills-title">Skills</h2>
+                    <div class="skills__tools">
+                        {% if user.is_superuser or is_editor %}
+                            <div class="skills-owner-actions">
+                                {% if user.is_superuser %}
+                                    <button type="button" class="cta-button label-chip skill-add-button" popovertarget="add-skill-modal">
+                                        <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/plus.svg' %}#icon"/></svg>
+                                        Add Skill
+                                    </button>
+                                {% endif %}
+                                <button type="button" class="ghost-button label-chip skills-manage-button" aria-pressed="false">Manage</button>
+                            </div>
                         {% endif %}
-                        <button type="button" class="button button-secondary skills-manage-button" aria-pressed="false">Manage</button>
+                        <div class="skills-filter" role="group" aria-label="Filter skills by category">
+                            <button type="button" class="skills-filter__option label-chip is-active" data-filter="all" aria-pressed="true">All</button>
+                            {% for category in skill_categories %}
+                                <button type="button" class="skills-filter__option label-chip" data-filter="{{ category.value }}" aria-pressed="false">{{ category.label|cut:" Skills" }}</button>
+                            {% endfor %}
+                        </div>
                     </div>
-                {% endif %}
+                </div>
 
                 <!-- JavaScript fills each group; the skeleton tiles show while loading -->
                 <div class="skills-board" id="skills-board" data-filter="all" aria-busy="true">
                     {% for category in skill_categories %}
                         <section class="skill-group" data-category="{{ category.value }}" aria-labelledby="skill-group-{{ category.value }}">
-                            <h3 id="skill-group-{{ category.value }}">{{ category.label }}</h3>
+                            <div class="skill-group__head">
+                                <h3 class="text-h3 skill-group__title" id="skill-group-{{ category.value }}">{{ category.label|lower|capfirst }}</h3>
+                                <p class="text-small skill-group__count"></p>
+                            </div>
                             <ul class="skills-grid" data-list="{{ category.value }}">
                                 <li class="skills-card skills-card--skeleton" aria-hidden="true"></li>
                                 <li class="skills-card skills-card--skeleton" aria-hidden="true"></li>
@@ -85,10 +125,10 @@
                             </ul>
                         </section>
                     {% endfor %}
-                    <p class="skills-message hide" id="skills-empty"></p>
-                    <div class="skills-message hide" id="skills-error" role="alert">
+                    <p class="skills-message text-body hide" id="skills-empty"></p>
+                    <div class="skills-message text-body hide" id="skills-error" role="alert">
                         <p>Failed to load skills.</p>
-                        <button type="button" class="button button-secondary" id="skills-retry">Try again</button>
+                        <button type="button" class="ghost-button label-chip" id="skills-retry">Try again</button>
                     </div>
                 </div>
             </div>
@@ -104,6 +144,7 @@
     {% endif %}
 
     {{ skill_categories|json_script:"skill-categories" }}
+    <script src="{% static 'js/skill-logos.js' %}" data-base="{% static 'img/skills/' %}"></script>
     <script>
     const SKILLS_ENDPOINT = "{% url 'main:get_skills_json' %}";
     const CREATE_SKILL_ENDPOINT = "{% url 'main:create_skill_ajax' %}";
@@ -160,8 +201,16 @@
         icon.className = 'skills-card__icon';
         const img = document.createElement('img');
         const hasOwnIcon = icon_url && isSafeIconUrl(icon_url);
-        img.src = hasOwnIcon ? icon_url : DEFAULT_SKILL_ICON;
-        img.alt = hasOwnIcon ? `${name} logo` : '';
+        const brandLogo = window.skillLogoFor ? skillLogoFor(name) : null;
+        const sources = [hasOwnIcon ? icon_url : null, brandLogo, DEFAULT_SKILL_ICON].filter(Boolean);
+        img.src = sources.shift();
+        img.alt = hasOwnIcon || brandLogo ? `${name} logo` : '';
+        img.addEventListener('error', () => {
+            if (!sources.length) return;
+            const next = sources.shift();
+            img.src = next;
+            if (next === DEFAULT_SKILL_ICON) img.alt = '';
+        });
         icon.append(img);
 
         const label = document.createElement('span');
@@ -220,6 +269,7 @@
 
             list.replaceChildren();
             items.forEach(skill => list.append(buildSkillCard(skill)));
+            group.querySelector('.skill-group__count').textContent = `${items.length} ${items.length === 1 ? 'skill' : 'skills'}`;
             if (items.length === 0 && IS_SUPERUSER) list.append(buildAddTile(category));
 
             const show = selected && (items.length > 0 || IS_SUPERUSER);
@@ -342,6 +392,7 @@
 
         const submitButton = skillForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
+        window.clearFieldErrors?.(skillForm);
 
         try {
             const response = await fetch(endpoint, {
@@ -358,6 +409,7 @@
                 showToast('Success', isEditing ? 'Skill updated successfully!' : 'New skill added successfully!', 'success');
                 fetchSkills();
             } else {
+                if (result.errors) window.showFieldErrors?.(skillForm, result.errors);
                 const errorMessages = result.errors
                     ? formatFieldErrors(result.errors)
                     : [result.message || `Something went wrong (status ${response.status}).`];
@@ -422,4 +474,5 @@
 
 {% block scripts %}
     <script src="{% static 'js/form-preview.js' %}" defer></script>
+    <script src="{% static 'js/form-errors.js' %}" data-alert-icon="{% static 'img/icons/alert.svg' %}" defer></script>
 {% endblock scripts %}

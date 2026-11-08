@@ -1,32 +1,27 @@
 {% extends "base.html" %}
+{% load static %}
 {% block meta %}
     <title>Register - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
     <main>
-        <section class="experience-section">
-            <div class="container">
-                <h1>Create an Account</h1>
-                <form method="post" action="{% url 'main:register' %}" class="project-form">
+        <section class="auth-page">
+            <div class="auth-card">
+                <h1 class="text-h2">Create an Account</h1>
+                <p class="text-body auth-card__intro">Make an account to star the projects and education you like.</p>
+                <form method="post" action="{% url 'main:register' %}" class="auth-form">
                     {% csrf_token %}
                     {% for error in form.non_field_errors %}
-                        <p class="form-error">{{ error }}</p>
+                        <p class="form-error" role="alert"><img class="form-error__icon" src="{% static 'img/icons/alert.svg' %}" alt="">{{ error }}</p>
                     {% endfor %}
-                    {% for field in form %}
-                        <div class="form-group">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                            {% if field.help_text %}
-                                <div class="form-help">{{ field.help_text }}</div>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <p class="form-error">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="button">Register</button>
+                    <div class="form-fields">
+                        {% for field in form %}
+                            {% include 'components/form_field.html' %}
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="button auth-form__submit">Register</button>
                 </form>
-                <p>Already have an account? <a href="{% url 'main:login' %}">Log in here</a>.</p>
+                <p class="text-small auth-card__switch">Already have an account? <a href="{% url 'main:login' %}">Log in here</a></p>
             </div>
         </section>
     </main>

@@ -26,6 +26,10 @@ class EducationForm(ModelForm):
             "description": "Description",
         }
 
+        help_texts = {
+            "ended_at": "Leave empty while it’s ongoing.",
+        }
+
         widgets = {
             "institution": TextInput(
                 attrs={
@@ -84,7 +88,15 @@ class EducationForm(ModelForm):
     def clean_description(self):
         return strip_tags(self.cleaned_data["description"]).strip()
 
-        
+    def clean(self):
+        cleaned_data = super().clean()
+        started_at = cleaned_data.get("started_at")
+        ended_at = cleaned_data.get("ended_at")
+        if started_at and ended_at and ended_at < started_at:
+            self.add_error("ended_at", "End date can't be before the start date.")
+        return cleaned_data
+
+
 class ProjectForm(ModelForm):
     class Meta:
         model = Project
@@ -97,11 +109,11 @@ class ProjectForm(ModelForm):
         ]
 
         labels = {
-            "title": "Nama Proyek",
-            "description": "Deskripsi Proyek",
-            "tech_stack": "Teknologi yang Digunakan",
-            "project_url": "URL Proyek",
-            "project_image_url": "URL Gambar Proyek",
+            "title": "Project name",
+            "description": "Description",
+            "tech_stack": "Tech stack",
+            "project_url": "Project URL",
+            "project_image_url": "Image URL",
         }
 
         widgets = {
@@ -151,16 +163,24 @@ class ExperienceForm(ModelForm):
         model = Experience
         fields = [
             "title",
+            "organization",
             "description",
             "category",
+            "started_at",
             "ended_at",
         ]
 
         labels = {
             "title": "Title",
+            "organization": "Organization",
             "description": "Description",
             "category": "Category",
+            "started_at": "Start Date",
             "ended_at": "End Date",
+        }
+
+        help_texts = {
+            "ended_at": "Leave empty while it’s ongoing.",
         }
 
         widgets = {
@@ -170,10 +190,21 @@ class ExperienceForm(ModelForm):
                     "maxlength": 255,
                 }
             ),
+            "organization": TextInput(
+                attrs={
+                    "placeholder": "Faculty of Computer Science, Universitas Indonesia",
+                    "maxlength": 255,
+                }
+            ),
             "description": Textarea(
                 attrs={
                     "placeholder": "Describe your experience",
                     "rows": 3,
+                }
+            ),
+            "started_at": DateInput(
+                attrs={
+                    "type": "date",
                 }
             ),
             "ended_at": DateInput(
@@ -182,6 +213,14 @@ class ExperienceForm(ModelForm):
                 }
             ),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        started_at = cleaned_data.get("started_at")
+        ended_at = cleaned_data.get("ended_at")
+        if started_at and ended_at and ended_at < started_at:
+            self.add_error("ended_at", "End date can't be before the start date.")
+        return cleaned_data
 
 
 class SkillForm(ModelForm):
