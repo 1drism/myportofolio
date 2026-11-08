@@ -51,6 +51,8 @@ body {
 /* makes the footer sticky on the bottom of the screen */
 main {
     flex: 1;
+    min-height: calc(100vh - 81px);
+    min-height: calc(100dvh - 81px);
 }
 
 
