@@ -211,6 +211,7 @@ h1 {
 }
 
 .nav-circle {
+    display: none;
     position: absolute;
     top: 50%;
     left: -16px;
@@ -219,6 +220,10 @@ h1 {
     overflow: visible;
     transform: translateY(-50%);
     pointer-events: none;
+}
+
+[aria-current="page"] > .nav-circle {
+    display: block;
 }
 
 .nav-circle use {
@@ -285,18 +290,10 @@ h1 {
     overflow: hidden;
 }
 
-.welcome__defs {
-    position: absolute;
-    width: 0;
-    height: 0;
-}
-
 .sparkle {
     position: absolute;
     width: 128px;
     height: 128px;
-    fill: var(--color-paper);
-    overflow: visible;
 }
 
 .sparkle--left {
@@ -406,10 +403,6 @@ h1 {
     left: -6px;
     width: calc(100% + 12px);
     height: 20px;
-    overflow: visible;
-    fill: none;
-    stroke: var(--color-accent);
-    stroke-linecap: round;
 }
 
 .about__bio {
@@ -565,8 +558,6 @@ h1 {
     position: absolute;
     width: 112px;
     height: 32px;
-    fill: var(--color-accent-light);
-    fill-opacity: 0.62;
 }
 
 .polaroid__tape--left {
@@ -1401,9 +1392,7 @@ html {
     width: var(--icon-size-sm);
     height: var(--icon-size-sm);
     fill: transparent;
-    stroke: var(--color-accent);
-    stroke-width: 1.33333;
-    stroke-linejoin: round;
+    color: var(--color-accent);
     transition: fill var(--star-ease), transform 0.2s ease;
 }
 
@@ -1539,11 +1528,7 @@ html {
     left: 15px;
     width: 20px;
     height: 20px;
-    fill: none;
-    stroke: var(--color-text-muted);
-    stroke-width: 1.66667;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    color: var(--color-text-muted);
     transform: translateY(-50%);
     pointer-events: none;
 }

@@ -18,6 +18,9 @@ def is_editor(user):
     return user.groups.filter(name='Editor').exists()
     
     
+SKILL_CATEGORY_ORDER = ["technical", "software", "soft"]
+
+
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'No active login session / Cookie not found')
     
@@ -32,7 +35,10 @@ def show_main(request):
         "form": SkillForm(),
         "skill_categories": [
             {"value": value, "label": label}
-            for value, label in sorted(Skill.CATEGORY_CHOICES, key=lambda choice: ["technical", "software", "soft"].index(choice[0]))
+            for value, label in sorted(
+                Skill.CATEGORY_CHOICES,
+                key=lambda choice: SKILL_CATEGORY_ORDER.index(choice[0]) if choice[0] in SKILL_CATEGORY_ORDER else len(SKILL_CATEGORY_ORDER),
+            )
         ],
         "is_editor": is_editor(request.user),
     }

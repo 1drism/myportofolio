@@ -23,6 +23,12 @@ function showToast(title, message, type = 'normal', duration = 3000) {
     toastTitle.textContent = title;
     toastMessage.textContent = message;
 
+    const announcer = document.getElementById('toast-announcer');
+    if (announcer) {
+        announcer.textContent = '';
+        setTimeout(() => { announcer.textContent = `${title}. ${message}`; }, 50);
+    }
+
     // Cancel the previous timer if a toast is still showing
     clearTimeout(toastTimer);
 

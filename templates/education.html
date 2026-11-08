@@ -15,7 +15,7 @@
                             <button type="button"
                                     class="cta-button label-button education-add-button"
                                     popovertarget="add-education-modal">
-                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.33333V12.6667M3.33333 8H12.6667"/></svg>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/plus.svg' %}#icon"/></svg>
                                 Add education
                             </button>
                         {% endif %}
@@ -25,7 +25,7 @@
                 <!-- Search form: no method/action anymore, JavaScript handles it -->
                 <form id="education-search-form" class="search-form" role="search">
                     <div class="search-field">
-                        <svg class="search-field__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M16.6667 16.6667L13.3333 13.3333M9.16667 15C12.3883 15 15 12.3883 15 9.16667C15 5.94501 12.3883 3.33333 9.16667 3.33333C5.94501 3.33333 3.33333 5.94501 3.33333 9.16667C3.33333 12.3883 5.94501 15 9.16667 15Z"/></svg>
+                        <svg class="search-field__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/search.svg' %}#icon"/></svg>
                         <input type="search"
                                id="search-input"
                                name="institution"
@@ -111,19 +111,8 @@
             .replaceAll("'", '&#39;');
     }
 
-    // "2024-08-26" -> 2024
-    function yearOf(value) {
-        return value ? new Date(value + 'T00:00').getFullYear() : '';
-    }
-
-    // "2025 – Present" while ongoing, "Graduated 2025" once it has an end date
-    function formatPeriod(education) {
-        if (education.is_ongoing) return `${yearOf(education.started_at)} – Present`;
-        return `Graduated ${yearOf(education.ended_at)}`;
-    }
-
     const STAR_INNER_HTML = `
-        <svg class="star-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.33333L9.7334 5.86667L13.6 6.4L10.8 9.13333L11.4667 13L8 11.2L4.5334 13L5.2 9.13333L2.4 6.4L6.26673 5.86667L8 2.33333Z"/></svg>
+        <svg class="star-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/star.svg' %}#icon"/></svg>
         <span class="star-label">
             <span class="star-label-off">Star</span>
             <span class="star-label-on" aria-hidden="true">Starred</span>
@@ -155,7 +144,7 @@
 
         articleElement.innerHTML = `
             <div class="timeline-row__when">
-                <p class="text-body-strong timeline-row__period">${escapeHtml(formatPeriod(education))}</p>
+                <p class="text-body-strong timeline-row__period">${escapeHtml(PortfolioFormat.educationPeriod(education.started_at, education.ended_at))}</p>
                 <p class="timeline-row__status label-overline${education.is_ongoing ? ' is-ongoing' : ''}">${education.is_ongoing ? 'Ongoing' : 'Completed'}</p>
             </div>
             <div class="timeline-row__body">

@@ -18,7 +18,7 @@
     };
 
     window.skillLogoFor = function (name) {
-        const key = String(name ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const key = String(name ?? "").toLowerCase().replace(/[\s._-]/g, "");
         return logos[key] ? `${base}${logos[key]}.svg` : null;
     };
 })();

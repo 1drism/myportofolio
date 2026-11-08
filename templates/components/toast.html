@@ -1,9 +1,10 @@
   {% load static %}
-  <div id="toast-component" class="toast-component toast-hidden" popover="manual" role="status" aria-live="polite">
+  <div id="toast-announcer" class="visually-hidden" role="status" aria-live="polite"></div>
+  <div id="toast-component" class="toast-component toast-hidden" popover="manual">
       <span class="toast-badge" aria-hidden="true">
-          <svg class="toast-icon toast-icon--success" viewBox="0 0 16 16" focusable="false"><path d="M3.33333 8.33333L6.33333 11.3333L12.6667 5"/></svg>
-          <svg class="toast-icon toast-icon--error" viewBox="0 0 22 22" focusable="false"><path d="M11 6.875V11.9167M11 15.125V15.5833"/></svg>
-          <svg class="toast-icon toast-icon--normal" viewBox="0 0 22 22" focusable="false"><path d="M11 10.0833V15.125M11 6.875V7.33333"/></svg>
+          <svg class="toast-icon toast-icon--success" viewBox="0 0 16 16" focusable="false"><use href="{% static 'img/icons/toast-success.svg' %}#icon"/></svg>
+          <svg class="toast-icon toast-icon--error" viewBox="0 0 22 22" focusable="false"><use href="{% static 'img/icons/toast-error.svg' %}#icon"/></svg>
+          <svg class="toast-icon toast-icon--normal" viewBox="0 0 22 22" focusable="false"><use href="{% static 'img/icons/toast-info.svg' %}#icon"/></svg>
       </span>
       <div class="toast-content">
           <h3 id="toast-title" class="toast-title text-body-strong">This is a Sample Title</h3>

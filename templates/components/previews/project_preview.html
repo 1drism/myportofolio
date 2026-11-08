@@ -1,3 +1,4 @@
+{% load static %}
 <aside class="form-preview" aria-label="Live preview">
     <p class="section-kicker">Live preview</p>
     <article class="preview-card" data-preview-card>
@@ -8,7 +9,7 @@
         <p class="preview-card__link" data-preview-link="project_url" hidden>
             <a href="#" class="label-button" target="_blank" rel="noopener noreferrer">
                 View project<span class="visually-hidden"> (opens in a new tab)</span>
-                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/arrow-up-right.svg' %}#icon"/></svg>
             </a>
         </p>
     </article>

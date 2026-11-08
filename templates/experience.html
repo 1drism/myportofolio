@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block meta %}
     <title>Experience - {{ name }}</title>
 {% endblock meta %}
@@ -12,7 +13,7 @@
                         <h1 class="text-h1">Experience</h1>
                         {% if user.is_superuser %}
                             <a href="{% url 'main:create_experience' %}" class="cta-button label-button">
-                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.33333V12.6667M3.33333 8H12.6667"/></svg>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/plus.svg' %}#icon"/></svg>
                                 Add experience
                             </a>
                         {% endif %}

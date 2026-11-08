@@ -36,7 +36,8 @@
                 container.append(line);
             });
             const field = form.elements[name];
-            if (field) field.setAttribute("aria-invalid", "true");
+            const fields = field instanceof RadioNodeList ? [...field] : [field];
+            fields.filter(Boolean).forEach(input => input.setAttribute("aria-invalid", "true"));
         });
     }
 
