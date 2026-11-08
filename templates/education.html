@@ -380,7 +380,7 @@
 
         const submitButton = educationForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        clearFieldErrors(educationForm);
+        window.clearFieldErrors?.(educationForm);
 
         try {
             if (isEditing) {
@@ -397,7 +397,7 @@
             await fetchEducation(searchInput.value.trim());
         } catch (error) {
             console.error('Error saving education:', error);
-            if (error.fieldErrors) showFieldErrors(educationForm, error.fieldErrors);
+            if (error.fieldErrors) window.showFieldErrors?.(educationForm, error.fieldErrors);
             showToast(failTitle, error.message, 'error');
         } finally {
             submitButton.disabled = false;

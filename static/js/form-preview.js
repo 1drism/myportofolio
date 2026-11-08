@@ -14,32 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return field.value.trim();
     }
 
-    function formatDate(value) {
-        if (!value) return "";
-        const date = new Date(value + "T00:00");
-        return date.toLocaleDateString("en-US", {
-            year: "numeric", month: "short", day: "numeric",
-        });
-    }
-
-    function toDate(value) {
-        return value ? new Date(value + "T00:00") : null;
-    }
-
-    function monthYear(date) {
-        return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-    }
-
-    function formatMonthRange(start, end) {
-        if (!start) return "Start date";
-        if (!end) return `${monthYear(start)} – Present`;
-        if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()) return monthYear(end);
-        if (start.getFullYear() === end.getFullYear()) {
-            return `${start.toLocaleDateString("en-US", { month: "short" })} – ${monthYear(end)}`;
-        }
-        return `${monthYear(start)} – ${monthYear(end)}`;
-    }
-
     // Only allow real web links or the site's own files, never "javascript:" URLs
     function isSafeUrl(url) {
         return /^https?:\/\//i.test(url) || /^\/(?!\/)/.test(url);
@@ -48,9 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function updatePreview() {
         card.querySelectorAll("[data-preview]").forEach((el) => {
             let value = fieldValue(el.dataset.preview);
-            if (el.dataset.format === "date") {
-                value = formatDate(value);
-            } else if (el.dataset.format === "list") {
+            if (el.dataset.format === "list") {
                 value = window.PortfolioFormat.techStack(value);
             }
             el.textContent = value || el.dataset.placeholder || "";
@@ -64,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.querySelectorAll("[data-preview-range]").forEach((el) => {
             const [startName, endName] = el.dataset.previewRange.split(" ");
-            el.textContent = formatMonthRange(toDate(fieldValue(startName)), toDate(fieldValue(endName)));
+            el.textContent = window.PortfolioFormat.monthRange(fieldValue(startName), fieldValue(endName));
         });
 
         card.querySelectorAll("[data-preview-period]").forEach((el) => {

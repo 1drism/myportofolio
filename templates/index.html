@@ -206,7 +206,10 @@
         img.src = sources.shift();
         img.alt = hasOwnIcon || brandLogo ? `${name} logo` : '';
         img.addEventListener('error', () => {
-            if (sources.length) img.src = sources.shift();
+            if (!sources.length) return;
+            const next = sources.shift();
+            img.src = next;
+            if (next === DEFAULT_SKILL_ICON) img.alt = '';
         });
         icon.append(img);
 
@@ -389,7 +392,7 @@
 
         const submitButton = skillForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        clearFieldErrors(skillForm);
+        window.clearFieldErrors?.(skillForm);
 
         try {
             const response = await fetch(endpoint, {
@@ -406,7 +409,7 @@
                 showToast('Success', isEditing ? 'Skill updated successfully!' : 'New skill added successfully!', 'success');
                 fetchSkills();
             } else {
-                if (result.errors) showFieldErrors(skillForm, result.errors);
+                if (result.errors) window.showFieldErrors?.(skillForm, result.errors);
                 const errorMessages = result.errors
                     ? formatFieldErrors(result.errors)
                     : [result.message || `Something went wrong (status ${response.status}).`];

@@ -315,7 +315,7 @@
         const failTitle = isEditing ? 'Failed to update project' : 'Failed to add project';
         const submitButton = projectForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
-        clearFieldErrors(projectForm);
+        window.clearFieldErrors?.(projectForm);
 
         try {
             const fields = new FormData(projectForm);
@@ -334,7 +334,7 @@
             await fetchProjects(searchInput.value.trim());
         } catch (error) {
             console.error('Error saving project:', error);
-            if (error.fieldErrors) showFieldErrors(projectForm, error.fieldErrors);
+            if (error.fieldErrors) window.showFieldErrors?.(projectForm, error.fieldErrors);
             showToast(failTitle, error.message, 'error');
         } finally {
             submitButton.disabled = false;

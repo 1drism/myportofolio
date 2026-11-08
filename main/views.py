@@ -19,6 +19,16 @@ def is_editor(user):
     
     
 SKILL_CATEGORY_ORDER = ["technical", "software", "soft"]
+SKILL_CATEGORY_LABELS = dict(Skill.CATEGORY_CHOICES)
+SKILL_CATEGORIES = [
+    {"value": value, "label": SKILL_CATEGORY_LABELS[value]}
+    for value in SKILL_CATEGORY_ORDER
+    if value in SKILL_CATEGORY_LABELS
+] + [
+    {"value": value, "label": label}
+    for value, label in Skill.CATEGORY_CHOICES
+    if value not in SKILL_CATEGORY_ORDER
+]
 
 
 def show_main(request):
@@ -33,13 +43,7 @@ def show_main(request):
         ),
         "last_login": last_login,
         "form": SkillForm(),
-        "skill_categories": [
-            {"value": value, "label": label}
-            for value, label in sorted(
-                Skill.CATEGORY_CHOICES,
-                key=lambda choice: SKILL_CATEGORY_ORDER.index(choice[0]) if choice[0] in SKILL_CATEGORY_ORDER else len(SKILL_CATEGORY_ORDER),
-            )
-        ],
+        "skill_categories": SKILL_CATEGORIES,
         "is_editor": is_editor(request.user),
     }
     return render(request, "index.html", context)
