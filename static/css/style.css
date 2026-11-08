@@ -974,6 +974,7 @@ html {
 }
 
 .experience-form .form-group--category,
+.experience-form .form-group--started_at,
 .experience-form .form-group--ended_at {
     grid-column: span 2;
 }
@@ -1188,6 +1189,7 @@ html {
     overflow-wrap: anywhere;
 }
 
+.preview-card__org:empty,
 .preview-card__description:empty {
     display: none;
 }

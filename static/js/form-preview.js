@@ -22,6 +22,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function toDate(value) {
+        return value ? new Date(value + "T00:00") : null;
+    }
+
+    function monthYear(date) {
+        return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    }
+
+    function formatMonthRange(start, end) {
+        if (!start) return "Start date";
+        if (!end) return `${monthYear(start)} – Present`;
+        if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()) return monthYear(end);
+        if (start.getFullYear() === end.getFullYear()) {
+            return `${start.toLocaleDateString("en-US", { month: "short" })} – ${monthYear(end)}`;
+        }
+        return `${monthYear(start)} – ${monthYear(end)}`;
+    }
+
     function yearOf(value) {
         return value ? new Date(value + "T00:00").getFullYear() : "";
     }
@@ -44,6 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const ended = fieldValue(el.dataset.previewStatus);
             el.textContent = ended ? "Completed" : "Ongoing";
             el.classList.toggle("is-ongoing", !ended);
+        });
+
+        card.querySelectorAll("[data-preview-range]").forEach((el) => {
+            const [startName, endName] = el.dataset.previewRange.split(" ");
+            el.textContent = formatMonthRange(toDate(fieldValue(startName)), toDate(fieldValue(endName)));
         });
 
         card.querySelectorAll("[data-preview-period]").forEach((el) => {

@@ -23,7 +23,7 @@
                     {% for experience in experience_list %}
                         <article class="timeline-row">
                             <div class="timeline-row__when">
-                                {# TODO(feature/experience-organization-dates): show the start – end date range here once Experience stores real dates #}
+                                <p class="text-body-strong timeline-row__period">{{ experience.period }}</p>
                                 <p class="timeline-row__status label-overline{% if experience.is_ongoing %} is-ongoing{% endif %}">
                                     {% if experience.is_ongoing %}Ongoing{% else %}Completed{% endif %}
                                 </p>
@@ -31,7 +31,9 @@
                             <div class="timeline-row__body">
                                 <span class="tag label-overline">{{ experience.get_category_display }}</span>
                                 <h2 class="text-h3 timeline-row__title">{{ experience.title }}</h2>
-                                {# TODO(feature/experience-organization-dates): show the organization here once Experience has that field #}
+                                {% if experience.organization %}
+                                    <p class="text-body-strong timeline-row__org">{{ experience.organization }}</p>
+                                {% endif %}
                                 <p class="text-body timeline-row__description">{{ experience.description }}</p>
                             </div>
                             <div class="timeline-row__actions">

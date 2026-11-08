@@ -3,6 +3,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from main.forms import ExperienceForm
 from main.models import Experience,Education,Project,Skill
 
 class MainTest(TestCase):
@@ -56,6 +57,57 @@ class MainTest(TestCase):
         self.assertFalse(self.experience.is_ongoing)
         self.assertContains(response, "Completed")
         self.assertNotContains(response, "Ongoing")
+
+    def test_experience_period(self):
+        def at(year, month):
+            return timezone.make_aware(timezone.datetime(year, month, 1))
+
+        self.experience.started_at = at(2025, 9)
+        self.assertEqual(self.experience.period, "Sep 2025 – Present")
+
+        self.experience.ended_at = at(2026, 2)
+        self.assertEqual(self.experience.period, "Sep 2025 – Feb 2026")
+
+        self.experience.started_at = at(2026, 7)
+        self.experience.ended_at = at(2026, 8)
+        self.assertEqual(self.experience.period, "Jul – Aug 2026")
+
+        self.experience.started_at = at(2024, 5)
+        self.experience.ended_at = at(2024, 5)
+        self.assertEqual(self.experience.period, "May 2024")
+
+    def test_experience_page_shows_organization_and_period(self):
+        self.experience.organization = "Fasilkom UI"
+        self.experience.started_at = timezone.make_aware(timezone.datetime(2025, 8, 1))
+        self.experience.save()
+        response = self.client.get(reverse("main:show_experience"))
+
+        self.assertContains(response, "Fasilkom UI")
+        self.assertContains(response, "Aug 2025 – Present")
+
+    def test_experience_list_is_newest_first(self):
+        Experience.objects.create(
+            title="Older role",
+            description="Older.",
+            started_at=timezone.make_aware(timezone.datetime(2020, 1, 1)),
+        )
+        response = self.client.get(reverse("main:show_experience"))
+
+        titles = [experience.title for experience in response.context["experience_list"]]
+        self.assertEqual(titles, ["PBP Teaching Assistant", "Older role"])
+
+    def test_experience_form_rejects_end_before_start(self):
+        form = ExperienceForm(data={
+            "title": "TA",
+            "organization": "",
+            "description": "Teaching.",
+            "category": "part-time",
+            "started_at": "2026-02-01",
+            "ended_at": "2025-01-01",
+        })
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("ended_at", form.errors)
         
 class EducationTest(TestCase):
     def setUp(self):

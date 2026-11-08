@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
 
 class Experience(models.Model):
@@ -16,13 +17,14 @@ class Experience(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
+    organization = models.CharField(max_length=255, blank=True, default="")
     description = models.TextField()
     category = models.CharField(
         max_length=20,
         choices=EXPERIENCE_CHOICES,
         default="full-time",
     )
-    started_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(default=timezone.now)
     ended_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
@@ -31,6 +33,18 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+
+    @property
+    def period(self):
+        start = timezone.localdate(self.started_at)
+        if self.ended_at is None:
+            return f"{start:%b %Y} – Present"
+        end = timezone.localdate(self.ended_at)
+        if (start.year, start.month) == (end.year, end.month):
+            return f"{end:%b %Y}"
+        if start.year == end.year:
+            return f"{start:%b} – {end:%b %Y}"
+        return f"{start:%b %Y} – {end:%b %Y}"
     
 class Education(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

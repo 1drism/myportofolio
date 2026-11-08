@@ -18,11 +18,6 @@
                         <div class="form-fields">
                             {% for field in form %}
                                 {% include 'components/form_field.html' %}
-                                {% if field.name == 'title' %}
-                                    {# TODO(feature/experience-organization-dates): add the organization field here once Experience has it #}
-                                {% elif field.name == 'category' %}
-                                    {# TODO(feature/experience-organization-dates): add the start date field here once Experience stores a real start date #}
-                                {% endif %}
                             {% endfor %}
                         </div>
                         <div class="form-actions form-actions--start">
@@ -36,10 +31,11 @@
                     <aside class="form-preview" aria-label="Live preview">
                         <p class="section-kicker">Live preview</p>
                         <article class="preview-card" data-preview-card>
-                            {# TODO(feature/experience-organization-dates): show the date range here once Experience stores real dates #}
+                            <p class="text-body-strong preview-card__period" data-preview-range="started_at ended_at"></p>
                             <p class="timeline-row__status label-overline" data-preview-status="ended_at"></p>
                             <span class="tag label-overline preview-card__tag" data-preview="category" data-placeholder="Category"></span>
                             <h2 class="text-h3 preview-card__title" data-preview="title" data-placeholder="Experience title"></h2>
+                            <p class="text-body-strong preview-card__org" data-preview="organization"></p>
                             <p class="text-body preview-card__description" data-preview="description"></p>
                         </article>
                     </aside>

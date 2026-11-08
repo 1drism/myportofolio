@@ -155,15 +155,19 @@ class ExperienceForm(ModelForm):
         model = Experience
         fields = [
             "title",
+            "organization",
             "description",
             "category",
+            "started_at",
             "ended_at",
         ]
 
         labels = {
             "title": "Title",
+            "organization": "Organization",
             "description": "Description",
             "category": "Category",
+            "started_at": "Start Date",
             "ended_at": "End Date",
         }
 
@@ -178,10 +182,21 @@ class ExperienceForm(ModelForm):
                     "maxlength": 255,
                 }
             ),
+            "organization": TextInput(
+                attrs={
+                    "placeholder": "Faculty of Computer Science, Universitas Indonesia",
+                    "maxlength": 255,
+                }
+            ),
             "description": Textarea(
                 attrs={
                     "placeholder": "Describe your experience",
                     "rows": 3,
+                }
+            ),
+            "started_at": DateInput(
+                attrs={
+                    "type": "date",
                 }
             ),
             "ended_at": DateInput(
@@ -190,6 +205,14 @@ class ExperienceForm(ModelForm):
                 }
             ),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        started_at = cleaned_data.get("started_at")
+        ended_at = cleaned_data.get("ended_at")
+        if started_at and ended_at and ended_at < started_at:
+            self.add_error("ended_at", "End date can't be before the start date.")
+        return cleaned_data
 
 
 class SkillForm(ModelForm):
