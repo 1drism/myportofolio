@@ -1,3 +1,4 @@
+{% load static %}
 {% comment %}
 Shared delete confirmation modal. JavaScript fills in the item name and delete URL.
 Usage: {% include "components/delete_modal.html" with name="project" title="Delete Project?" %}
@@ -19,7 +20,7 @@ Creates the ids delete-<name>-modal, delete-<name>-form and delete-<name>-name.
                 class="modal__close"
                 popovertarget="delete-{{ name }}-modal"
                 popovertargetaction="hide"
-                aria-label="Close confirmation">{% include 'components/icon_close.html' %}</button>
+                aria-label="Close confirmation"><svg class="modal__close-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/close.svg' %}#close"/></svg></button>
         <h2 class="text-h3" id="delete-{{ name }}-modal-title">{{ title }}</h2>
         <p class="text-body modal__message">
             Are you sure you want to delete

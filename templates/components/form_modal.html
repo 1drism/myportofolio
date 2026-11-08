@@ -1,3 +1,4 @@
+{% load static %}
 {% comment %}
 Shared add/edit modal with a live preview. JavaScript switches the title, button text and target endpoint.
 Usage: {% include "components/form_modal.html" with name="project" title="Add a New Project" submit_label="Add Project" action=create_url preview="components/previews/project_preview.html" %}
@@ -21,7 +22,7 @@ Creates the ids add-<name>-modal, add-<name>-modal-title and <name>-form.
                 class="modal__close"
                 popovertarget="add-{{ name }}-modal"
                 popovertargetaction="hide"
-                aria-label="Close {{ name }} form">{% include 'components/icon_close.html' %}</button>
+                aria-label="Close {{ name }} form"><svg class="modal__close-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/close.svg' %}#close"/></svg></button>
 
         <h2 class="text-h2" id="add-{{ name }}-modal-title">{{ title }}</h2>
         <div class="form-layout">

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block meta %}
     <title>Login - {{ name }}</title>
 {% endblock meta %}
@@ -16,7 +17,7 @@
                         {% endfor %}
                     </div>
                     {% for error in form.non_field_errors %}
-                        <p class="form-error" role="alert">{% include 'components/icon_alert.html' %}{{ error }}</p>
+                        <p class="form-error" role="alert"><img class="form-error__icon" src="{% static 'img/icons/alert.svg' %}" alt="">{{ error }}</p>
                     {% endfor %}
                     <button type="submit" class="button auth-form__submit">Login</button>
                 </form>

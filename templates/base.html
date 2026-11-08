@@ -15,7 +15,9 @@
     {% with url_name=request.resolver_match.url_name %}
     <header class="site-header" id="top">
         <div class="container container--wide site-header__inner">
-            {% include 'components/brand.html' %}
+            <a href="{% url 'main:show_main' %}" class="brand">
+                <img src="{% static 'img/dsr-logo.png' %}" alt="DSR Club, go to profile" class="brand__logo">
+            </a>
             <nav class="site-nav" aria-label="Main">
                 <a href="{% url 'main:show_main' %}" class="site-nav__link label-nav"{% if url_name == 'show_main' %} aria-current="page"{% endif %}>
                     Profile
@@ -68,7 +70,9 @@
             <hr class="site-footer__rule">
             <div class="site-footer__main">
                 <div class="site-footer__about">
-                    {% include 'components/brand.html' with brand_modifier='brand--footer' %}
+                    <a href="{% url 'main:show_main' %}" class="brand brand--footer">
+                        <img src="{% static 'img/dsr-logo.png' %}" alt="DSR Club, go to profile" class="brand__logo">
+                    </a>
                     <p class="text-body site-footer__bio">Second-year Computer Science student at Universitas Indonesia, building for the web with Django.</p>
                 </div>
                 <nav class="site-footer__col" aria-labelledby="footer-navigate">

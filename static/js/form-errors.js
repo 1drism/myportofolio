@@ -1,16 +1,12 @@
 (function () {
-    const SVG_NS = "http://www.w3.org/2000/svg";
+    const alertIconUrl = document.currentScript?.dataset.alertIcon || "/static/img/icons/alert.svg";
 
     function alertIcon() {
-        const svg = document.createElementNS(SVG_NS, "svg");
-        svg.setAttribute("class", "form-error__icon");
-        svg.setAttribute("viewBox", "0 0 16 16");
-        svg.setAttribute("aria-hidden", "true");
-        svg.setAttribute("focusable", "false");
-        const path = document.createElementNS(SVG_NS, "path");
-        path.setAttribute("d", "M8 5.33333V8.66667M8 11V11.3333M8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z");
-        svg.append(path);
-        return svg;
+        const icon = document.createElement("img");
+        icon.className = "form-error__icon";
+        icon.src = alertIconUrl;
+        icon.alt = "";
+        return icon;
     }
 
     function normalizeFieldErrors(errors) {

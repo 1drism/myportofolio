@@ -1,3 +1,4 @@
+{% load static %}
 <div class="form-group form-group--{{ field.name }}">
     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
     {{ field }}
@@ -6,7 +7,7 @@
     {% endif %}
     <div class="form-errors" data-errors-for="{{ field.name }}">
         {% for error in field.errors %}
-            <p class="form-error">{% include 'components/icon_alert.html' %}{{ error }}</p>
+            <p class="form-error"><img class="form-error__icon" src="{% static 'img/icons/alert.svg' %}" alt="">{{ error }}</p>
         {% endfor %}
     </div>
 </div>

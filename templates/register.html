@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block meta %}
     <title>Register - {{ name }}</title>
 {% endblock meta %}
@@ -11,7 +12,7 @@
                 <form method="post" action="{% url 'main:register' %}" class="auth-form">
                     {% csrf_token %}
                     {% for error in form.non_field_errors %}
-                        <p class="form-error" role="alert">{% include 'components/icon_alert.html' %}{{ error }}</p>
+                        <p class="form-error" role="alert"><img class="form-error__icon" src="{% static 'img/icons/alert.svg' %}" alt="">{{ error }}</p>
                     {% endfor %}
                     <div class="form-fields">
                         {% for field in form %}
