@@ -1,0 +1,118 @@
+{
+  "skills": [
+    {"key": "skill-python", "name": "Python", "category": "technical", "icon_url": ""},
+    {"key": "skill-java", "name": "Java", "category": "technical", "icon_url": ""},
+    {"key": "skill-c", "name": "C", "category": "technical", "icon_url": ""},
+    {"key": "skill-django", "name": "Django", "category": "technical", "icon_url": ""},
+    {"key": "skill-git", "name": "Git", "category": "software", "icon_url": ""},
+    {"key": "skill-figma", "name": "Figma", "category": "software", "icon_url": ""},
+    {"key": "skill-after-effects", "name": "Adobe After Effects", "category": "software", "icon_url": ""},
+    {"key": "skill-communication", "name": "Communication", "category": "soft", "icon_url": ""},
+    {"key": "skill-teamwork", "name": "Teamwork", "category": "soft", "icon_url": ""},
+    {"key": "skill-problem-solving", "name": "Problem Solving", "category": "soft", "icon_url": ""},
+    {"key": "skill-adaptability", "name": "Adaptability", "category": "soft", "icon_url": ""}
+  ],
+  "projects": [
+    {
+      "key": "project-portfolio",
+      "title": "Personal Portfolio Website",
+      "description": "Built and deployed a personal portfolio website with Django, featuring experience, education and projects sections, hosted on Fasilkom UI's PWS. Currently adding a REST API with Django REST Framework.",
+      "tech_stack": "Django, Python, Git",
+      "project_url": "https://github.com/1drism/myportofolio",
+      "project_image_url": ""
+    },
+    {
+      "key": "project-urfunfarming",
+      "title": "urFunFarming",
+      "description": "Group project (6 members, PBP 2026/2027): an urban farming community and local harvest marketplace. I owned Module 1 — the landing page, registration and login, and user profiles.",
+      "tech_stack": "Django, Python, HTMX, PostgreSQL",
+      "project_url": "https://github.com/paramitasan/urFunFarming",
+      "project_image_url": "https://raw.githubusercontent.com/paramitasan/urFunFarming/main/docs/screenshots/landing.png"
+    }
+  ],
+  "education": [
+    {
+      "key": "ui-bachelor",
+      "institution": "Universitas Indonesia",
+      "faculty_or_major": "Faculty of Computer Science · International Program",
+      "degree": "Bachelor of Computer Science",
+      "started_at": "2025-08-01",
+      "ended_at": null,
+      "description": ""
+    },
+    {
+      "key": "sma-al-azhar-kelapa-gading",
+      "institution": "SMA Islam Al-Azhar Kelapa Gading",
+      "faculty_or_major": "Senior High School",
+      "degree": "High School Diploma",
+      "started_at": "2022-07-01",
+      "ended_at": "2025-06-30",
+      "description": ""
+    }
+  ],
+  "experience": [
+    {
+      "key": "ta-fop1-2026",
+      "title": "Teaching Assistant, Foundations of Programming 1",
+      "organization": "Faculty of Computer Science, Universitas Indonesia",
+      "description": "Teaching assistant for Foundations of Programming 1, the introductory Python programming course for first-year Fasilkom UI students.",
+      "category": "part-time",
+      "started_at": "2026-08-01",
+      "ended_at": null
+    },
+    {
+      "key": "bem-sports-staff-2026",
+      "title": "Sports Department Staff",
+      "organization": "BEM Fasilkom UI",
+      "description": "Organize sports programs and events for Fasilkom UI students.",
+      "category": "volunteer",
+      "started_at": "2026-08-01",
+      "ended_at": null
+    },
+    {
+      "key": "mentor-ddp0-2026",
+      "title": "Mentor, Dasar-Dasar Pemrograman 0",
+      "organization": "Faculty of Computer Science, Universitas Indonesia",
+      "description": "Mentored incoming students in basic Python programming before their first semester through online and offline sessions, answering their questions and helping them debug their code.",
+      "category": "volunteer",
+      "started_at": "2026-07-01",
+      "ended_at": "2026-08-31"
+    },
+    {
+      "key": "compfest-decoration-2025",
+      "title": "Event Decoration Staff",
+      "organization": "COMPFEST",
+      "description": "Designed and set up venue decorations for COMPFEST 2026 and designed some event visual assets in Figma.",
+      "category": "part-time",
+      "started_at": "2025-12-01",
+      "ended_at": "2026-09-30"
+    },
+    {
+      "key": "sbf-sports-trainee-2025",
+      "title": "Sports Department Trainee",
+      "organization": "Sekolah BEM Fasilkom (SBF), BEM Fasilkom UI",
+      "description": "Managed an esports event for Fasilkom UI students, and initiated and hosted CS UI Water Run as the program's final project.",
+      "category": "volunteer",
+      "started_at": "2025-09-01",
+      "ended_at": "2026-01-01"
+    },
+    {
+      "key": "open-house-operational-2025",
+      "title": "Operational Staff",
+      "organization": "Open House Fasilkom UI",
+      "description": "Handled on-site operations for the open house for prospective students, coordinating with other divisions to keep the event running smoothly.",
+      "category": "volunteer",
+      "started_at": "2025-09-01",
+      "ended_at": "2026-02-28"
+    },
+    {
+      "key": "alkafest-2024",
+      "title": "Vice Head of E-Sport Division & Sponsorship Staff",
+      "organization": "ALKAFEST",
+      "description": "Led a team to organize esports competitions, coordinating members and ensuring the events ran successfully. Also searched for potential sponsors and reached out to them to request sponsorship for the event.",
+      "category": "volunteer",
+      "started_at": "2024-01-01",
+      "ended_at": "2025-05-29"
+    }
+  ]
+}

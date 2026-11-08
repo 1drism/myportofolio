@@ -51,7 +51,7 @@ def show_main(request):
 def show_experience(request):
     context = {
         "name": "Idris",
-        "experience_list": Experience.objects.order_by("-started_at"),
+        "experience_list": Experience.objects.order_by("-started_at", "title"),
         "is_editor": is_editor(request.user),
     }
     return render(request, "experience.html", context)
