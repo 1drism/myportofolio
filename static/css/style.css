@@ -688,26 +688,10 @@ h1 {
     color: var(--color-text-muted);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    html {
-        scroll-behavior: smooth;
-    }
+html {
+    scroll-behavior: smooth;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .nav-circle path {
-        animation: none;
-        stroke-dashoffset: 0;
-    }
-
-    .ghost-button,
-    .cta-button,
-    .site-nav__link,
-    .site-actions__link,
-    .site-footer__link {
-        transition: none;
-    }
-}
 
 .skills {
     padding: var(--space-128) 0;
@@ -945,31 +929,6 @@ h1 {
 @keyframes skeletonPulse {
     from { opacity: 0.45; }
     to   { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .skills-card,
-    .skills-card:hover {
-        transition: none;
-        transform: none;
-    }
-
-    .skills-card--skeleton {
-        animation: none;
-    }
-
-    .welcome__script,
-    .welcome__wordmark {
-        opacity: 1;
-        animation: none;
-    }
-
-    .avatar-hover,
-    .outline-button,
-    .social-link,
-    .scroll-cue {
-        transition: none;
-    }
 }
 
 .modal--form.modal--compact .modal__content {
@@ -1809,39 +1768,23 @@ h1 {
     outline-offset: 3px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .action-button,
-    .button-star,
-    .button-star .star-icon,
-    .project-card__link,
-    .search-input {
-        transition: none;
-    }
-
-    .button-star:hover .star-icon,
-    .button-star.star-pop .star-icon {
-        transform: none;
-        animation: none;
-    }
-}
-
 /* toast */
 .toast-component {
     position: fixed;
     inset: auto 2rem 2rem auto;
-    min-width: 280px;
-    max-width: min(420px, calc(100vw - 2rem));
+    width: min(400px, calc(100vw - 2rem));
     margin: 0;
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    padding: 15px 15px 17px;
+    overflow: hidden;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background-color: var(--color-paper-dark);
+    box-shadow: var(--shadow-modal);
+    color: var(--color-ink);
     display: none;
-    align-items: center;
-    gap: 1rem;
+    align-items: flex-start;
+    gap: var(--space-16);
     transition: opacity 0.3s ease, transform 0.3s ease;
-    background-color: var(--paper-dark);
-    border: 1px solid var(--line);
-    color: var(--ink);
 }
 
 .toast-component:popover-open {
@@ -1859,36 +1802,101 @@ h1 {
     transform: translateY(0);
 }
 
+.toast-badge {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--toast-tint);
+    color: var(--toast-color);
+}
+
+.toast-icon {
+    display: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.toast-icon--success {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.66667;
+}
+
+.toast-icon--error,
+.toast-icon--normal {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2.29167;
+}
+
+.toast-success .toast-icon--success,
+.toast-error .toast-icon--error,
+.toast-normal .toast-icon--normal {
+    display: block;
+}
+
+.toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
 .toast-title {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 0.15rem;
-    font-family: "Space Grotesk", -apple-system, sans-serif;
+    color: var(--color-ink);
 }
 
 .toast-message {
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
 }
 
-/* Change the left border based on the notification type */
-.toast-success {
-    border-left: 4px solid #22c55e;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), -4px 0 15px rgba(34, 197, 94, 0.25);
+.toast-progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background-color: var(--color-divider);
 }
-.toast-success .toast-title { color: #4ade80; }
+
+.toast-progress__bar {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: var(--toast-color);
+    transform-origin: left;
+}
+
+.toast-progress__bar.is-running {
+    animation: toastCountdown var(--toast-duration, 3000ms) linear forwards;
+}
+
+@keyframes toastCountdown {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
+/* Change the badge and countdown color based on the notification type */
+.toast-success {
+    --toast-color: var(--color-success-light);
+    --toast-tint: rgba(74, 222, 128, 0.14);
+}
 
 .toast-error {
-    border-left: 4px solid var(--danger);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), -4px 0 15px rgba(224, 105, 94, 0.25);
+    --toast-color: var(--color-danger-light);
+    --toast-tint: rgba(224, 105, 94, 0.14);
 }
-.toast-error .toast-title { color: var(--danger-light); }
 
 .toast-normal {
-    border-left: 4px solid var(--accent);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), -4px 0 15px rgba(255, 224, 67, 0.25);
+    --toast-color: var(--color-accent);
+    --toast-tint: rgba(255, 224, 67, 0.14);
 }
-.toast-normal .toast-title { color: var(--accent); }
 
 @media (max-width: 600px) {
     .toast-component {

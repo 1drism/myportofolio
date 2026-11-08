@@ -26,6 +26,14 @@ function showToast(title, message, type = 'normal', duration = 3000) {
     // Cancel the previous timer if a toast is still showing
     clearTimeout(toastTimer);
 
+    const progressBar = toastComponent.querySelector('.toast-progress__bar');
+    if (progressBar) {
+        toastComponent.style.setProperty('--toast-duration', `${duration}ms`);
+        progressBar.classList.remove('is-running');
+        void progressBar.offsetWidth;
+        progressBar.classList.add('is-running');
+    }
+
     // Show animation
     if (!toastComponent.matches(':popover-open')) {
         toastComponent.showPopover();
