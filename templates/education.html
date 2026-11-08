@@ -61,17 +61,21 @@
         {% include "components/delete_modal.html" with name="education" title="Delete Education?" %}
     {% endif %}
 
+    {% csrf_token %}
     <script>
     // Configuration
-    const BASE_EDUCATION_ENDPOINT = "{% url 'main:get_education_json' %}";
-    const CREATE_EDUCATION_ENDPOINT = "{% url 'main:create_education_ajax' %}";
-    const EDIT_EDUCATION_ENDPOINT = "{% url 'main:edit_education_ajax' '00000000-0000-0000-0000-000000000000' %}";
+    const BASE_EDUCATION_ENDPOINT = "{% url 'api:education-list' %}";
+    const DETAIL_EDUCATION_ENDPOINT = "{% url 'api:education-detail' '00000000-0000-0000-0000-000000000000' %}";
+    const STAR_EDUCATION_ENDPOINT = "{% url 'api:education-star' '00000000-0000-0000-0000-000000000000' %}";
+    const LOGIN_URL = "{% url 'main:login' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const IS_AUTHENTICATED = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
     const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
     const PLACEHOLDER_ID = "00000000-0000-0000-0000-000000000000";
+    const EDUCATION_FIELDS = ['institution', 'faculty_or_major', 'degree', 'started_at', 'ended_at', 'description'];
     let educationAbortController;
     let editingEducationId = null;   // null = the modal is adding, otherwise the ID being edited
+    let deletingEducationId = null;
 
     // DOM elements
     const loadingState = document.getElementById('loading');
@@ -111,26 +115,31 @@
     }
 
     // Build an education card element
-    function buildEducationCardElement(item) {
-        const education = item.fields;
-        const educationId = item.pk;
+    function buildEducationCardElement(education) {
+        const educationId = education.id;
 
         const articleElement = document.createElement('article');
         articleElement.className = 'education-card';
 
-        // Django fills in the URL with a dummy UUID, JavaScript swaps in the real ID
-        const starUrl = "{% url 'main:toggle_education_star' '00000000-0000-0000-0000-000000000000' %}"
-            .replace(PLACEHOLDER_ID, educationId);
-        const deleteUrl = "{% url 'main:delete_education' '00000000-0000-0000-0000-000000000000' %}"
-            .replace(PLACEHOLDER_ID, educationId);
+
+        const starInnerHtml = `
+            <span class="star-icon" aria-hidden="true">★</span>
+            <span class="star-label">
+                <span class="star-label-off">Star</span>
+                <span class="star-label-on" aria-hidden="true">Starred</span>
+            </span>
+            <span class="star-count"></span>`;
+
+        const starHtml = IS_AUTHENTICATED
+            ? `<button type="button" class="button button-star">${starInnerHtml}</button>`
+            : `<a href="${LOGIN_URL}" class="button button-star" aria-label="Log in to star">${starInnerHtml}</a>`;
 
         const editHtml = CAN_EDIT
             ? `<button type="button" class="button button-secondary edit-button">Edit</button>`
             : '';
 
         const deleteHtml = IS_SUPERUSER
-            ? `<button type="button" class="button button-danger delete-button"
-                       data-delete-url="${deleteUrl}">Delete</button>`
+            ? `<button type="button" class="button button-danger delete-button">Delete</button>`
             : '';
 
         articleElement.innerHTML = `
@@ -141,25 +150,17 @@
             <p class="education-date">${escapeHtml(formatDate(education.started_at))}</p>
             <p class="education-status">${education.is_ongoing ? 'Ongoing' : 'Completed'}</p>
             <div class="card-actions">
-                <form method="post" action="${starUrl}" class="star-form">
-                    {% csrf_token %}
-                    <button type="submit" class="button button-star">
-                        <span class="star-icon" aria-hidden="true">★</span>
-                        <span class="star-label">
-                            <span class="star-label-off">Star</span>
-                            <span class="star-label-on" aria-hidden="true">Starred</span>
-                        </span>
-                        <span class="star-count"></span>
-                    </button>
-                </form>
+                ${starHtml}
                 ${editHtml}
                 ${deleteHtml}
             </div>
         `;
 
-        const starForm = articleElement.querySelector('.star-form');
-        renderStarButton(starForm.querySelector('.button-star'), education);
-        starForm.addEventListener('submit', handleStarSubmit);
+        const starButton = articleElement.querySelector('.button-star');
+        renderStarButton(starButton, education);
+        if (IS_AUTHENTICATED) {
+            starButton.addEventListener('click', () => toggleStar(starButton, educationId));
+        }
 
         const editButton = articleElement.querySelector('.edit-button');
         if (editButton) {
@@ -169,7 +170,7 @@
         const deleteButton = articleElement.querySelector('.delete-button');
         if (deleteButton) {
             deleteButton.addEventListener('click', () =>
-                openDeleteModal(deleteButton.dataset.deleteUrl, education.institution));
+                openDeleteModal(educationId, education.institution));
         }
         return articleElement;
     }
@@ -183,34 +184,14 @@
     }
 
     // Toggle a star via AJAX so the page doesn't reload
-    async function handleStarSubmit(e) {
-        if (!IS_AUTHENTICATED) return;   // Let the normal submit send guests to the login page
-        e.preventDefault();
-
-        const form = e.currentTarget;
-        const button = form.querySelector('.button-star');
-        const institution = form.closest('.education-card').querySelector('h2').textContent;
+    async function toggleStar(button, educationId) {
+        const institution = button.closest('.education-card').querySelector('h2').textContent;
         if (button.disabled) return;
         button.disabled = true;
 
         try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            });
-
-            // Session expired: @login_required redirected fetch to the login page
-            if (response.redirected) {
-                window.location.href = response.url;
-                return;
-            }
-            if (!response.ok) {
-                showToast('Failed to update star', `Something went wrong (status ${response.status}).`, 'error');
-                return;
-            }
-
-            const starData = await response.json();
+            const starUrl = STAR_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, educationId);
+            const starData = await writeEducation(starUrl, 'POST');
             renderStarButton(button, starData);
             if (starData.is_starred) {
                 button.classList.remove('star-pop');
@@ -222,7 +203,7 @@
             }
         } catch (error) {
             console.error('Error toggling star:', error);
-            showToast('Failed to update star', 'Could not reach the server. Please try again.', 'error');
+            showToast('Failed to update star', error.message, 'error');
         } finally {
             button.disabled = false;
         }
@@ -236,28 +217,19 @@
         try {
             displayPageSection({ showLoading: true });
 
-            const url = searchQuery
-                ? `${BASE_EDUCATION_ENDPOINT}?institution=${encodeURIComponent(searchQuery)}`
-                : BASE_EDUCATION_ENDPOINT;
+            const url = new URL(BASE_EDUCATION_ENDPOINT, window.location.origin);
+            if (searchQuery) url.searchParams.set('institution', searchQuery);
 
             const response = await fetch(url, {
                 headers: { 'Accept': 'application/json' },
                 signal: educationAbortController.signal,
             });
 
-            if (!response.ok) throw new Error('Failed to fetch data');
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
             const educationData = await response.json();
-
-            if (educationData.length === 0) {
-                displayPageSection({ showEmpty: true });
-            } else {
-                gridContainer.innerHTML = '';
-                educationData.forEach(item => {
-                    gridContainer.appendChild(buildEducationCardElement(item));
-                });
-                displayPageSection({ showGrid: true });
-            }
+            gridContainer.replaceChildren(...educationData.map(buildEducationCardElement));
+            displayPageSection({ showGrid: educationData.length > 0, showEmpty: educationData.length === 0 });
         } catch (error) {
             if (error.name === 'AbortError') return;
             console.error('Error loading education:', error);
@@ -269,8 +241,8 @@
     const deleteModal = document.getElementById('delete-education-modal');
     const deleteForm = document.getElementById('delete-education-form');
 
-    function openDeleteModal(deleteUrl, institution) {
-        deleteForm.action = deleteUrl;
+    function openDeleteModal(educationId, institution) {
+        deletingEducationId = educationId;
         document.getElementById('delete-education-name').textContent = institution;
         deleteModal.showPopover();
     }
@@ -284,31 +256,15 @@
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(deleteForm.action, {
-                method: 'POST',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                body: new FormData(deleteForm),
-            });
-
-            // Session expired: @login_required redirected fetch to the login page
-            if (response.redirected) {
-                window.location.href = response.url;
-                return;
-            }
-            if (!response.ok) {
-                const message = response.status === 403
-                    ? 'Only the portfolio owner can delete education.'
-                    : `Something went wrong (status ${response.status}).`;
-                showToast('Failed to delete education', message, 'error');
-                return;
-            }
+            const detailUrl = DETAIL_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, deletingEducationId);
+            await writeEducation(detailUrl, 'DELETE');
 
             deleteModal.hidePopover();
             showToast('Education deleted', `"${institution}" has been removed.`, 'success');
-            fetchEducation(searchInput.value.trim());
+            await fetchEducation(searchInput.value.trim());
         } catch (error) {
             console.error('Error deleting education:', error);
-            showToast('Failed to delete education', 'Could not reach the server. Please try again.', 'error');
+            showToast('Failed to delete education', error.message, 'error');
         } finally {
             submitButton.disabled = false;
         }
@@ -340,7 +296,7 @@
     // Edit button: fill the form with this entry's current data, then open the modal
     function openEditEducationModal(educationId, education) {
         setEducationModalMode(educationId);
-        ['institution', 'faculty_or_major', 'degree', 'started_at', 'ended_at', 'description'].forEach(name => {
+        EDUCATION_FIELDS.forEach(name => {
             educationForm.elements[name].value = education[name] ?? '';   // dates are "YYYY-MM-DD", as <input type="date"> expects
         });
         educationForm.dispatchEvent(new Event('input'));   // refresh the live preview
@@ -368,13 +324,43 @@
         return cookieValue;
     }
 
-    // Turn {"institution": [{"message": "..."}]} into "Institution: ..." using the form's own labels
-    function formatFieldErrors(errors) {
-        return Object.entries(errors).flatMap(([fieldName, fieldErrors]) => {
-            const label = educationForm.querySelector(`label[for="id_${fieldName}"]`);
+    // Turn DRF errors into one message, using the form's own labels
+    function apiErrorMessage(data, status) {
+        const messages = Object.entries(data).flatMap(([fieldName, value]) => {
+            const label = educationForm?.querySelector(`label[for="id_${fieldName}"]`);
             const prefix = label ? `${label.textContent}: ` : '';
-            return fieldErrors.map(error => prefix + error.message);
+            return [value].flat()
+                .filter(message => typeof message === 'string')
+                .map(message => prefix + message);
         });
+        return messages.join(' ') || `Request failed (HTTP ${status}).`;
+    }
+
+    // Send a JSON write request to the API with the CSRF token
+    async function writeEducation(url, method, payload) {
+        const response = await fetch(url, {
+            method,
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: payload === undefined ? undefined : JSON.stringify(payload),
+        }).catch(() => {
+            throw new Error('Could not reach the server. Please try again.');
+        });
+        if (response.status === 204) return null;
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
+        return data;
+    }
+
+    // Only the model fields, never csrfmiddlewaretoken; an empty end date is sent as null
+    function buildEducationPayload() {
+        const fields = new FormData(educationForm);
+        const payload = Object.fromEntries(EDUCATION_FIELDS.map(name => [name, fields.get(name)]));
+        if (!payload.ended_at) payload.ended_at = null;
+        return payload;
     }
 
     // Send the form data to the server (add or edit, depending on the modal mode)
@@ -382,37 +368,27 @@
         event.preventDefault();
 
         const isEditing = editingEducationId !== null;
-        const endpoint = isEditing
-            ? EDIT_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, editingEducationId)
-            : CREATE_EDUCATION_ENDPOINT;
         const failTitle = isEditing ? 'Failed to update education' : 'Failed to add education';
 
         const submitButton = educationForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
 
         try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                body: new FormData(educationForm),
-            });
-            const result = await response.json().catch(() => ({}));
-
-            if (response.ok) {
-                educationForm.reset();
-                setEducationModalMode(null);
-                closeEducationModal();
-                showToast('Success', isEditing ? 'Education updated successfully!' : 'New education added successfully!', 'success');
-                fetchEducation(searchInput.value.trim());
+            if (isEditing) {
+                const detailUrl = DETAIL_EDUCATION_ENDPOINT.replace(PLACEHOLDER_ID, editingEducationId);
+                await writeEducation(detailUrl, 'PUT', buildEducationPayload());
             } else {
-                const errorMessages = result.errors
-                    ? formatFieldErrors(result.errors)
-                    : [result.message || `Something went wrong (status ${response.status}).`];
-                showToast(failTitle, errorMessages.join(' '), 'error');
+                await writeEducation(BASE_EDUCATION_ENDPOINT, 'POST', buildEducationPayload());
             }
+
+            educationForm.reset();
+            setEducationModalMode(null);
+            closeEducationModal();
+            showToast('Success', isEditing ? 'Education updated successfully!' : 'New education added successfully!', 'success');
+            await fetchEducation(searchInput.value.trim());
         } catch (error) {
             console.error('Error saving education:', error);
-            showToast(failTitle, 'Could not reach the server. Please try again.', 'error');
+            showToast(failTitle, error.message, 'error');
         } finally {
             submitButton.disabled = false;
         }
