@@ -407,6 +407,7 @@ h1 {
 .welcome__wordmark {
     position: relative;
     width: 800px;
+    max-width: 100%;
     height: auto;
     margin-top: -11px;
     opacity: 0;
@@ -439,7 +440,7 @@ h1 {
 
 .about__grid {
     display: grid;
-    grid-template-columns: 640px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 640px) minmax(0, 1fr);
     align-items: center;
     column-gap: var(--space-32);
 }
@@ -471,7 +472,7 @@ h1 {
 
 .about__underline {
     position: absolute;
-    top: 68px;
+    top: calc(100% - 12px);
     left: -6px;
     width: calc(100% + 12px);
     height: 20px;
@@ -484,7 +485,7 @@ h1 {
 
 .meta-list {
     display: grid;
-    grid-template-columns: 120px 184px 272px;
+    grid-template-columns: minmax(0, 120px) minmax(0, 184px) minmax(0, 272px);
     column-gap: var(--space-32);
     padding-top: var(--space-24);
     border-top: 1px solid var(--color-divider);
@@ -576,15 +577,13 @@ h1 {
 .about__media {
     position: relative;
     justify-self: end;
-    width: 448px;
-    height: 520px;
+    width: min(448px, 100%);
 }
 
 .polaroid {
     position: relative;
-    width: 448px;
-    height: 520px;
-    padding: var(--space-24);
+    width: 100%;
+    padding: var(--space-24) var(--space-24) 22px;
     border-radius: var(--radius-print);
     background-color: var(--color-ink);
     box-shadow: var(--shadow-modal);
@@ -593,8 +592,8 @@ h1 {
 
 .polaroid__photo {
     position: relative;
-    width: 400px;
-    height: 400px;
+    width: 100%;
+    aspect-ratio: 1;
 }
 
 .avatar {
@@ -640,14 +639,14 @@ h1 {
 
 .polaroid__tape--right {
     top: -4px;
-    left: 372px;
+    right: -36px;
     transform: rotate(33deg);
 }
 
 .hover-me {
     position: absolute;
     top: 3px;
-    left: 373px;
+    right: -85px;
     z-index: 2;
     width: 160px;
     height: auto;
@@ -692,7 +691,7 @@ h1 {
 
 .site-footer__main {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 256px 256px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 256px) minmax(0, 256px);
     column-gap: var(--space-32);
     row-gap: var(--space-48);
     padding: var(--space-64) 0;
@@ -847,7 +846,7 @@ html {
 
 .skill-group {
     display: grid;
-    grid-template-columns: 256px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 256px) minmax(0, 1fr);
     align-items: start;
     column-gap: var(--space-32);
 }
@@ -1591,7 +1590,8 @@ html {
 
 .search-field {
     position: relative;
-    width: 432px;
+    flex: 0 1 432px;
+    min-width: 0;
 }
 
 .search-field__icon {
@@ -1645,7 +1645,7 @@ html {
 
 .timeline-row {
     display: grid;
-    grid-template-columns: 256px 448px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 256px) minmax(0, 448px) minmax(0, 1fr);
     column-gap: var(--space-32);
     padding: var(--space-32) 0;
     border-top: 1px solid var(--color-line);
@@ -1775,7 +1775,8 @@ html {
 .project-card__image {
     display: block;
     width: 100%;
-    height: 312px;
+    height: auto;
+    aspect-ratio: 496 / 312;
     margin-bottom: var(--space-32);
     border: 1px solid var(--color-line);
     border-radius: var(--radius-md);
@@ -2112,5 +2113,72 @@ html {
     .modal__actions .button {
         width: 100%;
         text-align: center;
+    }
+}
+
+@media (max-width: 800px) {
+    .welcome__script {
+        margin-right: 0;
+        font-size: clamp(44px, 11vw, 96px);
+        line-height: 0.9;
+    }
+
+    .sparkle {
+        width: clamp(56px, 14vw, 128px);
+        height: clamp(56px, 14vw, 128px);
+    }
+
+    .sparkle--left {
+        top: 72px;
+        left: 5%;
+    }
+
+    .sparkle--right {
+        top: auto;
+        right: 5%;
+        bottom: 96px;
+        left: auto;
+    }
+
+    .about,
+    .skills {
+        padding: var(--space-96) 0;
+    }
+
+    .list-page {
+        padding: var(--space-64) 0 var(--space-96);
+    }
+
+    .auth-page {
+        padding: var(--space-64) var(--space-24);
+    }
+}
+
+@media (max-width: 600px) {
+    .container,
+    .container--wide {
+        padding: 0 var(--space-16);
+    }
+
+    .welcome {
+        height: auto;
+        padding: 128px var(--space-16) 120px;
+    }
+
+    .about,
+    .skills {
+        padding: var(--space-64) 0;
+    }
+
+    .list-page {
+        padding: var(--space-48) 0 var(--space-64);
+    }
+
+    .auth-page {
+        padding: var(--space-48) var(--space-16);
+    }
+
+    .auth-card {
+        padding: 23px;
     }
 }
