@@ -5,50 +5,55 @@
 {% endblock meta %}
 {% block content %}
     <main>
-        <section class="education-section" id="education">
-            <div class="container">
-                <p class="section-kicker">Where I've studied</p>
-                <div class="page-header">
-                    <h1>Education</h1>
-                    {% if user.is_superuser %}
-                        <button type="button"
-                                class="button education-add-button"
-                                popovertarget="add-education-modal">
-                            <span aria-hidden="true">+</span>
-                            Add Education
-                        </button>
-                    {% endif %}
+        <section class="list-page" id="education">
+            <div class="container container--wide">
+                <div class="list-page__header">
+                    <p class="label-overline list-page__kicker">Where I've studied</p>
+                    <div class="page-heading">
+                        <h1 class="text-h1">Education</h1>
+                        {% if user.is_superuser %}
+                            <button type="button"
+                                    class="cta-button label-button education-add-button"
+                                    popovertarget="add-education-modal">
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.33333V12.6667M3.33333 8H12.6667"/></svg>
+                                Add education
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Search form: no method/action anymore, JavaScript handles it -->
-                <form id="education-search-form" class="search-form">
-                    <input type="search"
-                           id="search-input"
-                           name="institution"
-                           value="{{ institution_query }}"
-                           placeholder="Search by institution"
-                           class="search-input"
-                           aria-label="Search by institution">
-                    <button type="submit" class="button">Search</button>
+                <form id="education-search-form" class="search-form" role="search">
+                    <div class="search-field">
+                        <svg class="search-field__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M16.6667 16.6667L13.3333 13.3333M9.16667 15C12.3883 15 15 12.3883 15 9.16667C15 5.94501 12.3883 3.33333 9.16667 3.33333C5.94501 3.33333 3.33333 5.94501 3.33333 9.16667C3.33333 12.3883 5.94501 15 9.16667 15Z"/></svg>
+                        <input type="search"
+                               id="search-input"
+                               name="institution"
+                               value="{{ institution_query }}"
+                               placeholder="Search by institution"
+                               class="search-input text-body"
+                               aria-label="Search by institution">
+                    </div>
+                    <button type="submit" class="outline-button label-button">Search</button>
                 </form>
 
                 <!-- Loading State -->
-                <div id="loading" class="empty-state hide">
+                <div id="loading" class="empty-state text-body hide">
                     <p>Loading education...</p>
                 </div>
 
                 <!-- Error State -->
-                <div id="error" class="empty-state hide">
+                <div id="error" class="empty-state text-body hide">
                     <p>Failed to load education data. Please try again.</p>
                 </div>
 
                 <!-- Empty State -->
-                <div id="empty" class="empty-state hide">
+                <div id="empty" class="empty-state text-body hide">
                     <p>No education has been added or found yet.</p>
                 </div>
 
-                <!-- Education Grid: JavaScript fills this in -->
-                <div id="grid" class="education-grid hide"></div>
+                <!-- Education rows: JavaScript fills this in -->
+                <div id="grid" class="timeline hide"></div>
             </div>
         </section>
     </main>
@@ -106,50 +111,60 @@
             .replaceAll("'", '&#39;');
     }
 
-    // "2024-08-26" -> "Aug 26, 2024"
-    function formatDate(value) {
-        if (!value) return '';
-        return new Date(value + 'T00:00').toLocaleDateString('en-US', {
-            year: 'numeric', month: 'short', day: 'numeric',
-        });
+    // "2024-08-26" -> 2024
+    function yearOf(value) {
+        return value ? new Date(value + 'T00:00').getFullYear() : '';
     }
+
+    // "2025 – Present" while ongoing, "Graduated 2025" once it has an end date
+    function formatPeriod(education) {
+        if (education.is_ongoing) return `${yearOf(education.started_at)} – Present`;
+        return `Graduated ${yearOf(education.ended_at)}`;
+    }
+
+    const STAR_INNER_HTML = `
+        <svg class="star-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.33333L9.7334 5.86667L13.6 6.4L10.8 9.13333L11.4667 13L8 11.2L4.5334 13L5.2 9.13333L2.4 6.4L6.26673 5.86667L8 2.33333Z"/></svg>
+        <span class="star-label">
+            <span class="star-label-off">Star</span>
+            <span class="star-label-on" aria-hidden="true">Starred</span>
+        </span>
+        <span class="star-count"></span>`;
 
     // Build an education card element
     function buildEducationCardElement(education) {
         const educationId = education.id;
 
         const articleElement = document.createElement('article');
-        articleElement.className = 'education-card';
-
-
-        const starInnerHtml = `
-            <span class="star-icon" aria-hidden="true">★</span>
-            <span class="star-label">
-                <span class="star-label-off">Star</span>
-                <span class="star-label-on" aria-hidden="true">Starred</span>
-            </span>
-            <span class="star-count"></span>`;
+        articleElement.className = 'timeline-row education-card';
 
         const starHtml = IS_AUTHENTICATED
-            ? `<button type="button" class="button button-star">${starInnerHtml}</button>`
-            : `<a href="${LOGIN_URL}" class="button button-star" aria-label="Log in to star">${starInnerHtml}</a>`;
+            ? `<button type="button" class="action-button label-chip button-star">${STAR_INNER_HTML}</button>`
+            : `<a href="${LOGIN_URL}" class="action-button label-chip button-star" aria-label="Log in to star">${STAR_INNER_HTML}</a>`;
 
         const editHtml = CAN_EDIT
-            ? `<button type="button" class="button button-secondary edit-button">Edit</button>`
+            ? `<button type="button" class="action-button label-chip edit-button" aria-label="Edit ${escapeHtml(education.institution)}">Edit</button>`
             : '';
 
         const deleteHtml = IS_SUPERUSER
-            ? `<button type="button" class="button button-danger delete-button">Delete</button>`
+            ? `<button type="button" class="action-button action-button--danger label-chip delete-button" aria-label="Delete ${escapeHtml(education.institution)}">Delete</button>`
+            : '';
+
+        const descriptionHtml = education.description
+            ? `<p class="text-body timeline-row__description">${escapeHtml(education.description)}</p>`
             : '';
 
         articleElement.innerHTML = `
-            <span class="education-degree">${escapeHtml(education.degree)}</span>
-            <h2>${escapeHtml(education.institution)}</h2>
-            <p class="education-major">${escapeHtml(education.faculty_or_major)}</p>
-            <p class="education-description">${escapeHtml(education.description)}</p>
-            <p class="education-date">${escapeHtml(formatDate(education.started_at))}</p>
-            <p class="education-status">${education.is_ongoing ? 'Ongoing' : 'Completed'}</p>
-            <div class="card-actions">
+            <div class="timeline-row__when">
+                <p class="text-body-strong timeline-row__period">${escapeHtml(formatPeriod(education))}</p>
+                <p class="timeline-row__status label-overline${education.is_ongoing ? ' is-ongoing' : ''}">${education.is_ongoing ? 'Ongoing' : 'Completed'}</p>
+            </div>
+            <div class="timeline-row__body">
+                <span class="tag label-overline">${escapeHtml(education.degree)}</span>
+                <h2 class="text-h3 timeline-row__title">${escapeHtml(education.institution)}</h2>
+                <p class="text-body-strong timeline-row__org">${escapeHtml(education.faculty_or_major)}</p>
+                ${descriptionHtml}
+            </div>
+            <div class="timeline-row__actions">
                 ${starHtml}
                 ${editHtml}
                 ${deleteHtml}

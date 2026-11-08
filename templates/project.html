@@ -5,45 +5,50 @@
 {% endblock meta %}
 {% block content %}
     <main>
-        <section class="project-section" id="projects">
-            <div class="container">
-                <p class="section-kicker">What I've built</p>
-                <div class="page-header">
-                    <h1>Projects</h1>
-                    {% if user.is_superuser %}
-                        <button type="button"
-                                class="button project-add-button"
-                                popovertarget="add-project-modal">
-                            <span aria-hidden="true">+</span>
-                            Add Project
-                        </button>
-                    {% endif %}
+        <section class="list-page" id="projects">
+            <div class="container container--wide">
+                <div class="list-page__header">
+                    <p class="label-overline list-page__kicker">What I've built</p>
+                    <div class="page-heading">
+                        <h1 class="text-h1">Projects</h1>
+                        {% if user.is_superuser %}
+                            <button type="button"
+                                    class="cta-button label-button project-add-button"
+                                    popovertarget="add-project-modal">
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.33333V12.6667M3.33333 8H12.6667"/></svg>
+                                Add project
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Search form: no method/action anymore, JavaScript handles it -->
-                <form id="project-search-form" class="search-form">
-                    <input type="search"
-                           id="search-input"
-                           name="title"
-                           value="{{ title_query }}"
-                           placeholder="Search by project name"
-                           class="search-input"
-                           aria-label="Search by project name">
-                    <button type="submit" class="button">Search</button>
+                <form id="project-search-form" class="search-form" role="search">
+                    <div class="search-field">
+                        <svg class="search-field__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M16.6667 16.6667L13.3333 13.3333M9.16667 15C12.3883 15 15 12.3883 15 9.16667C15 5.94501 12.3883 3.33333 9.16667 3.33333C5.94501 3.33333 3.33333 5.94501 3.33333 9.16667C3.33333 12.3883 5.94501 15 9.16667 15Z"/></svg>
+                        <input type="search"
+                               id="search-input"
+                               name="title"
+                               value="{{ title_query }}"
+                               placeholder="Search by project name"
+                               class="search-input text-body"
+                               aria-label="Search by project name">
+                    </div>
+                    <button type="submit" class="outline-button label-button">Search</button>
                 </form>
 
                 <!-- Loading State -->
-                <div id="loading" class="empty-state hide">
+                <div id="loading" class="empty-state text-body hide">
                     <p>Loading projects...</p>
                 </div>
 
                 <!-- Error State -->
-                <div id="error" class="empty-state hide">
+                <div id="error" class="empty-state text-body hide">
                     <p>Failed to load project data. Please try again.</p>
                 </div>
 
                 <!-- Empty State -->
-                <div id="empty" class="empty-state hide">
+                <div id="empty" class="empty-state text-body hide">
                     <p>No projects have been added or found yet.</p>
                 </div>
 
@@ -118,7 +123,7 @@
     }
 
     const STAR_INNER_HTML = `
-        <span class="star-icon" aria-hidden="true">★</span>
+        <svg class="star-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 2.33333L9.7334 5.86667L13.6 6.4L10.8 9.13333L11.4667 13L8 11.2L4.5334 13L5.2 9.13333L2.4 6.4L6.26673 5.86667L8 2.33333Z"/></svg>
         <span class="star-label">
             <span class="star-label-off">Star</span>
             <span class="star-label-on" aria-hidden="true">Starred</span>
@@ -132,29 +137,33 @@
         articleElement.dataset.id = project.id;
 
         const imageHtml = project.project_image_url
-            ? `<img src="${escapeHtml(project.project_image_url)}" alt="${escapeHtml(project.title)}" class="project-image">`
+            ? `<img src="${escapeHtml(project.project_image_url)}" alt="${escapeHtml(project.title)}" class="project-card__image">`
             : '';
 
+        const isGitHub = /^https:\/\/(www\.)?github\.com\//.test(project.project_url || '');
         const urlHtml = project.project_url
-            ? `<p class="project-link"><a href="${escapeHtml(project.project_url)}">View Project</a></p>`
+            ? `<a href="${escapeHtml(project.project_url)}" class="project-card__link label-button" target="_blank" rel="noopener noreferrer">
+                   ${isGitHub ? 'View on GitHub' : 'View project'}<span class="visually-hidden"> (opens in a new tab)</span>
+                   <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+               </a>`
             : '';
 
         const starHtml = IS_AUTHENTICATED
-            ? `<button type="button" class="button button-star" data-action="star" data-id="${projectId}">${STAR_INNER_HTML}</button>`
-            : `<a href="${LOGIN_URL}" class="button button-star" aria-label="Log in to star">${STAR_INNER_HTML}</a>`;
+            ? `<button type="button" class="action-button label-chip button-star" data-action="star" data-id="${projectId}">${STAR_INNER_HTML}</button>`
+            : `<a href="${LOGIN_URL}" class="action-button label-chip button-star" aria-label="Log in to star">${STAR_INNER_HTML}</a>`;
 
         const ownerButtonsHtml = IS_SUPERUSER
-            ? `<button type="button" class="button button-secondary" data-action="edit" data-id="${projectId}">Edit</button>
-               <button type="button" class="button button-danger" data-action="delete" data-id="${projectId}">Delete</button>`
+            ? `<button type="button" class="action-button label-chip" data-action="edit" data-id="${projectId}" aria-label="Edit ${escapeHtml(project.title)}">Edit</button>
+               <button type="button" class="action-button action-button--danger label-chip" data-action="delete" data-id="${projectId}" aria-label="Delete ${escapeHtml(project.title)}">Delete</button>`
             : '';
 
         articleElement.innerHTML = `
             ${imageHtml}
-            <h2>${escapeHtml(project.title)}</h2>
-            <span class="project-tech">${escapeHtml(project.tech_stack)}</span>
-            <p class="project-description">${escapeHtml(project.description)}</p>
+            <p class="label-overline project-card__tech">${escapeHtml(project.tech_stack)}</p>
+            <h2 class="text-h2 project-card__title">${escapeHtml(project.title)}</h2>
+            <p class="text-body-lg project-card__description">${escapeHtml(project.description)}</p>
             ${urlHtml}
-            <div class="card-actions">
+            <div class="project-card__actions">
                 ${starHtml}
                 ${ownerButtonsHtml}
             </div>
