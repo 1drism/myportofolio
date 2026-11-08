@@ -1,0 +1,151 @@
+:root {
+    --color-paper: #222121;
+    --color-paper-dark: #151515;
+    --color-ink: #fbfbfb;
+    --color-text-muted: #b8b5b2;
+    --color-accent: #ffe043;
+    --color-accent-light: #ebd357;
+    --color-accent-dark: #b8962e;
+    --color-line: #c19e14a1;
+    --color-danger: #b42318;
+    --color-danger-light: #e0695e;
+    --color-success-light: #4ade80;
+
+    --logo-python: #3776ab;
+    --logo-java: #e76f00;
+    --logo-c: #a8b9cc;
+    --logo-django: #44b78b;
+    --logo-git: #f05032;
+    --logo-figma-red: #f24e1e;
+    --logo-figma-coral: #ff7262;
+    --logo-figma-purple: #a259ff;
+    --logo-figma-blue: #1abcfe;
+    --logo-figma-green: #0acf83;
+    --logo-after-effects-tile: #00005b;
+    --logo-after-effects-letters: #9999ff;
+
+    --space-8: 8px;
+    --space-16: 16px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-48: 48px;
+    --space-64: 64px;
+    --space-96: 96px;
+    --space-128: 128px;
+    --space-160: 160px;
+
+    --radius-md: 8px;
+    --radius-print: 2px;
+
+    --shadow-glow-accent: 0 0 24px 0 rgba(235, 212, 87, 0.32);
+    --shadow-modal: 0 16px 48px 0 rgba(0, 0, 0, 0.5);
+
+    --icon-size-sm: 16px;
+    --icon-size-md: 24px;
+
+    --font-heading: "Space Grotesk", -apple-system, "Segoe UI", sans-serif;
+    --font-body: "Roboto", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --font-display: "Rowdies", "Space Grotesk", sans-serif;
+    --font-script: "RC_fonts", cursive;
+}
+
+.text-h1 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 72px;
+    line-height: 80px;
+    letter-spacing: -0.02em;
+}
+
+.text-h2 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 48px;
+    letter-spacing: -0.01em;
+}
+
+.text-h3 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 32px;
+    letter-spacing: 0;
+}
+
+.text-body-lg {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 32px;
+}
+
+.text-body {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.text-body-strong {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.text-small {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 24px;
+}
+
+.label-button {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 16px;
+}
+
+.label-nav {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.label-chip {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 24px;
+}
+
+.label-overline {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 800px) {
+    .text-h1 {
+        font-size: 56px;
+        line-height: 64px;
+    }
+}
+
+@media (max-width: 600px) {
+    .text-h1 {
+        font-size: 44px;
+        line-height: 52px;
+    }
+
+    .text-h2 {
+        font-size: 32px;
+        line-height: 40px;
+    }
+}

@@ -13,17 +13,17 @@
 }
 
 :root {
-    --ink: #fbfbfb;
-    --paper: #222121;
-    --accent: #FFE043;
-    --paper-dark: #151515;
-    --accent-light: #ebd357;
-    --accent-dark: #b8962e;
-    --danger: #b42318;
-    --danger-light: #e0695e;
-    --line: #c19e14a1;
-    --text-muted: #b8b5b2;
-    --radius: 4px;
+    --ink: var(--color-ink);
+    --paper: var(--color-paper);
+    --accent: var(--color-accent);
+    --paper-dark: var(--color-paper-dark);
+    --accent-light: var(--color-accent-light);
+    --accent-dark: var(--color-accent-dark);
+    --danger: var(--color-danger);
+    --danger-light: var(--color-danger-light);
+    --line: var(--color-line);
+    --text-muted: var(--color-text-muted);
+    --radius: var(--radius-md);
 }
 
 /* .hide is toggled by JavaScript; [hidden] must also win over classes that set display */
