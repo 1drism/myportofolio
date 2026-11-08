@@ -22,10 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    function formatList(value) {
-        return value.split(",").map((item) => item.trim()).filter(Boolean).join(" · ");
-    }
-
     function toDate(value) {
         return value ? new Date(value + "T00:00") : null;
     }
@@ -44,10 +40,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${monthYear(start)} – ${monthYear(end)}`;
     }
 
-    function yearOf(value) {
-        return value ? new Date(value + "T00:00").getFullYear() : "";
-    }
-
     // Only allow real web links or the site's own files, never "javascript:" URLs
     function isSafeUrl(url) {
         return /^https?:\/\//i.test(url) || /^\/(?!\/)/.test(url);
@@ -59,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (el.dataset.format === "date") {
                 value = formatDate(value);
             } else if (el.dataset.format === "list") {
-                value = formatList(value);
+                value = window.PortfolioFormat.techStack(value);
             }
             el.textContent = value || el.dataset.placeholder || "";
         });
@@ -77,10 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.querySelectorAll("[data-preview-period]").forEach((el) => {
             const [startName, endName] = el.dataset.previewPeriod.split(" ");
-            const start = yearOf(fieldValue(startName));
-            const end = yearOf(fieldValue(endName));
-            if (end) el.textContent = `Graduated ${end}`;
-            else el.textContent = start ? `${start} – Present` : "Start date";
+            el.textContent = window.PortfolioFormat.educationPeriod(fieldValue(startName), fieldValue(endName));
         });
 
         card.querySelectorAll("[data-preview-src]").forEach((el) => {
@@ -88,8 +77,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const logo = el.dataset.previewLogo && window.skillLogoFor
                 ? window.skillLogoFor(fieldValue(el.dataset.previewLogo))
                 : null;
-            const src = logo || (isSafeUrl(url) ? url : el.dataset.previewDefault);
+            const sources = [isSafeUrl(url) ? url : null, logo, el.dataset.previewDefault].filter(Boolean);
+            const src = sources.shift();
             el.hidden = !src;
+            el.onerror = () => {
+                if (sources.length) el.src = sources.shift();
+                else el.hidden = true;
+            };
             if (src) el.src = src;
         });
 
