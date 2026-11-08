@@ -111,6 +111,10 @@
             .replaceAll("'", '&#39;');
     }
 
+    function formatTechStack(value) {
+        return String(value ?? '').split(',').map(item => item.trim()).filter(Boolean).join(' · ');
+    }
+
     function projectEndpoint(pattern, id) {
         return pattern.replace(PLACEHOLDER_ID, id);
     }
@@ -159,7 +163,7 @@
 
         articleElement.innerHTML = `
             ${imageHtml}
-            <p class="label-overline project-card__tech">${escapeHtml(project.tech_stack)}</p>
+            <p class="label-overline project-card__tech">${escapeHtml(formatTechStack(project.tech_stack))}</p>
             <h2 class="text-h2 project-card__title">${escapeHtml(project.title)}</h2>
             <p class="text-body-lg project-card__description">${escapeHtml(project.description)}</p>
             ${urlHtml}

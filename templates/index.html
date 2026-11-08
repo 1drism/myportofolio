@@ -167,6 +167,7 @@
     {% endif %}
 
     {{ skill_categories|json_script:"skill-categories" }}
+    <script src="{% static 'js/skill-logos.js' %}" data-base="{% static 'img/skills/' %}"></script>
     <script>
     const SKILLS_ENDPOINT = "{% url 'main:get_skills_json' %}";
     const CREATE_SKILL_ENDPOINT = "{% url 'main:create_skill_ajax' %}";
@@ -222,9 +223,10 @@
         const icon = document.createElement('span');
         icon.className = 'skills-card__icon';
         const img = document.createElement('img');
+        const brandLogo = skillLogoFor(name);
         const hasOwnIcon = icon_url && isSafeIconUrl(icon_url);
-        img.src = hasOwnIcon ? icon_url : DEFAULT_SKILL_ICON;
-        img.alt = hasOwnIcon ? `${name} logo` : '';
+        img.src = brandLogo || (hasOwnIcon ? icon_url : DEFAULT_SKILL_ICON);
+        img.alt = brandLogo || hasOwnIcon ? `${name} logo` : '';
         icon.append(img);
 
         const label = document.createElement('span');

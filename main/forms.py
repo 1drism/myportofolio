@@ -101,11 +101,11 @@ class ProjectForm(ModelForm):
         ]
 
         labels = {
-            "title": "Nama Proyek",
-            "description": "Deskripsi Proyek",
-            "tech_stack": "Teknologi yang Digunakan",
-            "project_url": "URL Proyek",
-            "project_image_url": "URL Gambar Proyek",
+            "title": "Project name",
+            "description": "Description",
+            "tech_stack": "Tech stack",
+            "project_url": "Project URL",
+            "project_image_url": "Image URL",
         }
 
         widgets = {

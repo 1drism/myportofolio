@@ -22,6 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function formatList(value) {
+        return value.split(",").map((item) => item.trim()).filter(Boolean).join(" · ");
+    }
+
     function toDate(value) {
         return value ? new Date(value + "T00:00") : null;
     }
@@ -54,6 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let value = fieldValue(el.dataset.preview);
             if (el.dataset.format === "date") {
                 value = formatDate(value);
+            } else if (el.dataset.format === "list") {
+                value = formatList(value);
             }
             el.textContent = value || el.dataset.placeholder || "";
         });
@@ -79,7 +85,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.querySelectorAll("[data-preview-src]").forEach((el) => {
             const url = fieldValue(el.dataset.previewSrc);
-            const src = isSafeUrl(url) ? url : el.dataset.previewDefault;
+            const logo = el.dataset.previewLogo && window.skillLogoFor
+                ? window.skillLogoFor(fieldValue(el.dataset.previewLogo))
+                : null;
+            const src = logo || (isSafeUrl(url) ? url : el.dataset.previewDefault);
             el.hidden = !src;
             if (src) el.src = src;
         });
