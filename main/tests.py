@@ -440,6 +440,19 @@ class SkillTest(AjaxTestBase):
         self.assertContains(owner_page, 'id="add-skill-modal"')
         self.assertContains(owner_page, 'id="delete-skill-modal"')
 
+    def test_editor_sees_manage_but_not_add_button(self):
+        add_button = 'skill-add-button" popovertarget="add-skill-modal"'
+        manage_button = 'skills-manage-button" aria-pressed="false"'
+        self.login(self.editor)
+        editor_page = self.client.get(reverse("main:show_main"))
+        self.login(self.owner)
+        owner_page = self.client.get(reverse("main:show_main"))
+
+        self.assertNotContains(editor_page, add_button)
+        self.assertContains(editor_page, manage_button)
+        self.assertContains(owner_page, add_button)
+        self.assertContains(owner_page, manage_button)
+
     def test_create_permissions(self):
         data = {"name": "Teamwork", "category": "soft"}
         for user in [None, self.visitor, self.editor]:
