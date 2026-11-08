@@ -31,7 +31,8 @@ def show_main(request):
         "last_login": last_login,
         "form": SkillForm(),
         "skill_categories": [
-            {"value": value, "label": label} for value, label in Skill.CATEGORY_CHOICES
+            {"value": value, "label": label}
+            for value, label in sorted(Skill.CATEGORY_CHOICES, key=lambda choice: ["technical", "software", "soft"].index(choice[0]))
         ],
         "is_editor": is_editor(request.user),
     }

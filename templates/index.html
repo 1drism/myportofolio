@@ -5,79 +5,142 @@
 {% endblock meta %}
 {% block content %}
     <main>
-        <section class="welcome">
-            <img src="/static/img/banana-cat-image.png" alt="" class="decoration-cat cat-banana">
-            <h1 class="welcome-text">Welcome to my</h1>
-            <img src="/static/img/portfolio-img.png" alt="Portfolio" class="welcome-bottom">
-            <img src="/static/img/milk-cat-image.png" alt="" class="decoration-cat cat-milk">
+        <section class="welcome" aria-label="Welcome">
+            <svg class="welcome__defs" aria-hidden="true" focusable="false">
+                <filter id="sparkle-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="16" result="blur"/>
+                    <feComposite in="SourceAlpha" in2="blur" operator="arithmetic" k2="1" k3="-1" result="edge"/>
+                    <feFlood flood-color="#ffe043" flood-opacity="0.71"/>
+                    <feComposite in2="edge" operator="in" result="glow"/>
+                    <feMerge>
+                        <feMergeNode in="SourceGraphic"/>
+                        <feMergeNode in="glow"/>
+                    </feMerge>
+                </filter>
+            </svg>
+            <svg class="sparkle sparkle--left" viewBox="0 0 128 128" aria-hidden="true" focusable="false">
+                <path d="M64 0C68 40 88 60 128 64C88 68 68 88 64 128C60 88 40 68 0 64C40 60 60 40 64 0Z" filter="url(#sparkle-glow)"/>
+            </svg>
+            <svg class="sparkle sparkle--right" viewBox="0 0 128 128" aria-hidden="true" focusable="false">
+                <path d="M64 0C68 40 88 60 128 64C88 68 68 88 64 128C60 88 40 68 0 64C40 60 60 40 64 0Z" filter="url(#sparkle-glow)"/>
+            </svg>
+            <p class="welcome__script">Welcome to my</p>
+            <img src="/static/img/portfolio-img.png" alt="Portfolio" class="welcome__wordmark">
+            <a href="#profile" class="scroll-cue label-overline">
+                Scroll
+                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 6L8 10L12 6"/></svg>
+            </a>
         </section>
-        <div class="divider">
-        </div>
-        <section class="hero" id="profile">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <p class="hero-kicker">Computer Science &middot; Universitas Indonesia</p>
-                    <h1>{{ name }}</h1>
-                </div>
-                <div class="hero-photo">
-                    <img class="avatar avatar-default" src="/static/img/avatar-image.jpg" alt="Photo of {{ name }}">
-                    <img class="avatar avatar-hover" src="/static/img/hover-image.png" alt=" :)">
-                    <img class="hover-me" src="/static/img/try-hover-me.png" alt="Try hovering the photo">
-                </div>
-                <div class="hero-details">
-                    <p class="bio">{{ bio }}</p>
+
+        <section class="about" id="profile">
+            <div class="container container--wide about__grid">
+                <div class="about__content">
+                    <div class="about__heading">
+                        <p class="label-overline about__kicker">Computer Science &middot; Universitas Indonesia</p>
+                        {% with name_parts=name.split %}
+                            <h1 class="text-h1 about__name">
+                                {{ name_parts|slice:":-1"|join:" " }}
+                                <span class="about__underlined">
+                                    {{ name_parts|last }}
+                                    <svg class="about__underline" viewBox="0 0 220 20" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                                        <path d="M3 12C40 6.5 95 4.8 150 7.6C181 9.3 204 10.2 216 6.4" stroke-width="3.5"/>
+                                        <path d="M26 16.5C71 12.6 129 11.9 197 13.8" stroke-width="2.5"/>
+                                    </svg>
+                                </span>
+                            </h1>
+                        {% endwith %}
+                    </div>
+                    <p class="text-body-lg about__bio">{{ bio }}</p>
                     <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>{{ npm }}</dd>
+                        <div class="meta-list__item">
+                            <dt class="label-overline">NPM</dt>
+                            <dd class="text-body-strong">{{ npm }}</dd>
                         </div>
-                        <div class="meta-row">
-                            <dt>Program</dt>
-                            <dd>{{ study_program }}</dd>
+                        <div class="meta-list__item">
+                            <dt class="label-overline">Program</dt>
+                            <dd class="text-body-strong">{{ study_program }}</dd>
                         </div>
-                            <div class="meta-row">
-                            <dt>Last Login Session</dt>
-                            <dd>{{ last_login }}</dd>
+                        <div class="meta-list__item">
+                            <dt class="label-overline">Last login session</dt>
+                            <dd class="text-body-strong">{{ last_login }}</dd>
                         </div>
                     </dl>
-                    <div class="social-links">
-                        <a href="https://github.com/1drism" class="social-link">GitHub</a>
-                        <a href="https://linkedin.com/in/muhamad-idris-kamal/" class="social-link">LinkedIn</a>
-                        <a href="mailto:idriskamal1107@gmail.com" class="social-link">Email</a>
+                    <div class="about__actions">
+                        <div class="about__buttons">
+                            <a href="{% url 'main:show_projects' %}" class="cta-button cta-button--lg label-button">
+                                View projects
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3.33333 8H12.6667M8.66667 12L12.6667 8L8.66667 4"/></svg>
+                            </a>
+                            <a href="mailto:idriskamal1107@gmail.com" class="outline-button label-button">Email me</a>
+                        </div>
+                        <div class="social-links">
+                            <a href="https://github.com/1drism" class="social-link label-button" target="_blank" rel="noopener noreferrer">
+                                GitHub<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+                            </a>
+                            <a href="https://linkedin.com/in/muhamad-idris-kamal/" class="social-link label-button" target="_blank" rel="noopener noreferrer">
+                                LinkedIn<span class="visually-hidden"> (opens in a new tab)</span>
+                                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4.66667 11.3333L11.3333 4.66667M11.3333 10V4.66667H6"/></svg>
+                            </a>
+                        </div>
                     </div>
+                </div>
+
+                <div class="about__media">
+                    <figure class="polaroid hero-photo">
+                        <svg class="polaroid__tape polaroid__tape--left" viewBox="0 0 112 32" aria-hidden="true" focusable="false">
+                            <path d="M4 0L108 1L112 5L108 9L112 13L108 17L111 21L107 25L112 29L108 32L5 31L0 27L4 23L1 19L5 15L0 11L4 7L1 3L4 0Z"/>
+                        </svg>
+                        <svg class="polaroid__tape polaroid__tape--right" viewBox="0 0 112 32" aria-hidden="true" focusable="false">
+                            <path d="M4 0L108 1L112 5L108 9L112 13L108 17L111 21L107 25L112 29L108 32L5 31L0 27L4 23L1 19L5 15L0 11L4 7L1 3L4 0Z"/>
+                        </svg>
+                        <div class="polaroid__photo">
+                            <img class="avatar avatar-default" src="/static/img/avatar-image.jpg" alt="Photo of {{ name }}">
+                            <img class="avatar avatar-hover" src="/static/img/hover-image.png" alt=" :)">
+                        </div>
+                        <figcaption class="polaroid__caption">
+                            <span class="visually-hidden">Me and Mt. Fuji</span>
+                            {% include 'components/photo_caption.html' %}
+                        </figcaption>
+                    </figure>
+                    <img class="hover-me" src="/static/img/try-hover-me.png" alt="Try hovering the photo">
                 </div>
             </div>
         </section>
-        <div class="divider">
-        </div>
-        <section class="skills" id="skills">
-            <div class="container">
-                <h2>Skills</h2>
 
-                <div class="skills-filter" role="group" aria-label="Filter skills by category">
-                    <button type="button" class="skills-filter__option is-active" data-filter="all" aria-pressed="true">All</button>
-                    {% for category in skill_categories %}
-                        <button type="button" class="skills-filter__option" data-filter="{{ category.value }}" aria-pressed="false">{{ category.label }}</button>
-                    {% endfor %}
-                </div>
-
-                {% if user.is_superuser or is_editor %}
-                    <div class="skills-owner-actions">
-                        {% if user.is_superuser %}
-                            <button type="button" class="button skill-add-button" popovertarget="add-skill-modal">
-                                <span aria-hidden="true">+</span>
-                                Add Skill
-                            </button>
+        <section class="skills" id="skills" aria-labelledby="skills-title">
+            <div class="container container--wide">
+                <div class="skills__header">
+                    <h2 class="text-h2" id="skills-title">Skills</h2>
+                    <div class="skills__tools">
+                        {% if user.is_superuser or is_editor %}
+                            <div class="skills-owner-actions">
+                                {% if user.is_superuser %}
+                                    <button type="button" class="cta-button label-chip skill-add-button" popovertarget="add-skill-modal">
+                                        <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3.33333V12.6667M3.33333 8H12.6667"/></svg>
+                                        Add Skill
+                                    </button>
+                                {% endif %}
+                                <button type="button" class="ghost-button label-chip skills-manage-button" aria-pressed="false">Manage</button>
+                            </div>
                         {% endif %}
-                        <button type="button" class="button button-secondary skills-manage-button" aria-pressed="false">Manage</button>
+                        <div class="skills-filter" role="group" aria-label="Filter skills by category">
+                            <button type="button" class="skills-filter__option label-chip is-active" data-filter="all" aria-pressed="true">All</button>
+                            {% for category in skill_categories %}
+                                <button type="button" class="skills-filter__option label-chip" data-filter="{{ category.value }}" aria-pressed="false">{{ category.label|cut:" Skills" }}</button>
+                            {% endfor %}
+                        </div>
                     </div>
-                {% endif %}
+                </div>
 
                 <!-- JavaScript fills each group; the skeleton tiles show while loading -->
                 <div class="skills-board" id="skills-board" data-filter="all" aria-busy="true">
                     {% for category in skill_categories %}
                         <section class="skill-group" data-category="{{ category.value }}" aria-labelledby="skill-group-{{ category.value }}">
-                            <h3 id="skill-group-{{ category.value }}">{{ category.label }}</h3>
+                            <div class="skill-group__head">
+                                <h3 class="text-h3 skill-group__title" id="skill-group-{{ category.value }}">{{ category.label|lower|capfirst }}</h3>
+                                <p class="text-small skill-group__count"></p>
+                            </div>
                             <ul class="skills-grid" data-list="{{ category.value }}">
                                 <li class="skills-card skills-card--skeleton" aria-hidden="true"></li>
                                 <li class="skills-card skills-card--skeleton" aria-hidden="true"></li>
@@ -85,10 +148,10 @@
                             </ul>
                         </section>
                     {% endfor %}
-                    <p class="skills-message hide" id="skills-empty"></p>
-                    <div class="skills-message hide" id="skills-error" role="alert">
+                    <p class="skills-message text-body hide" id="skills-empty"></p>
+                    <div class="skills-message text-body hide" id="skills-error" role="alert">
                         <p>Failed to load skills.</p>
-                        <button type="button" class="button button-secondary" id="skills-retry">Try again</button>
+                        <button type="button" class="ghost-button label-chip" id="skills-retry">Try again</button>
                     </div>
                 </div>
             </div>
@@ -220,6 +283,7 @@
 
             list.replaceChildren();
             items.forEach(skill => list.append(buildSkillCard(skill)));
+            group.querySelector('.skill-group__count').textContent = `${items.length} ${items.length === 1 ? 'skill' : 'skills'}`;
             if (items.length === 0 && IS_SUPERUSER) list.append(buildAddTile(category));
 
             const show = selected && (items.length > 0 || IS_SUPERUSER);
