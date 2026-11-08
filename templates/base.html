@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/static/css/tokens.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="{% static 'js/formatters.js' %}"></script>
+    <script src="{% static 'js/site-menu.js' %}" defer></script>
     {% block meta %} {% endblock meta %}
 </head>
 <body>
@@ -18,38 +19,44 @@
             <a href="{% url 'main:show_main' %}" class="brand">
                 <img src="{% static 'img/dsr-logo.png' %}" alt="DSR Club, go to profile" class="brand__logo">
             </a>
-            <nav class="site-nav" aria-label="Main">
-                <a href="{% url 'main:show_main' %}" class="site-nav__link label-nav"{% if nav_section == '' %} aria-current="page"{% endif %}>
-                    Profile
-                    {% include 'components/nav_circle.html' %}
-                </a>
-                <a href="{% url 'main:show_experience' %}" class="site-nav__link label-nav"{% if nav_section == 'experience' %} aria-current="page"{% endif %}>
-                    Experience
-                    {% include 'components/nav_circle.html' %}
-                </a>
-                <a href="{% url 'main:show_education' %}" class="site-nav__link label-nav"{% if nav_section == 'education' %} aria-current="page"{% endif %}>
-                    Education
-                    {% include 'components/nav_circle.html' %}
-                </a>
-                <a href="{% url 'main:show_projects' %}" class="site-nav__link label-nav"{% if nav_section == 'projects' %} aria-current="page"{% endif %}>
-                    Projects
-                    {% include 'components/nav_circle.html' %}
-                </a>
-            </nav>
-            <div class="site-actions">
-                {% if user.is_authenticated %}
-                    <span class="site-user">
-                        <span class="site-user__avatar label-chip" aria-hidden="true">{{ user.username|first|upper }}</span>
-                        <span class="site-user__name label-nav">{{ user.username }}</span>
-                    </span>
-                    <a href="{% url 'main:logout' %}" class="site-actions__link label-nav">Logout</a>
-                {% else %}
-                    <a href="{% url 'main:login' %}" class="site-actions__link label-nav"{% if nav_section == 'login' %} aria-current="page"{% endif %}>
-                        Login
+            <button type="button" class="ghost-button label-chip site-menu-toggle" aria-expanded="false" aria-controls="site-menu">
+                <svg class="icon-sm" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="{% static 'img/icons/menu.svg' %}#icon"/></svg>
+                Menu
+            </button>
+            <div class="site-menu" id="site-menu">
+                <nav class="site-nav" aria-label="Main">
+                    <a href="{% url 'main:show_main' %}" class="site-nav__link label-nav"{% if nav_section == '' %} aria-current="page"{% endif %}>
+                        Profile
                         {% include 'components/nav_circle.html' %}
                     </a>
-                    <a href="{% url 'main:register' %}" class="ghost-button label-chip"{% if nav_section == 'register' %} aria-current="page"{% endif %}>Register</a>
-                {% endif %}
+                    <a href="{% url 'main:show_experience' %}" class="site-nav__link label-nav"{% if nav_section == 'experience' %} aria-current="page"{% endif %}>
+                        Experience
+                        {% include 'components/nav_circle.html' %}
+                    </a>
+                    <a href="{% url 'main:show_education' %}" class="site-nav__link label-nav"{% if nav_section == 'education' %} aria-current="page"{% endif %}>
+                        Education
+                        {% include 'components/nav_circle.html' %}
+                    </a>
+                    <a href="{% url 'main:show_projects' %}" class="site-nav__link label-nav"{% if nav_section == 'projects' %} aria-current="page"{% endif %}>
+                        Projects
+                        {% include 'components/nav_circle.html' %}
+                    </a>
+                </nav>
+                <div class="site-actions">
+                    {% if user.is_authenticated %}
+                        <span class="site-user">
+                            <span class="site-user__avatar label-chip" aria-hidden="true">{{ user.username|first|upper }}</span>
+                            <span class="site-user__name label-nav">{{ user.username }}</span>
+                        </span>
+                        <a href="{% url 'main:logout' %}" class="site-actions__link label-nav">Logout</a>
+                    {% else %}
+                        <a href="{% url 'main:login' %}" class="site-actions__link label-nav"{% if nav_section == 'login' %} aria-current="page"{% endif %}>
+                            Login
+                            {% include 'components/nav_circle.html' %}
+                        </a>
+                        <a href="{% url 'main:register' %}" class="ghost-button label-chip"{% if nav_section == 'register' %} aria-current="page"{% endif %}>Register</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>
