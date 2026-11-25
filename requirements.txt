@@ -1,4 +1,4 @@
-django
+django>=6.0,<6.1  # 6.1 needs PostgreSQL 15+, PWS runs 14
 gunicorn
 whitenoise
 psycopg2-binary
