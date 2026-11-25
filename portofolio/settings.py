@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-edy5tr&h*tg_fbc8*g@=j22c6&8enupj0fcle3^a!$-^9nkus%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1","muhamad-idris51-myportofolio.pws.cs.ui.ac.id"]
+# 10.0.2.2 is how the Android emulator reaches the host machine's localhost
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "muhamad-idris51-myportofolio.pws.cs.ui.ac.id"]
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 # Application definition
@@ -41,10 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    "corsheaders",
     "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
+    # Must come before CommonMiddleware so CORS headers are added to every response
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -85,6 +90,26 @@ WSGI_APPLICATION = 'portofolio.wsgi.application'
 
 # gunakan https:// trailing the url
 CSRF_TRUSTED_ORIGINS = ["https://muhamad-idris51-myportofolio.pws.cs.ui.ac.id"]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        # Token first: mobile clients send "Authorization: Token <key>" and get
+        # 401 on a missing/invalid token, while web pages keep using sessions
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+}
+
+# CORS for Flutter Web (Chrome): allow all origins locally (PRODUCTION=False),
+# and only the origins listed in CORS_ALLOWED_ORIGINS in production.
+# Native Android apps do not use CORS.
+CORS_ALLOW_ALL_ORIGINS = not PRODUCTION
+if PRODUCTION:
+    CORS_ALLOWED_ORIGINS = [
+        origin.strip()
+        for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+        if origin.strip()
+    ]
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
