@@ -3,6 +3,7 @@ import uuid
 from django.contrib.auth.models import Group, User
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from main.models import Education, Project
@@ -354,3 +355,67 @@ class EducationAPITest(APITestCase):
         response = client.post(self.star_url, HTTP_X_CSRFTOKEN=token)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(self.education.starred_by.filter(pk=self.regular.pk).exists())
+
+
+class TokenAuthAPITest(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_superuser(
+            username="owner", password="test-password", email="owner@example.com",
+        )
+        self.token_url = reverse("api:api_token_auth")
+        self.logout_url = reverse("api:api_logout")
+        self.projects_url = reverse("api:project-list")
+        self.payload = {
+            "title": "Mobile project", "description": "Made from Flutter", "tech_stack": "Dart",
+            "project_url": "https://example.com/", "project_image_url": "",
+        }
+
+    def obtain_token(self):
+        response = self.client.post(
+            self.token_url, {"username": "owner", "password": "test-password"}, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        return response.data["token"]
+
+    def test_obtain_token_with_valid_credentials(self):
+        token = self.obtain_token()
+        self.assertEqual(Token.objects.get(user=self.owner).key, token)
+
+    def test_obtain_token_with_wrong_password_fails(self):
+        response = self.client.post(
+            self.token_url, {"username": "owner", "password": "wrong"}, format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertNotIn("token", response.data)
+
+    def test_token_post_works_without_csrf(self):
+        client = APIClient(enforce_csrf_checks=True)
+        client.credentials(HTTP_AUTHORIZATION=f"Token {self.obtain_token()}")
+        response = client.post(self.projects_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Project.objects.filter(title="Mobile project").exists())
+
+    def test_invalid_token_returns_401(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token invalid-key")
+        response = self.client.post(self.projects_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(Project.objects.count(), 0)
+
+    def test_logout_revokes_token(self):
+        token = self.obtain_token()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token}")
+        response = self.client.post(self.logout_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Token.objects.filter(key=token).exists())
+        # The revoked token can no longer be used
+        response = self.client.post(self.projects_url, self.payload, format="json")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_logout_requires_authentication(self):
+        response = self.client.post(self.logout_url)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_logout_only_accepts_post(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {self.obtain_token()}")
+        response = self.client.get(self.logout_url)
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

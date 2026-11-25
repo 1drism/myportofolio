@@ -11,6 +11,16 @@ from main.permissions import (
 from main.serializers import EducationSerializer, ProjectSerializer
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def api_logout(request):
+    # request.auth is the Token instance when the caller used TokenAuthentication
+    # (None for session logins); deleting it revokes that key.
+    if request.auth is not None:
+        request.auth.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 @api_view(["GET", "HEAD", "POST"])
 @permission_classes([IsPortfolioOwnerOrReadOnly])
 def project_list(request):
