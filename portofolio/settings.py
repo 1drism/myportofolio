@@ -22,15 +22,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
+PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-edy5tr&h*tg_fbc8*g@=j22c6&8enupj0fcle3^a!$-^9nkus%'
+# The fallback is for local development only; production must set SECRET_KEY.
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-local-development-only')
+if PRODUCTION and SECRET_KEY.startswith('django-insecure-'):
+    raise RuntimeError('SECRET_KEY must be set when PRODUCTION=True.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not PRODUCTION
 
 # 10.0.2.2 is how the Android emulator reaches the host machine's localhost
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "10.0.2.2", "muhamad-idris51-myportofolio.pws.cs.ui.ac.id"]
-PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
+
+if PRODUCTION:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
